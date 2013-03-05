@@ -1,0 +1,28 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="Sanity" verbose="1">
+	<test name="Groovy">
+		<classes>
+			<class name="org.jsystemtest.integration.GroovyTest" />
+		</classes>
+	</test>
+	<test name="JMS">
+		<classes>
+			<class name="org.jsystemtest.integration.JmsSystemModuleTests" />
+		</classes>
+	</test>
+	<test name="BDD Example">
+		<classes>
+			<class name="org.jsystemtest.integration.BDDExampleTest" />
+		</classes>
+	</test>
+	<test name="Reporter UNIT Test">
+		<classes>
+			<class name="org.jsystemtest.integration.ReporterTests" />
+		</classes>
+	</test>
+	<test name="Everything">
+		<packages>
+			<package name="org.jsystemtest.integration" />
+		</packages>
+	</test>
+</suite>

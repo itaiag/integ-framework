@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jms="http://www.springframework.org/schema/jms"
+	xsi:schemaLocation="http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms-3.1.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+
+
+	<!-- JMS Connection to Sonic -->
+
+	<bean id="sonicConnectionFactory" class='progress.message.jclient.QueueConnectionFactory'>
+		<property name="brokerURL">
+			<value>${jms.broker.url}</value>
+		</property>
+		<property name="defaultUser">
+			<value>${jms.user.name}</value>
+		</property>
+		<property name="defaultPassword">
+			<value>${jms.user.password}</value>
+		</property>
+		<property name="prefetchCount">
+			<value>1</value>
+		</property>
+	</bean>
+
+	<bean id="JmsSystemModule"
+		class="com.rsa.fa.blackbox.integration.systemModule.jms.JmsSystemModule">
+		<constructor-arg ref="connectionFactory" />
+
+
+	</bean>
+
+	<bean id="connectionFactory"
+		class="org.springframework.jms.connection.CachingConnectionFactory">
+		<property name="targetConnectionFactory" ref="sonicConnectionFactory" />
+		<property name="sessionCacheSize" value="10" />
+		<property name="cacheProducers" value="false" />
+	</bean>
+
+</beans>
+
+	

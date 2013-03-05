@@ -1,0 +1,16 @@
+*.class
+
+# Package Files #
+*.jar
+*.ear
+
+#Eclipse files
+.settings
+.project
+.classpath
+
+#Binaries
+target
+
+#TestNG
+test-output/

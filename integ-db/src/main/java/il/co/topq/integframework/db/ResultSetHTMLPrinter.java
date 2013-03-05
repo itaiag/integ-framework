@@ -1,9 +1,10 @@
 package il.co.topq.integframework.db;
 
+import il.co.topq.integframework.reporting.Reporter;
+
 import java.util.List;
 import java.util.Map;
 
-import com.topq.integ.reporting.Reporter;
 
 
 public class ResultSetHTMLPrinter implements ResultSetPrinter {

@@ -1,10 +1,11 @@
 package il.co.topq.integframework.bdd;
 
+import il.co.topq.integframework.reporting.Reporter;
+import il.co.topq.integframework.reporting.Reporter.Color;
+import il.co.topq.integframework.reporting.Reporter.Style;
+
 import java.lang.reflect.Method;
 
-import com.topq.integ.reporting.Reporter;
-import com.topq.integ.reporting.Reporter.Color;
-import com.topq.integ.reporting.Reporter.Style;
 
 public class BddExecutor {
 

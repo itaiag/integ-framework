@@ -1,9 +1,10 @@
 package il.co.topq.integframework;
 
+import il.co.topq.integframework.assertion.Assert;
+import il.co.topq.integframework.assertion.FindTextAssertion;
+
 import org.testng.annotations.Test;
 
-import com.topq.integ.assertion.Assert;
-import com.topq.integ.assertion.FindTextAssertion;
 
 public class LogicAssertionTest {
 

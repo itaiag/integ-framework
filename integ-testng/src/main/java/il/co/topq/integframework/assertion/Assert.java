@@ -1,7 +1,7 @@
-package com.topq.integ.assertion;
+package il.co.topq.integframework.assertion;
 
-import com.topq.integ.reporting.Reporter;
-import com.topq.integ.reporting.Reporter.Color;
+import il.co.topq.integframework.reporting.Reporter;
+import il.co.topq.integframework.reporting.Reporter.Color;
 
 /**
  * Class for comparing between actual and expected states

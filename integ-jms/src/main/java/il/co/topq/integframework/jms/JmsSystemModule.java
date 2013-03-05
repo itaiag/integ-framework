@@ -1,23 +1,25 @@
 package il.co.topq.integframework.jms;
 
+import il.co.topq.integframework.reporting.Reporter;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.QueueBrowser;
 import javax.jms.QueueConnectionFactory;
 import javax.jms.Session;
 import javax.jms.TextMessage;
-import javax.annotation.PostConstruct;
+
 import org.springframework.jms.core.BrowserCallback;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
 import org.springframework.jms.support.converter.MessageType;
 
-import com.topq.integ.reporting.Reporter;
 
 /**
  * <b>Package:</b> com.rsa.fa.blackbox.integration.jms<br/>

@@ -3,6 +3,7 @@ package il.co.topq.integframework;
 import il.co.topq.integframework.bdd.BddI;
 import il.co.topq.integframework.bdd.Step;
 import il.co.topq.integframework.jms.JmsSystemModule;
+import il.co.topq.integframework.reporting.Reporter;
 
 import javax.jms.Message;
 
@@ -13,7 +14,6 @@ import org.springframework.jms.support.converter.MessageType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.topq.integ.reporting.Reporter;
 
 /**
  */

@@ -3,6 +3,9 @@ package il.co.topq.integframework;
 import il.co.topq.integframework.bdd.BddExecutor;
 import il.co.topq.integframework.bdd.BddI;
 import il.co.topq.integframework.bdd.Step;
+import il.co.topq.integframework.reporting.Reporter;
+import il.co.topq.integframework.reporting.Reporter.Color;
+import il.co.topq.integframework.reporting.Reporter.Style;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,9 +13,6 @@ import java.util.Random;
 
 import org.testng.annotations.Test;
 
-import com.topq.integ.reporting.Reporter;
-import com.topq.integ.reporting.Reporter.Color;
-import com.topq.integ.reporting.Reporter.Style;
 
 public class ReporterTests {
 

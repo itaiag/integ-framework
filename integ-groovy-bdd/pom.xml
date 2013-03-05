@@ -3,7 +3,6 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>co.il.topq.integframework</groupId>
 	<artifactId>integ-groovy-bdd</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
 
 	<dependencies>
 		<dependency>
@@ -88,4 +87,9 @@
 			</plugins>
 		</pluginManagement>
 	</build>
+	<parent>
+		<groupId>il.co.topq.integframework</groupId>
+		<artifactId>integ-parent</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
 </project>

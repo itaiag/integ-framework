@@ -1,4 +1,4 @@
-package com.topq.integ.assertion;
+package il.co.topq.integframework.assertion;
 
 /**
  * Intefrace for creating assertion logic

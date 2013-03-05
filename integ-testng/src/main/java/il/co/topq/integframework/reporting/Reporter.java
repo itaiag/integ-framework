@@ -1,4 +1,4 @@
-package com.topq.integ.reporting;
+package il.co.topq.integframework.reporting;
 
 import java.io.File;
 import java.io.IOException;

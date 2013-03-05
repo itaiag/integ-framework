@@ -3,7 +3,6 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>il.co.topq.integframwork</groupId>
 	<artifactId>integ-junit</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
@@ -17,4 +16,9 @@
 		</dependency>
 
 	</dependencies>
+	<parent>
+		<groupId>il.co.topq.integframework</groupId>
+		<artifactId>integ-parent</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
 </project>

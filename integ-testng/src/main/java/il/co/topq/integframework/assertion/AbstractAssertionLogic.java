@@ -1,4 +1,4 @@
-package com.topq.integ.assertion;
+package il.co.topq.integframework.assertion;
 
 /**
  * Abstract class which intend to inherit by assertion logic classes.

@@ -5,6 +5,11 @@
 	<artifactId>integ-parent</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<assembly.format>dir</assembly.format>
+		<topq.repository.rootUrl>http://80.74.108.9</topq.repository.rootUrl>
+	</properties>
 	<build>
 		<plugins>
 			<plugin>
@@ -16,9 +21,41 @@
 					<target>1.6</target>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.1.2</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<attach>true</attach>
+				</configuration>
+			</plugin>
 
 		</plugins>
 	</build>
+	<repositories>
+		<repository>
+			<id>topq</id>
+			<url>${topq.repository.rootUrl}/content/groups/public</url>
+		</repository>
+	</repositories>
+	<distributionManagement>
+		<snapshotRepository>
+			<id>topq</id>
+			<name>RepositoryProxy</name>
+			<url>${topq.repository.rootUrl}/content/repositories/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
+	<organization>
+		<name>Top-Q</name>
+	</organization>
 	<modules>
 		<module>../integ-bdd</module>
 		<module>../integ-cli</module>

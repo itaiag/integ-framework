@@ -30,8 +30,6 @@ import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.support.events.WebDriverEventListener;
 import org.testng.Reporter;
 
-//import com.tools.CurrentPageKeeper;
-
 /**
  * This class implements the Selenium system object. This class is responsible
  * for communication between the client and the remote control of the Selenium
@@ -84,16 +82,11 @@ public class WebDriverSystemModule implements HasWebDriver {
 	 */
 	protected String webDriverEventListenerClasses = "";
 
-//	protected WebDriverScreenshotEventHandler screenshot;
-
 	private boolean browserIsOpened = false;
 
 	private boolean clearCookiesBeforeOpen = false;
 	
 	public WebDriverSystemModule() throws Exception{
-//		if (lazyInit == false) {
-//			openBrowser();
-//		}
 		
 	}
 	

@@ -85,11 +85,11 @@ public class WebDriverSystemModule implements HasWebDriver {
 	private boolean browserIsOpened = false;
 
 	private boolean clearCookiesBeforeOpen = false;
-	
-	public WebDriverSystemModule() throws Exception{
-		
+
+	public WebDriverSystemModule() throws Exception {
+
 	}
-	
+
 	/**
 	 * Open the browser:
 	 * <ol>
@@ -154,10 +154,10 @@ public class WebDriverSystemModule implements HasWebDriver {
 
 			ClassLoader loader = this.getClass().getClassLoader();
 
-			for (String eventListenerClass: listeners) {
+			for (String eventListenerClass : listeners) {
 				try {
-					
-					if(eventListenerClass !=null && !eventListenerClass.isEmpty()){
+
+					if (eventListenerClass != null && !eventListenerClass.isEmpty()) {
 						// Trim the class string
 						eventListenerClass = eventListenerClass.trim();
 
@@ -165,12 +165,12 @@ public class WebDriverSystemModule implements HasWebDriver {
 						Class<?> loadClass = loader.loadClass(eventListenerClass);
 
 						// create new instance of the class
-						WebDriverEventListener webDriverEventListener = (WebDriverEventListener) loadClass.newInstance();
+						WebDriverEventListener webDriverEventListener = (WebDriverEventListener) loadClass
+								.newInstance();
 
 						// register the class as a web driver event handler.
 						driverWrapper.register(webDriverEventListener);
 					}
-			
 
 				} catch (Throwable e) {
 					Reporter.log(eventListenerClass + " cannot be loaded");
@@ -191,8 +191,7 @@ public class WebDriverSystemModule implements HasWebDriver {
 
 		if (getWebDriver() != null) {
 			webDriverInstance = webDriverFactory(getWebDriver());
-		}
-		else {
+		} else {
 
 			String error = "Browser instance init Exception, the webDriver type(e.g. CHROME_DRIVER) must not be null";
 			error += "\n" + WebDriverType.getAllSupportedWebDriverTypesAsString();
@@ -233,35 +232,35 @@ public class WebDriverSystemModule implements HasWebDriver {
 			switch (type) {
 			case CHROME_DRIVER:
 				webDriver = getChromeDriver();
-			break;
+				break;
 
 			case FIREFOX_DRIVER:
 				webDriver = getFirefoxWebDriver();
-			break;
+				break;
 
 			case INTERNET_EXPLORER_DRIVER:
 				webDriver = getInternetExplorerWebDriver();
-			break;
+				break;
 
 			case HTML_UNIT_DRIVER:
 				webDriver = getHtmlUnitDriver();
-			break;
+				break;
 
 			case OPERA_DRIVER:
 				webDriver = getOperaDriver();
-			break;
+				break;
 
 			case ANDROID_DRIVER:
 				webDriver = getAndroidDriver();
-			break;
+				break;
 
 			case IPHONE_DRIVER:
 				webDriver = getIphoneDriver();
-			break;
+				break;
 
 			case SAFARI_DRIVER:
 				webDriver = getSafariDriver();
-			break;
+				break;
 
 			default:
 				throw new IllegalArgumentException("WebDriver type is unsupported");
@@ -276,8 +275,7 @@ public class WebDriverSystemModule implements HasWebDriver {
 		if (webDriver == null) {
 			Reporter.log("Failed to init the web driver", false);
 			throw new IllegalArgumentException("Failed to init the web driver-" + type);
-		}
-		else {
+		} else {
 			driver = new WebDriverWrapper(webDriver);
 		}
 		return driver;
@@ -364,11 +362,10 @@ public class WebDriverSystemModule implements HasWebDriver {
 
 			if (browserPath == null || browserPath.isEmpty()) {
 				webDriver = new FirefoxDriver(ffProfile);
-			}
-			else {
+			} else {
 				if (ffBinary == null) {
 					System.setProperty("webdriver.firefox.bin", browserPath);
-					// Build  the Default path of Firefox driver in runtime
+					// Build the Default path of Firefox driver in runtime
 					Reporter.log("set Firefox bin Property :" + browserPath);
 					File pathToFirefoxBinary = new File(browserPath);
 					ffBinary = new FirefoxBinary(pathToFirefoxBinary);
@@ -418,8 +415,7 @@ public class WebDriverSystemModule implements HasWebDriver {
 			if (switches.size() > 0) {
 				options.addArguments(switches);
 				driver = new ChromeDriver(options);
-			}
-			else {
+			} else {
 				driver = new ChromeDriver();
 			}
 		} catch (Throwable e) {
@@ -464,11 +460,10 @@ public class WebDriverSystemModule implements HasWebDriver {
 						+ File.separator + "resources" + File.separator + CHROME_DRIVER_EXE_NAME);
 
 				if (chromeExe.exists()) {
-					Reporter.log("found the chrome driver exe(default folder -" + chromeExe + ").");
+					Reporter.log("found the chrome driver exe(default folder -" + chromeExe + ").", true);
 					path = chromeExe.getAbsolutePath();
-				}
-				else {
-					Reporter.log("didn't find the chromedriver.exe under the default folder -" + chromeExe);
+				} else {
+					Reporter.log("didn't find the chromedriver.exe under the default folder -" + chromeExe, true);
 				}
 
 				// if (!libFolder.exists()) {
@@ -478,13 +473,12 @@ public class WebDriverSystemModule implements HasWebDriver {
 				// }
 				// path = libFolder.getAbsolutePath() + File.separator +
 				// CHROME_DRIVER_EXE_NAME;
-			}
-			else {
+			} else {
 				path = chromeDriverPath;
 			}
 
 		} catch (Exception e) {
-			Reporter.log("Failed to get the chrome driver path"+e.getMessage());
+			Reporter.log("Failed to get the chrome driver path" + e.getMessage());
 		}
 
 		return path;

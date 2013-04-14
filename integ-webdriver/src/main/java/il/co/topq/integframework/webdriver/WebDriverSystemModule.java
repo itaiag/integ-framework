@@ -139,7 +139,7 @@ public class WebDriverSystemModule implements HasWebDriver {
 	 * 
 	 * @see #openBrowser
 	 */
-	public void restartBrwoser() {
+	public void restartBrowser() {
 		closeBrowser();
 		openBrowser();
 	}

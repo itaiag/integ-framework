@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
  * @author Ita Agmon
  * 
  */
-public class FindTextAssertion extends AbstractAssertionLogic {
+public class FindTextAssertion extends AbstractAssertionLogic<String> {
 
 	private final String expectedText;
 
@@ -75,13 +75,10 @@ public class FindTextAssertion extends AbstractAssertionLogic {
 
 	}
 
-	@Override
-	public Class<?> getActualClass() {
-		return String.class;
-	}
+	
 
 	@Override
-	public void setActual(Object actual) {
+	public void setActual(String actual) {
 		this.actual = actual;
 		if (actual != null) {
 			actualText = (String) actual;

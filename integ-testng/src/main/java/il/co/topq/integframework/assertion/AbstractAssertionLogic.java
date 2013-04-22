@@ -6,12 +6,12 @@ package il.co.topq.integframework.assertion;
  * @author Itai Agmon
  * 
  */
-public abstract class AbstractAssertionLogic implements IAssertionLogic {
+public abstract class AbstractAssertionLogic<T> implements IAssertionLogic<T> {
 
 	/**
 	 * The actual object to perform assertion on
 	 */
-	protected Object actual;
+	protected T actual;
 
 	/**
 	 * The status of the assertion
@@ -28,19 +28,13 @@ public abstract class AbstractAssertionLogic implements IAssertionLogic {
 	 */
 	protected String message;
 
-	/**
-	 * Class that the assertion can be performed on
-	 */
-	@Override
-	public Class<?> getActualClass() {
-		return Object.class;
-	}
+	
 
 	/**
 	 * Sets the actual object to perfrom assertion on
 	 */
 	@Override
-	public void setActual(Object actual) {
+	public void setActual(T actual) {
 		this.actual = actual;
 	}
 

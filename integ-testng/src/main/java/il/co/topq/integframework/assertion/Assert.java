@@ -36,11 +36,11 @@ public class Assert extends org.testng.Assert {
 	 * @throws AssertionError
 	 *             If assertion fails
 	 */
-	static public void assertLogic(final Object actual, final AbstractAssertionLogic logic) throws Exception {
+	static public <T> void assertLogic(final T actual, final AbstractAssertionLogic<T> logic) throws Exception {
 		assertLogicHappens(actual, logic, 0);
 	}
 
-	static public void assertLogicHappens(final Object actual, final AbstractAssertionLogic logic, final long timeout)
+	static public <T> void assertLogicHappens(final T actual, final AbstractAssertionLogic<T> logic, final long timeout)
 			throws Exception {
 		if (null == actual) {
 			throw new IllegalArgumentException("Actual can't be null");
@@ -48,11 +48,7 @@ public class Assert extends org.testng.Assert {
 		if (null == logic) {
 			throw new IllegalArgumentException("logic can't be null");
 		}
-		if (!logic.getActualClass().isAssignableFrom(actual.getClass())) {
-			Reporter.log("Actual type " + actual.getClass().getSimpleName() + " is not applicable for assertion logic");
-			throw new IllegalStateException("Actual type " + actual.getClass().getSimpleName()
-					+ " is not applicable for assertion logic");
-		}
+	
 		logic.setActual(actual);
 		try {
 			logic.doAssertion();

@@ -1,6 +1,6 @@
 package il.co.topq.integframework.assertion;
 
-public class NumberCompareAssertion extends AbstractAssertionLogic {
+public class NumberCompareAssertion extends AbstractAssertionLogic<Integer> {
 
 	public enum CompareMethod {
 		BIGGER, BIGGER_OR_EQUALS, EQUALS, SMALLER_OR_EQUALS, SMALLER
@@ -72,18 +72,14 @@ public class NumberCompareAssertion extends AbstractAssertionLogic {
 
 	}
 
-	@Override
-	public Class<?> getActualClass() {
-		return Integer.class;
-	}
-
+	
 	/**
 	 * Sets the actual object to perfrom assertion on
 	 */
 	@Override
-	public void setActual(Object actual) {
+	public void setActual(Integer actual) {
 		if (actual != null) {
-			actualInt = (Integer) actual;
+			actualInt =  actual;
 		}
 	}
 

@@ -1,14 +1,19 @@
 package il.co.topq.integframework.webdriver.utils;
 
+import il.co.topq.integframework.reporting.Reporter;
+
+import java.io.File;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchWindowException;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Action;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.testng.Reporter;
 
 public class WebDriverUtils {
 
@@ -29,8 +34,8 @@ public class WebDriverUtils {
 		return false;
 
 	}
-	
-	public static void rightClickOnElement(WebDriver driver,WebElement webElement){
+
+	public static void rightClickOnElement(WebDriver driver, WebElement webElement) {
 		Actions actions = new Actions(driver);
 		Action action = actions.contextClick(webElement).build();
 		action.perform();
@@ -77,6 +82,20 @@ public class WebDriverUtils {
 		}
 		throw new IllegalStateException("Failed to switch to window with title '" + windowTitle + "'");
 
+	}
+
+	public static void addScreenshot(WebDriver driver) {
+		File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+		File newFile = new File("screenShot" + System.currentTimeMillis() + ".png");
+		scrFile.renameTo(newFile);
+		Reporter.logImage("Screenshot", newFile);
+		scrFile.delete();
+		newFile.delete();
+	}
+
+	public static void safeClick(WebDriver driver, WebElement element) {
+		Actions builder = new Actions(driver);
+		builder.moveToElement(element).click(element).perform();
 	}
 
 }

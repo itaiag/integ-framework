@@ -65,5 +65,6 @@
 		<module>../integ-junit</module>
 		<module>../integ-testng</module>
 		<module>../integ-webdriver</module>
+		<module>../integ-image-validator</module>
 	</modules>
 </project>

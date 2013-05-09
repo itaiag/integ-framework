@@ -10,6 +10,7 @@ import org.apache.commons.exec.DefaultExecuteResultHandler;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.ExecuteWatchdog;
+import org.apache.commons.exec.Executor;
 import org.apache.commons.exec.LogOutputStream;
 import org.apache.commons.exec.PumpStreamHandler;
 
@@ -25,6 +26,19 @@ public class ProcessHandler {
 
 	private DefaultExecuteResultHandler resultHandler;
 
+	private final Executor executor;
+
+	public ProcessHandler(Executor executor) {
+		if (null == executor) {
+			executor = new DefaultExecutor();
+		}
+		this.executor = executor;
+	}
+
+	public ProcessHandler() {
+		this(null);
+	}
+
 	/**
 	 * Sets the working dir to <code>workingDir</code> launches process
 	 * <code>commandLine</code>
@@ -39,7 +53,6 @@ public class ProcessHandler {
 	 *             process
 	 */
 	public int execute(File workingDir, CommandLine commandLine, boolean blocking, int timeout) throws IOException {
-		DefaultExecutor executor = new DefaultExecutor();
 		if (null != workingDir) {
 			executor.setWorkingDirectory(workingDir.getCanonicalFile());
 		}
@@ -108,6 +121,9 @@ public class ProcessHandler {
 	 * @return
 	 */
 	public String[] getOut() {
+		if (null == out){
+			return null;
+		}
 		return out.getOut();
 	}
 

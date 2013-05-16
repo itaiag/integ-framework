@@ -1,0 +1,8 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="Sanity" verbose="1">
+	<test name="Google Search Tests">
+		<packages>
+			<package name="co.il.topq.auto.tests"></package>
+		</packages>
+	</test>
+</suite>

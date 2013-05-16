@@ -5,6 +5,11 @@ import il.co.topq.integframework.cli.process.ProcessHandler;
 import java.io.File;
 import java.io.IOException;
 
+/**
+ * 
+ * @author Itai_Agmon
+ *
+ */
 public class ImageMagick implements ImageComparatorI {
 
 	private final String imageMagickPath;

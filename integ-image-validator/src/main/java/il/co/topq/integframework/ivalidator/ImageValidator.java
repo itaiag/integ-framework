@@ -4,13 +4,35 @@ import java.io.File;
 
 import javax.annotation.PostConstruct;
 
+/**
+ * 
+ * @author Itai_Agmon
+ * 
+ */
 public class ImageValidator {
 
-	private boolean createRepository = false;
+	private final FileRepositoryI repository;
 
-	private ImageComparatorI comparator;
+	private final ImageComparatorI comparator;
 
-	private FileRepositoryI repository;
+	private ValidationResultsHandlerI resultHandler;
+
+	/**
+	 * If set to true, do not validate images just add them to the repository
+	 */
+	private boolean createRepository;
+
+	public ImageValidator(FileRepositoryI repository, ImageComparatorI comparator, boolean createRepository) {
+		super();
+		this.repository = repository;
+		this.comparator = comparator;
+		this.createRepository = createRepository;
+		resultHandler = new DefaultValidatorResultHandlerImpl();
+	}
+
+	public ImageValidator(FileRepositoryI repository, ImageComparatorI comparator) {
+		this(repository, comparator, false);
+	}
 
 	@PostConstruct
 	public void init() {
@@ -23,20 +45,44 @@ public class ImageValidator {
 
 	}
 
-	public void validate(File imgFile, String[] props) throws ImageComparatorException {
+	/**
+	 * 
+	 * @param imgFile
+	 * @param props
+	 * @throws ImageComparatorException
+	 */
+	public boolean validate(final File imgFile, String[] props) throws ImageComparatorException {
 		if (createRepository) {
-			repository.addFiles(new File[]{imgFile}, props);
-			return;
+			try {
+				repository.addFile(imgFile, props, null);
+			} catch (FileRepositoryException e) {
+				throw new ImageComparatorException("Failed to add file to the repository", e);
+			}
+			return true;
 		}
-		File[] repoFiles = repository.getFiles(props);
-		//TODO: Validate number of files returned
+		File[] repoFiles = null;
+		try {
+			repoFiles = repository.getFiles(props);
+		} catch (FileRepositoryException e) {
+			throw new ImageComparatorException("Failed to get repository file", e);
+		}
 		File expectedFile = repoFiles[0];
-		File maskFile = repoFiles[1];
-		
-		expectedFile = comparator.applyMask(expectedFile, maskFile);
-		File actualFile = comparator.applyMask(imgFile, maskFile);
+		File maskFile = null;
+		if (repoFiles.length > 1) {
+			maskFile = repoFiles[1];
+		}
+		File actualFile = imgFile;
+		if (maskFile != null) {
+			expectedFile = comparator.applyMask(expectedFile, maskFile);
+			actualFile = comparator.applyMask(imgFile, maskFile);
+		}
+
 		File resultFile = new File("resultFile.png");
-		comparator.compare(actualFile, expectedFile, resultFile);
+		boolean result = comparator.compare(actualFile, expectedFile, resultFile);
+		if (resultHandler != null) {
+			resultHandler.handle(imgFile, props, result, resultFile);
+		}
+		return result;
 	}
 
 	public boolean isCreateRepository() {
@@ -47,12 +93,8 @@ public class ImageValidator {
 		this.createRepository = createRepository;
 	}
 
-	public ImageComparatorI getComparator() {
-		return comparator;
-	}
-
-	public void setComparator(ImageComparatorI comparator) {
-		this.comparator = comparator;
+	public void setResultHandler(ValidationResultsHandlerI resultHandler) {
+		this.resultHandler = resultHandler;
 	}
 
 }

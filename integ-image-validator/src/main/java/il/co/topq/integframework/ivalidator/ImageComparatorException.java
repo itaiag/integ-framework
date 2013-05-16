@@ -1,5 +1,10 @@
 package il.co.topq.integframework.ivalidator;
 
+/**
+ * 
+ * @author Itai_Agmon
+ *
+ */
 public class ImageComparatorException extends Exception {
 
 	public ImageComparatorException(String message, Throwable e) {

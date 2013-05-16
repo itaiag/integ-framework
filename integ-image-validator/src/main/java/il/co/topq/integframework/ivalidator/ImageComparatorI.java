@@ -2,6 +2,11 @@ package il.co.topq.integframework.ivalidator;
 
 import java.io.File;
 
+/**
+ * 
+ * @author Itai_Agmon
+ *
+ */
 public interface ImageComparatorI {
 
 	public boolean compare(File actualImg, File expectedImg, File resultFile) throws ImageComparatorException;

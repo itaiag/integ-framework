@@ -1,5 +1,12 @@
 package il.co.topq.integframework.ivalidator;
 
+import il.co.topq.integframework.ivalidator.comparator.ImageComparatorException;
+import il.co.topq.integframework.ivalidator.comparator.ImageComparatorI;
+import il.co.topq.integframework.ivalidator.repository.FileRepositoryException;
+import il.co.topq.integframework.ivalidator.repository.FileRepositoryI;
+import il.co.topq.integframework.ivalidator.resultHandler.DefaultValidatorResultHandlerImpl;
+import il.co.topq.integframework.ivalidator.resultHandler.ValidationResultsHandlerI;
+
 import java.io.File;
 
 import javax.annotation.PostConstruct;
@@ -17,17 +24,24 @@ public class ImageValidator {
 
 	private ValidationResultsHandlerI resultHandler;
 
+	private boolean enabled = true;
+
 	/**
 	 * If set to true, do not validate images just add them to the repository
 	 */
 	private boolean createRepository;
 
-	public ImageValidator(FileRepositoryI repository, ImageComparatorI comparator, boolean createRepository) {
-		super();
+	public ImageValidator(FileRepositoryI repository, ImageComparatorI comparator, boolean createRepository,
+			ValidationResultsHandlerI resultHandler) {
 		this.repository = repository;
 		this.comparator = comparator;
 		this.createRepository = createRepository;
-		resultHandler = new DefaultValidatorResultHandlerImpl();
+		this.resultHandler = resultHandler;
+
+	}
+
+	public ImageValidator(FileRepositoryI repository, ImageComparatorI comparator, boolean createRepository) {
+		this(repository, comparator, createRepository, new DefaultValidatorResultHandlerImpl());
 	}
 
 	public ImageValidator(FileRepositoryI repository, ImageComparatorI comparator) {
@@ -52,6 +66,9 @@ public class ImageValidator {
 	 * @throws ImageComparatorException
 	 */
 	public boolean validate(final File imgFile, String[] props) throws ImageComparatorException {
+		if (!enabled) {
+			return true;
+		}
 		if (createRepository) {
 			try {
 				repository.addFile(imgFile, props, null);
@@ -77,7 +94,7 @@ public class ImageValidator {
 			actualFile = comparator.applyMask(imgFile, maskFile);
 		}
 
-		File resultFile = new File("resultFile.png");
+		File resultFile = new File(System.getProperty("java.io.tmpdir"), "resultFile.png");
 		boolean result = comparator.compare(actualFile, expectedFile, resultFile);
 		if (resultHandler != null) {
 			resultHandler.handle(imgFile, props, result, resultFile);
@@ -95,6 +112,14 @@ public class ImageValidator {
 
 	public void setResultHandler(ValidationResultsHandlerI resultHandler) {
 		this.resultHandler = resultHandler;
+	}
+
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
 	}
 
 }

@@ -1,5 +1,9 @@
 package il.co.topq.integframework.ivalidator;
 
+import il.co.topq.integframework.ivalidator.repository.FileRepositoryException;
+import il.co.topq.integframework.ivalidator.repository.FileRepositoryI;
+import il.co.topq.integframework.ivalidator.repository.FileRepositoryImpl;
+
 import java.io.File;
 import java.io.IOException;
 

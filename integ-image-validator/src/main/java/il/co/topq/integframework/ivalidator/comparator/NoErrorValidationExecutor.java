@@ -1,4 +1,4 @@
-package il.co.topq.integframework.ivalidator;
+package il.co.topq.integframework.ivalidator.comparator;
 
 import org.apache.commons.exec.DefaultExecutor;
 

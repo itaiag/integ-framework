@@ -1,5 +1,8 @@
 package il.co.topq.integframework.ivalidator;
 
+import il.co.topq.integframework.ivalidator.comparator.ImageMagick;
+import il.co.topq.integframework.ivalidator.repository.FileRepositoryImpl;
+
 import java.io.File;
 
 import junit.framework.Assert;
@@ -19,8 +22,7 @@ public class TestImageValidator {
 
 	@Before
 	public void setUp() throws Exception {
-		validator = new ImageValidator(new FileRepositoryImpl(repositoryPath), new ImageMagick(
-				CommonResources.IMAGE_MAGICK_PATH));
+		validator = new ImageValidator(new FileRepositoryImpl(repositoryPath), new ImageMagick());
 		img1 = TestUtils.getFileFromResources("img1.png");
 		img2 = TestUtils.getFileFromResources("img2.png");
 		mask1 = TestUtils.getFileFromResources("mask1.png");

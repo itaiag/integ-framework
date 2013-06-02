@@ -1,12 +1,16 @@
 package il.co.topq.integframework.ivalidator;
 
+import il.co.topq.integframework.ivalidator.comparator.ImageComparatorException;
+import il.co.topq.integframework.ivalidator.comparator.ImageMagick;
+
 import java.io.File;
 import java.io.IOException;
 
-import junit.framework.Assert;
-
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
+
+import junit.framework.Assert;
 
 public class TestImageMagick {
 
@@ -24,7 +28,7 @@ public class TestImageMagick {
 		imgFile2 = TestUtils.getFileFromResources("img2.png");
 		maskFile = TestUtils.getFileFromResources("mask1.png");
 		maskedImageFile = TestUtils.getFileFromResources("img1masked1.png");
-		comparator = new ImageMagick(CommonResources.IMAGE_MAGICK_PATH);
+		comparator = new ImageMagick();
 	}
 
 	@After
@@ -32,14 +36,14 @@ public class TestImageMagick {
 		resultFile.delete();
 	}
 
-	// @Test
+//	@Test
 	public void testAddMask() throws ImageComparatorException {
 		File newFile = comparator.applyMask(imgFile1, maskFile);
 		Assert.assertTrue(newFile.exists());
 		Assert.assertEquals(maskedImageFile.length(), newFile.length());
 	}
 
-	// @Test
+//	@Test
 	public void testCompareSuccess() throws ImageComparatorException {
 		boolean equals = comparator.compare(imgFile1, imgFile1, resultFile);
 		Assert.assertTrue(equals);

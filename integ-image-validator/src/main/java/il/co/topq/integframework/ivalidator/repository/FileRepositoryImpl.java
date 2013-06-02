@@ -1,4 +1,4 @@
-package il.co.topq.integframework.ivalidator;
+package il.co.topq.integframework.ivalidator.repository;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -15,6 +15,10 @@ import org.apache.commons.io.FileUtils;
 public class FileRepositoryImpl implements FileRepositoryI {
 
 	private final File repositoryPath;
+
+	public FileRepositoryImpl() throws FileRepositoryException {
+		this(null);
+	}
 
 	public FileRepositoryImpl(File repositoryPath) throws FileRepositoryException {
 		super();

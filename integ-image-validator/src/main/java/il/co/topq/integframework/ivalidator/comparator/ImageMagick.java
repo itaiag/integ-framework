@@ -1,8 +1,9 @@
-package il.co.topq.integframework.ivalidator;
+package il.co.topq.integframework.ivalidator.comparator;
 
 import il.co.topq.integframework.cli.process.ProcessHandler;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 
 /**
@@ -43,6 +44,50 @@ public class ImageMagick implements ImageComparatorI {
 	 * 
 	 */
 	private final static String COMPARE = "\"%s\"/compare -verbose -metric mae \"%s\" \"%s\" \"%s\"";
+
+	public ImageMagick() throws IOException{
+		this(findImageMagickPath());
+	}
+	
+	private static String findImageMagickPath() throws IOException {
+		if (System.getProperty("os.name").contains("Windows")){
+			File[] imageMagickFolder =  new File("C:\\Program Files").listFiles(new FilenameFilter(){
+
+				@Override
+				public boolean accept(File dir, String name) {
+					if (name.contains("ImageMagick")){
+						return true;
+					}
+					return false;
+				}
+			
+			});
+			if (imageMagickFolder == null || imageMagickFolder.length == 0) {
+				imageMagickFolder = new File("C:\\Program Files (x86)").listFiles(new FilenameFilter(){
+					
+					@Override
+					public boolean accept(File dir, String name) {
+						if (name.contains("ImageMagick")){
+							return true;
+						}
+						return false;
+					}
+					
+				});
+			}
+			if (imageMagickFolder != null && imageMagickFolder.length > 0) {
+				return imageMagickFolder[0].getAbsolutePath();
+			}
+			throw new IOException("Failed to find imageMagick path");
+
+		}else {
+			return "";
+		}
+	}
+	
+	public static void main(String[] args) throws IOException {
+		System.out.println(findImageMagickPath());
+	}
 
 	public ImageMagick(String imageMagickPath) throws IOException {
 		super();

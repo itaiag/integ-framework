@@ -1,21 +1,48 @@
 package il.co.topq.integframework.webdriver.utils;
 
 import il.co.topq.integframework.reporting.Reporter;
+import il.co.topq.integframework.webdriver.WebDriverType;
+import il.co.topq.integframework.webdriver.WebDriverWrapper;
 
 import java.io.File;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchWindowException;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.android.AndroidDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.htmlunit.HtmlUnitDriver;
+import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.interactions.Action;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.iphone.IPhoneDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class WebDriverUtils {
+
+	public static WebDriverType getDriverType(WebDriver driver) {
+		if (driver == null){
+			return null;
+		}
+		JavascriptExecutor executor = (JavascriptExecutor) driver;
+		String userAgent = (String) executor.executeScript("return navigator.userAgent;");
+		if (userAgent.contains("MSIE")) {
+			return WebDriverType.INTERNET_EXPLORER_DRIVER;
+		}
+		if (userAgent.contains("Firefox")) {
+			return WebDriverType.FIREFOX_DRIVER;
+		}
+		if (userAgent.contains("Chrome")) {
+			return WebDriverType.CHROME_DRIVER;
+		}
+		return null;
+	}
 
 	private static boolean switchToWindowWithTitle(WebDriver driver, String[] windowHandles, String windowTitle) {
 		for (String windowHandle : windowHandles) {

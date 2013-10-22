@@ -5,11 +5,12 @@ import java.util.EnumSet;
 /**
  * 
  * @author Liel Ran ,Create Date - 22.12.11
- *
+ * 
  */
 public enum WebDriverType {
 	FIREFOX_DRIVER("firefox"), INTERNET_EXPLORER_DRIVER("iexplore"), HTML_UNIT_DRIVER("htmlunit"), CHROME_DRIVER(
-			"chrome"), OPERA_DRIVER("opera"), IPHONE_DRIVER("iphone"), ANDROID_DRIVER("android"), SAFARI_DRIVER("safari");
+			"chrome"), OPERA_DRIVER("opera"), IPHONE_DRIVER("iphone"), ANDROID_DRIVER("android"), SAFARI_DRIVER(
+			"safari"), PHANTOMJS_DRIVER("phantomJs");
 
 	private String webDriverType;
 
@@ -38,7 +39,7 @@ public enum WebDriverType {
 		sb.append("The Supported WebDriverType:");
 		sb.append("\n");
 		int index = 1;
-		for (WebDriverType type : EnumSet.allOf(WebDriverType.class) ) {
+		for (WebDriverType type : EnumSet.allOf(WebDriverType.class)) {
 			sb.append(index + ". " + type.name() + "\n");
 			index++;
 		}

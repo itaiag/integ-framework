@@ -2,6 +2,7 @@ package il.co.topq.integframework.webdriver;
 
 import il.co.topq.integframework.webdriver.CurrentPageKeeper.AbstractPageObjectResolver;
 import il.co.topq.integframework.webdriver.eventlistener.WebDriverReportEventHandler;
+import il.co.topq.integframework.webdriver.eventlistener.WebDriverScreenshotEventHandler;
 import il.co.topq.integframework.webdriver.utils.FileUtils;
 
 import java.io.File;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.android.AndroidDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -24,6 +26,8 @@ import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.iphone.IPhoneDriver;
+import org.openqa.selenium.phantomjs.PhantomJSDriver;
+import org.openqa.selenium.phantomjs.PhantomJSDriverService;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.safari.SafariDriver;
@@ -261,6 +265,9 @@ public class WebDriverSystemModule implements HasWebDriver {
 			case SAFARI_DRIVER:
 				webDriver = getSafariDriver();
 				break;
+			case PHANTOMJS_DRIVER:
+				webDriver = getPhantomJsDriver();
+				break;
 
 			default:
 				throw new IllegalArgumentException("WebDriver type is unsupported");
@@ -279,6 +286,22 @@ public class WebDriverSystemModule implements HasWebDriver {
 			driver = new WebDriverWrapper(webDriver);
 		}
 		return driver;
+	}
+
+	private WebDriver getPhantomJsDriver() {
+		if (StringUtils.isEmpty(browserPath)) {
+			throw new IllegalArgumentException("Path to PhantomJS was not defined");
+		}
+
+		DesiredCapabilities capabilites = new DesiredCapabilities();
+		capabilites.setJavascriptEnabled(true);
+		capabilites.setCapability("takesScreenshot", true);
+
+		PhantomJSDriverService service = new PhantomJSDriverService.Builder()
+				.usingCommandLineArguments(new String[] { "--ignore-ssl-errors=yes" })
+				.usingPhantomJSExecutable(new File(browserPath)).build();
+
+		return new PhantomJSDriver(service, capabilites);
 	}
 
 	private WebDriver getSafariDriver() {

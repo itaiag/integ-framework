@@ -41,7 +41,7 @@
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>versions-maven-plugin</artifactId>
 				<version>2.1</version>
-			
+
 			</plugin>
 
 		</plugins>
@@ -58,6 +58,11 @@
 			<name>RepositoryProxy</name>
 			<url>${topq.repository.rootUrl}/content/repositories/snapshots</url>
 		</snapshotRepository>
+		<repository>
+			<id>topq</id>
+			<name>RepositoryProxy</name>
+			<url>${topq.repository.rootUrl}/content/repositories/releases</url>
+		</repository>
 	</distributionManagement>
 	<organization>
 		<name>Top-Q</name>

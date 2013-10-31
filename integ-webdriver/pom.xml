@@ -21,14 +21,14 @@
 		<dependency>
 			<groupId>il.co.topq.integframework</groupId>
 			<artifactId>integ-testng</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
+			<version>1.0.0</version>
 		</dependency>
 		<!-- <dependency> <groupId>com.google.guava</groupId> <artifactId>guava</artifactId> 
 			<version>14.0.1</version> <type>bundle</type> </dependency> -->
 		<dependency>
 			<groupId>il.co.topq.integframework</groupId>
 			<artifactId>integ-junit</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
+			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.detro.ghostdriver</groupId>
@@ -72,7 +72,7 @@
 	<parent>
 		<groupId>il.co.topq.integframework</groupId>
 		<artifactId>integ-parent</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
+		<version>1.0.0</version>
 		<relativePath>../integ-parent</relativePath>
 	</parent>
 </project>

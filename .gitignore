@@ -17,3 +17,7 @@ test-output/
 
 #Project specific
 integ-image-validator/*.png
+
+#Maven
+pom.xml.versionsBackup
+

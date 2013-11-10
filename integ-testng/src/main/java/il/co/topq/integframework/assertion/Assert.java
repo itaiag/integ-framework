@@ -2,6 +2,7 @@ package il.co.topq.integframework.assertion;
 
 import il.co.topq.integframework.reporting.Reporter;
 import il.co.topq.integframework.reporting.Reporter.Color;
+import il.co.topq.integframework.reporting.Reporter.Style;
 
 /**
  * Class for comparing between actual and expected states
@@ -23,6 +24,23 @@ public class Assert extends org.testng.Assert {
 		}
 
 	}
+	
+	/**
+	 * Execute the <code>logic</code> on the the <code>actual</code> object.
+	 * 
+	 * @param actual
+	 *            Object to perform assertion on
+	 * @param logic
+	 *            Logic to operate on the actual object
+	 * @throws Exception
+	 *             If exception occurced during assertion
+	 * @throws AssertionError
+	 *             If assertion fails
+	 */
+	static public <T> void assertLogic(final T actual, final AbstractAssertionLogic<T> logic, final long timeout) throws Exception {
+		assertLogicHappens(actual, logic, timeout, true);
+	}
+
 
 	/**
 	 * Execute the <code>logic</code> on the the <code>actual</code> object.
@@ -37,23 +55,29 @@ public class Assert extends org.testng.Assert {
 	 *             If assertion fails
 	 */
 	static public <T> void assertLogic(final T actual, final AbstractAssertionLogic<T> logic) throws Exception {
-		assertLogicHappens(actual, logic, 0);
+		assertLogic(actual, logic, 0l);
 	}
 
-	static public <T> void assertLogicHappens(final T actual, final AbstractAssertionLogic<T> logic, final long timeout)
-			throws Exception {
+	static public <T> void assertLogicHappens(final T actual, final AbstractAssertionLogic<T> logic,
+			final long timeout, boolean silent) throws Exception {
 		if (null == actual) {
 			throw new IllegalArgumentException("Actual can't be null");
 		}
 		if (null == logic) {
 			throw new IllegalArgumentException("logic can't be null");
 		}
-	
+
 		logic.setActual(actual);
 		try {
 			logic.doAssertion();
-			Reporter.log(logic.isStatus() ? "Assertion success: " : "Assertion failure: " + logic.getTitle(),
-					logic.getMessage(), logic.isStatus() ? Color.GREEN : Color.RED);
+			if (logic.isStatus()) {
+				if (!silent) {
+					Reporter.log("Assertion success ", Style.REGULAR, Color.GREEN);
+				}
+			} else {
+				Reporter.log("Assertion failure: " + logic.getTitle(), logic.getMessage(), Color.RED);
+
+			}
 			if (!logic.isStatus()) {
 				throw new AssertionError(logic.getTitle());
 			}
@@ -67,9 +91,9 @@ public class Assert extends org.testng.Assert {
 				} catch (InterruptedException interruptedException) {
 
 				}
-				assertLogicHappens(actual, logic, timeout - 3000);
+				assertLogicHappens(actual, logic, timeout - 3000, silent);
 			}
+
 		}
 	}
-
 }

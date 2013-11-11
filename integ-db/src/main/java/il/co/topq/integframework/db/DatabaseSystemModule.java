@@ -15,7 +15,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 public class DatabaseSystemModule {
 
-	private final JdbcTemplate template;
+	protected final JdbcTemplate template;
 	private List<ResultSetPrinter> resultSetPrinterList;
 
 	public DatabaseSystemModule(final DataSource dataSource) {

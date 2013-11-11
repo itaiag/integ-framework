@@ -2,6 +2,9 @@ package il.co.topq.integframework.reporting;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
@@ -43,61 +46,37 @@ public class Reporter extends org.testng.Reporter {
 
 	}
 
-	/**
-	 * Appending <code>s</code> to the report
-	 * 
-	 * @param s
-	 */
 	public static void log(String s) {
-		log(s, false);
+		log(s, false, null, null);
+	}
+	
+	public static void log(String s, boolean logToStandardOut) {
+		log(s, logToStandardOut, null, null);
+	}
+	
+	public static void log(final String s, Style style) {
+		log(s, false, style, null);
+	}
+	
+	public static void log(final String s, Color color) {
+		log(s, false, null, color);
+	}
+	
+	public static void log(final String s, Style style, Color color) {
+		log(s, false, style, color);
 	}
 
 	/**
-	 * Appending <code>s</code> to the report
+	 * Appending <code>s</code> to the report with time stamp
 	 * 
 	 * @param s
 	 */
-	public static void log(String s, boolean logToStandardOut) {
-		s = s + "\n";
-		org.testng.Reporter.log(toHtml(s), false);
-		if (logToStandardOut) {
-			System.out.println(s);
+	public static void log(String s, boolean logToStandardOut, Style style, Color color) {
+		if(!s.startsWith("</")){ // No need to add time stamp for close tag 
+			DateFormat df = new SimpleDateFormat("HH:mm:ss:SS");
+			String reportDate = df.format(new Date(System.currentTimeMillis()));
+			s = reportDate + " - " + s + "\n";
 		}
-	}
-
-	public static void log(final String s, Style style) {
-		if (null != style) {
-			System.out.println(s);
-			log(appendStyleParagraph(s, style), false);
-		} else {
-			log(s);
-		}
-
-	}
-
-	private static String appendStyleParagraph(String s, Style style) {
-		final StringBuilder sb = new StringBuilder();
-		sb.append("<p>");
-		sb.append("<").append(style.value).append(">");
-		sb.append(s);
-		sb.append("</").append(style.value).append(">");
-		sb.append("</p>");
-		return sb.toString();
-	}
-
-	private static String appendColorParagraph(String s, Color color) {
-		if (color == null) {
-			return s;
-		}
-		final StringBuilder sb = new StringBuilder();
-		sb.append("<p style='color:").append(color.name()).append("'>");
-		sb.append(s);
-		sb.append("</p>");
-		return sb.toString();
-
-	}
-
-	public static void log(final String s, Style style, Color color) {
 		String newS = s;
 		if (null == style) {
 			style = Style.REGULAR;
@@ -108,12 +87,7 @@ public class Reporter extends org.testng.Reporter {
 		if (style != Style.REGULAR) {
 			newS = appendStyleParagraph(newS, style);
 		}
-		if (style != Style.REGULAR || color != null) {
-			log(newS, false);
-			System.out.println(s);
-		} else {
-			log(s);
-		}
+		writeToLog(newS, logToStandardOut);
 	}
 
 	/**
@@ -149,8 +123,7 @@ public class Reporter extends org.testng.Reporter {
 			System.out.println(body + "\n");
 		}
 		if (null == body || body.isEmpty()) {
-			title = appendColorParagraph(title, color);
-			log(title);
+			log(title, color);
 			return;
 		}
 		startLogToggle(title, color);
@@ -160,6 +133,10 @@ public class Reporter extends org.testng.Reporter {
 	}
 
 	public static void startLogToggle(String title) {
+		startLogToggle(title, null);
+	}
+
+	public static void startLogToggle(String title, Color color) {
 		if (inToggle) {
 			return;
 		}
@@ -180,11 +157,7 @@ public class Reporter extends org.testng.Reporter {
 		toggleElement.append("<div class='stackTrace' id='");
 		toggleElement.append(id);
 		toggleElement.append("' style='display: none;'>");
-		log(toggleElement.toString(), false);
-	}
-
-	public static void startLogToggle(String title, Color color) {
-		startLogToggle(appendColorParagraph(title, color));
+		log(toggleElement.toString(), false, null, color);
 	}
 
 	public static void stopLogToggle() {
@@ -193,10 +166,6 @@ public class Reporter extends org.testng.Reporter {
 		}
 		log("</div>", false);
 		inToggle = false;
-	}
-
-	private static String toHtml(String str) {
-		return str.replace("\n", "<br/>");
 	}
 
 	public static void logImage(String title, final File file) {
@@ -211,6 +180,57 @@ public class Reporter extends org.testng.Reporter {
 
 	}
 
+	/**
+	 * Copy file to the report and add link. If another file is alrady exists in
+	 * the reports folder with the same name the old file will be deleted.
+	 * 
+	 * @param title
+	 *            The title to appear as link to the file
+	 * @param file
+	 *            The file to copy to the report
+	 */
+	public static void logFile(String title, final File file) {
+		File newFile = copyFileToReporterFolder(file);
+		if (null == newFile) {
+			return;
+		}
+		// Creating link
+		
+		if (null == title || title.isEmpty()) {
+			title = file.getName();
+		}
+		System.out.println(title);
+		log("<a href='" + newFile.getName() + "'>" + title + "</a>", false);
+	}
+
+	private static void writeToLog(String s, boolean logToStandardOut){
+		org.testng.Reporter.log(toHtml(s), false);
+		if (logToStandardOut) {
+			System.out.println(s);
+		}
+	}
+	
+	private static String appendStyleParagraph(String s, Style style) {
+		final StringBuilder sb = new StringBuilder();
+		sb.append("<p>");
+		sb.append("<").append(style.value).append(">");
+		sb.append(s);
+		sb.append("</").append(style.value).append(">");
+		sb.append("</p>");
+		return sb.toString();
+	}
+
+	private static String appendColorParagraph(String s, Color color) {
+		if (color == null) {
+			return s;
+		}
+		final StringBuilder sb = new StringBuilder();
+		sb.append("<p style='color:").append(color.name()).append("'>");
+		sb.append(s);
+		sb.append("</p>");
+		return sb.toString();
+	}
+	
 	private static File copyFileToReporterFolder(File file) {
 		if (null == file || !file.exists() || !file.isFile()) {
 			// File is not exist
@@ -239,27 +259,8 @@ public class Reporter extends org.testng.Reporter {
 		}
 		return newFile;
 	}
-
-	/**
-	 * Copy file to the report and add link. If another file is alrady exists in
-	 * the reports folder with the same name the old file will be deleted.
-	 * 
-	 * @param title
-	 *            The title to appear as link to the file
-	 * @param file
-	 *            The file to copy to the report
-	 */
-	public static void logFile(String title, final File file) {
-		File newFile = copyFileToReporterFolder(file);
-		if (null == newFile) {
-			return;
-		}
-		// Creating link
-		if (null == title || title.isEmpty()) {
-			title = file.getName();
-		}
-		System.out.println(title);
-		log("<a href='" + newFile.getName() + "'>" + title + "</a>", false);
+	
+	private static String toHtml(String str) {
+		return str.replace("\n", "<br/>");
 	}
-
 }

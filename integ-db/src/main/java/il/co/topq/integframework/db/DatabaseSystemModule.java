@@ -67,13 +67,32 @@ public class DatabaseSystemModule {
 	 *            expectedNumOfAffectedRows
 	 * @throws Exception
 	 */
+	public void executeUpdateStatement(final String sql) throws Exception {
+		executeUpdateStatement(sql, -1);
+	}
+
+	/**
+	 * Executes the given SQL statement, which may be an INSERT, UPDATE or
+	 * DELETE statement Compare between the number of rows returned as a result
+	 * of 'executeUpdate' and the expected number of affected rows
+	 * 
+	 * @param sql
+	 *            expectedNumOfAffectedRows
+	 * @param expectedNumOfAffectedRows
+	 *            The number of rows that we expected to be affected as a result
+	 *            of the query. specify -1 if you don't want to perform
+	 *            assertion.
+	 * @throws Exception
+	 */
 	public void executeUpdateStatement(final String sql, int expectedNumOfAffectedRows) throws Exception {
 		if (null == sql || sql.isEmpty()) {
 			throw new IllegalArgumentException("SQL query can't be empty");
 		}
 		int rows = template.update(sql);
-		Assert.assertLogicHappens(rows, new NumberCompareAssertion(expectedNumOfAffectedRows, CompareMethod.EQUALS),
-				0l, true);
+		if (expectedNumOfAffectedRows >= 0) {
+			Assert.assertLogicHappens(rows,
+					new NumberCompareAssertion(expectedNumOfAffectedRows, CompareMethod.EQUALS), 0l, true);
+		}
 	}
 
 	/**

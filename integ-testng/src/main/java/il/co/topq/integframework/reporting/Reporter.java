@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
+import org.testng.ITestResult;
 
 /**
  * Wrapper for the TestNG HTML report
@@ -131,6 +132,37 @@ public class Reporter extends org.testng.Reporter {
 		stopLogToggle();
 
 	}
+	
+	public static void log(String title, String body, boolean status) {
+		getCurrentTestResult().setStatus(ITestResult.FAILURE);
+		log(title, body, Color.RED);
+	}
+
+	/**
+	 * report a 
+	 * @param title
+	 * @param body
+	 * @param status
+	 */
+	public static void log(String title, String body, int status) {
+		getCurrentTestResult().setStatus(status);
+		Color statusColor;
+		switch (status) {
+		case ITestResult.FAILURE:
+			statusColor=Color.RED;
+			break;
+		case ITestResult.SUCCESS_PERCENTAGE_FAILURE:
+			statusColor=Color.YELLOW;
+			break;
+		case ITestResult.SUCCESS:
+			statusColor=Color.GREEN;
+			break;
+		default:
+			statusColor=Color.BLUE;
+		}
+		log(title, body, statusColor);
+	}
+	
 
 	public static void startLogToggle(String title) {
 		startLogToggle(title, null);
@@ -145,7 +177,7 @@ public class Reporter extends org.testng.Reporter {
 			title = "link";
 		}
 		StringBuilder toggleElement = new StringBuilder();
-		final long id = System.currentTimeMillis() + new Random().nextInt(10000);
+		final String id = System.currentTimeMillis() + "_" + new Random().nextInt(10000);
 
 		// Creating link
 		toggleElement.append(" <a href=\"javascript:toggleElement('");

@@ -16,7 +16,7 @@ public class RootLinuxCliConnection extends LinuxDefaultCliConnection {
 		prompts.addAll(Arrays.asList(super.getPrompts()));
 		
 		Prompt rootPrompt = new Prompt();
-		rootPrompt.setPrompt("$ ");
+		rootPrompt.setPrompt("# ");
 		if (StringUtils.isEmpty(suUser)){
 			rootPrompt.setCommandEnd(true);
 		}

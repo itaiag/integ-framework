@@ -49,7 +49,7 @@ public class LinuxDefaultCliConnection extends CliConnectionImpl {
 		ArrayList<Prompt> prompts = new ArrayList<Prompt>();		
 		Prompt p = new Prompt();
 		p.setCommandEnd(true);
-		p.setPrompt("# ");
+		p.setPrompt("$ ");
 		prompts.add(p);
 		
 		p = new Prompt();

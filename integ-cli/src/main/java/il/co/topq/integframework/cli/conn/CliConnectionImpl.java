@@ -5,9 +5,7 @@
  */
 package il.co.topq.integframework.cli.conn;
 
-import il.co.topq.integframework.AbstractModule;
 import il.co.topq.integframework.AbstractModuleImpl;
-import il.co.topq.integframework.assertion.AbstractAssertionLogic;
 import il.co.topq.integframework.assertion.IAssertionLogic;
 import il.co.topq.integframework.cli.terminal.BufferInputStream;
 import il.co.topq.integframework.cli.terminal.Cli;
@@ -30,27 +28,9 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Properties;
 import java.util.regex.Pattern;
-
-import javax.annotation.PostConstruct;
-
-
-
-import javax.annotation.PreDestroy;
-
-import org.testng.ITestResult;
-
-
-
-
-
-
-
-
-
-//import jsystem.framework.analyzer.AnalyzerParameter;
-//import jsystem.framework.system.SystemObjectImpl;
 
 /**
  * This is a default implementation for CliConnection your implementation should
@@ -413,10 +393,9 @@ implements CliConnection {
 		if (command.isIgnoreErrors() || (cli.isForceIgnoreAnyErrors())) {
 			;
 		} else {
-			IAssertionLogic<String>[] analyzers = command.getAnalyzers();
+			List<IAssertionLogic<String>> analyzers = command.getAnalyzers();
 			if (analyzers != null) {
-				for (int i = 0; i < analyzers.length; i++) {
-					IAssertionLogic<String> analyzer= analyzers[i];
+				for (IAssertionLogic<String> analyzer : analyzers) {
 					analyzer.setActual(cli.getActual(String.class));
 					analyzer.doAssertion();					
 				}

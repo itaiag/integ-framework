@@ -3,7 +3,6 @@
  */
 package il.co.topq.integframework.cli.terminal;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 

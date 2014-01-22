@@ -10,9 +10,9 @@ import il.co.topq.integframework.assertion.IAssertionLogic;
 import il.co.topq.integframework.assertion.TextNotFoundAssertion;
 import il.co.topq.integframework.cli.terminal.Prompt;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.Vector;
 
 /**
  * 
@@ -168,7 +168,7 @@ public class CliCommand {
 	
 	boolean suppressEcho = false;
 
-	List<IAssertionLogic> analyzers = new Vector<IAssertionLogic>();
+	List<IAssertionLogic<String>> analyzers = new ArrayList<IAssertionLogic<String>> ();
 	
 	Prompt[] prompts = null;
 	
@@ -194,11 +194,8 @@ public class CliCommand {
 	/**
 	 * @return the array of analyzers defined for the command
 	 */
-	public IAssertionLogic<String>[] getAnalyzers() {
-		Object[] o = analyzers.toArray();
-		IAssertionLogic[] ret = new IAssertionLogic[o.length];
-		System.arraycopy(o,0,ret,0,o.length);
-		return ret;
+	public List<IAssertionLogic<String>> getAnalyzers() {
+		return analyzers;
 	}
 	
 	/**
@@ -207,7 +204,7 @@ public class CliCommand {
 	 * 			   
 	 * @param analyzer	an AnalyzerParameterImpl analyzer
 	 */
-	public void addAnalyzers(IAssertionLogic analyzer) {
+	public void addAnalyzers(IAssertionLogic<String> analyzer) {
 		analyzers.add(analyzer);
 	}
 	

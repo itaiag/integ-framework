@@ -3,7 +3,6 @@ package il.co.topq.integframework.hdfs.support;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Iterator;
 
 import org.apache.hadoop.fs.Hdfs;
 import org.apache.hadoop.fs.LocatedFileStatus;
@@ -12,10 +11,10 @@ import org.apache.hadoop.fs.RemoteIterator;
 import org.apache.hadoop.fs.UnresolvedLinkException;
 import org.apache.hadoop.security.AccessControlException;
 
-import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 
 public abstract class HdfsExpectedConditions {
+	@SuppressWarnings("unused")
 	private final int _;
 	private HdfsExpectedConditions(){
 		_=1;

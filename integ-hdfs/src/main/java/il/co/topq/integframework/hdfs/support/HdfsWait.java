@@ -1,5 +1,7 @@
 package il.co.topq.integframework.hdfs.support;
 
+import il.co.topq.integframework.support.FluentWait;
+
 import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.fs.Hdfs;

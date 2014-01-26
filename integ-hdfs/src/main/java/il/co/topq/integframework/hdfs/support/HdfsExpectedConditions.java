@@ -29,6 +29,11 @@ public abstract class HdfsExpectedConditions {
 		return new Predicate<Hdfs>() {
 			
 			@Override
+			public String toString() {
+				return "the file in " + path.toString() + " to be openable";
+			};
+			
+			@Override
 			public boolean apply(Hdfs hdfs) {
 				try {
 					hdfs.open(path).close();
@@ -44,14 +49,18 @@ public abstract class HdfsExpectedConditions {
 					throw new RuntimeException(e);
 				}
 				return true;
-				
-				
 			}
 		};
 	}
 
 	public static HdfsExpectedCondition<InputStream> fileIsReadable(final Path path){
-		return new HdfsExpectedCondition<InputStream>() {			
+		return new HdfsExpectedCondition<InputStream>() {
+			
+			@Override
+			public String toString() {
+				return "the file in " + path.toString() + " to be openable";				
+			};
+			
 			@Override
 			public InputStream apply(Hdfs hdfs) {
 				try {
@@ -72,7 +81,12 @@ public abstract class HdfsExpectedConditions {
 	}
 
 	public static Predicate<Hdfs> directoryConatins(final Path directory, final String file){
-		return new Predicate<Hdfs> () {			
+		return new Predicate<Hdfs> () {
+			@Override
+			public String toString() {
+				return "the directory " + directory.toString() + " to contain the file " + file;
+			};
+				
 			@Override
 			public boolean apply(Hdfs hdfs) {
 				try {
@@ -99,5 +113,38 @@ public abstract class HdfsExpectedConditions {
 		};
 	}
 
-	
+
+	public static Predicate<Hdfs> directoryConatins(final Path directory, final String file, final boolean isRegexp){
+		if (!isRegexp) return directoryConatins(directory, file);
+		return new Predicate<Hdfs> () {
+			@Override
+			public String toString() {
+				return "the directory " + directory.toString() + " to contain a file matchin the regular expression " + file;
+			};
+				
+			@Override
+			public boolean apply(Hdfs hdfs) {
+				try {
+					RemoteIterator<LocatedFileStatus> locatedStatusIterator = hdfs.listLocatedStatus(directory);
+					while (locatedStatusIterator.hasNext()){
+						LocatedFileStatus locatedFileStatus = locatedStatusIterator.next();
+						if (locatedFileStatus.getPath().getName().matches(file)){
+							return true;
+						}						
+					}
+				} catch (AccessControlException e) {
+					throw new RuntimeException(e);
+				} catch (FileNotFoundException e) {
+					return false;
+				} catch (UnresolvedLinkException e) {
+					return false;
+				} catch (IllegalArgumentException e) {
+					throw e;
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+				return false;
+			}
+		};
+	}
 }

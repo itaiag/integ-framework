@@ -1,7 +1,9 @@
 package il.co.topq.integframework.hdfs;
 
 import static org.apache.hadoop.io.IOUtils.copyBytes;
+import il.co.topq.integframework.hdfs.support.HdfsExpectedCondition;
 import il.co.topq.integframework.hdfs.support.HdfsWait;
+import il.co.topq.integframework.support.TimeoutException;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -13,6 +15,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.EnumSet;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.CreateFlag;
@@ -25,6 +28,8 @@ import org.apache.hadoop.fs.UnresolvedLinkException;
 import org.apache.hadoop.fs.UnsupportedFileSystemException;
 import org.apache.hadoop.hdfs.protocol.HdfsConstants;
 import org.apache.hadoop.security.AccessControlException;
+
+import com.google.common.base.Predicate;
 
 public class HDFSSystemModule {
 
@@ -73,4 +78,26 @@ public class HDFSSystemModule {
 				true);
 	}
 
+	public <T> T validateThat(HdfsExpectedCondition<T> expectedCondition) throws Exception{
+		HdfsWait oldWait = this.wait;
+		this.wait = new HdfsWait(hdfs);
+		wait.withTimeout(0, TimeUnit.MILLISECONDS);
+		try {
+			return wait.until(expectedCondition);
+		}
+		catch (TimeoutException exception){
+			if (exception instanceof Exception) {
+				Exception ex = (Exception) exception;
+				throw ex;
+			}
+			throw new Exception(exception.getCause()); 
+		} finally {
+			this.wait=oldWait;
+		}
+		
+	}
+	
+	public boolean validateThat(Predicate<Hdfs> predicate){
+		return predicate.apply(hdfs);
+	}
 }

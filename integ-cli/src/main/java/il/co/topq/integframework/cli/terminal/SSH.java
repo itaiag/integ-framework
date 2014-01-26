@@ -4,11 +4,14 @@
 package il.co.topq.integframework.cli.terminal;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Arrays;
 
 import ch.ethz.ssh2.Connection;
 import ch.ethz.ssh2.InteractiveCallback;
 import ch.ethz.ssh2.LocalPortForwarder;
+import ch.ethz.ssh2.SCPClient;
 import ch.ethz.ssh2.Session;
 
 /**
@@ -70,7 +73,7 @@ public class SSH extends Terminal {
 		for(String method: authMethods) {
 			System.out.println(method);
 		}
-		boolean privateKeyAuthentication = false;
+//		boolean privateKeyAuthentication = false;
 		boolean passAuthentication = false;
 		for (int i = 0; i < authMethods.length; i++) {
 			if (authMethods[i].equalsIgnoreCase("password")) {
@@ -80,7 +83,7 @@ public class SSH extends Terminal {
 		}
 		if(Arrays.asList(authMethods).contains("publickey")){
 			// we can authenticate with a RSA private key
-			privateKeyAuthentication=true;
+//			privateKeyAuthentication=true;
 		}
 		
 		/* Authenticate */
@@ -141,7 +144,34 @@ public class SSH extends Terminal {
 	public String getConnectionName() {
 		return "SSH";
 	}
-
+	
+	/**
+	 * get an {@link InputStream} for a remote file<br /> 
+	 * The session for opened for this SCP transfer must be closed using
+	 * {@link InputStream#close()}
+	 * @param remoteFile
+	 * @return
+	 * @throws IOException
+	 */
+	public InputStream get(final String remoteFile) throws IOException{
+		return new SCPClient(getConn()).get(remoteFile);
+	}
+	
+	/**
+	 * get an {@link OutputStream} for a remote file <br />
+	 * The session for opened for this SCP transfer must be closed using
+	 * {@link OutputStream#close()}
+	 *
+	 * @param remoteFile
+	 * @param length The size of the file to send
+	 * @param remoteTargetDirectory
+	 * @param mode
+	 * @return
+	 * @throws IOException
+	 */
+	public OutputStream get(final String remoteFile, long length, String remoteTargetDirectory, String mode) throws IOException{
+		return new SCPClient(getConn()).put(remoteFile, length, remoteTargetDirectory, mode);
+	}
 	/**
 	 * The logic that one has to implement if "keyboard-interactive" 
 	 * authentication shall be supported.

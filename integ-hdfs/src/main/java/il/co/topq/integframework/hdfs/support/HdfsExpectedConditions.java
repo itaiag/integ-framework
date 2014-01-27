@@ -80,70 +80,76 @@ public abstract class HdfsExpectedConditions {
 		};
 	}
 
-	public static Predicate<Hdfs> directoryConatins(final Path directory, final String file){
-		return new Predicate<Hdfs> () {
+	public static HdfsExpectedCondition<Path> directoryConatins(final Path directory, final String file){
+		return new HdfsExpectedCondition<Path> () {
 			@Override
 			public String toString() {
 				return "the directory " + directory.toString() + " to contain the file " + file;
 			};
 				
 			@Override
-			public boolean apply(Hdfs hdfs) {
+			public Path apply(Hdfs hdfs) {
 				try {
 					RemoteIterator<LocatedFileStatus> locatedStatusIterator = hdfs.listLocatedStatus(directory);
 					while (locatedStatusIterator.hasNext()){
 						LocatedFileStatus locatedFileStatus = locatedStatusIterator.next();
 						if (0==locatedFileStatus.getPath().compareTo(new Path(directory, file))){
-							return true;
+							return locatedFileStatus.getPath();
 						}						
 					}
 				} catch (AccessControlException e) {
 					throw new RuntimeException(e);
 				} catch (FileNotFoundException e) {
-					return false;
+					throw null;
 				} catch (UnresolvedLinkException e) {
-					return false;
+					throw new RuntimeException(e);
 				} catch (IllegalArgumentException e) {
 					throw e;
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
-				return false;
+				return null;
 			}
 		};
 	}
 
-
-	public static Predicate<Hdfs> directoryConatins(final Path directory, final String file, final boolean isRegexp){
+	/**
+	 * find the first file/folder that matches the file name (or file pattern if the isRegexp set to true)
+	 * @param directory
+	 * @param file
+	 * @param isRegexp
+	 * @return
+	 */
+	public static HdfsExpectedCondition<Path> directoryConatins(final Path directory, final String file, final boolean isRegexp){
 		if (!isRegexp) return directoryConatins(directory, file);
-		return new Predicate<Hdfs> () {
+		return new HdfsExpectedCondition<Path> () {
 			@Override
 			public String toString() {
 				return "the directory " + directory.toString() + " to contain a file matchin the regular expression " + file;
 			};
 				
 			@Override
-			public boolean apply(Hdfs hdfs) {
+			public Path apply(Hdfs hdfs) {
 				try {
 					RemoteIterator<LocatedFileStatus> locatedStatusIterator = hdfs.listLocatedStatus(directory);
 					while (locatedStatusIterator.hasNext()){
 						LocatedFileStatus locatedFileStatus = locatedStatusIterator.next();
 						if (locatedFileStatus.getPath().getName().matches(file)){
-							return true;
+							return locatedFileStatus.getPath();
 						}						
 					}
 				} catch (AccessControlException e) {
 					throw new RuntimeException(e);
 				} catch (FileNotFoundException e) {
-					return false;
+					return null;
 				} catch (UnresolvedLinkException e) {
-					return false;
+					throw new RuntimeException(e);
 				} catch (IllegalArgumentException e) {
 					throw e;
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
-				return false;
+				return null;
 			}
 		};
 	}

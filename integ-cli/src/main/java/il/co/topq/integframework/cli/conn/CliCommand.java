@@ -132,7 +132,7 @@ public class CliCommand {
 	
 	String[] errors = defaultErrors;
 	
-	String[] musts = null;
+	List<String> musts = null;
 	
 	boolean addEnter = true;
 	
@@ -385,7 +385,7 @@ public class CliCommand {
 	 * 
 	 * @return musts
 	 */
-	public String[] getMusts() {
+	public List<String> getMusts() {
 		return musts;
 	}
 	
@@ -395,10 +395,10 @@ public class CliCommand {
 	 * 
 	 * @param musts
 	 */
-	public void addMusts(String[] musts) {
-		this.musts = musts;
-		for (int i = 0; i < musts.length; i++){
-			addAnalyzers(new FindTextAssertion(musts[i]));
+	public void addMusts(List<String> musts) {
+		this.musts.addAll(musts);
+		for (String must: musts){
+			addAnalyzers(new FindTextAssertion(must));
 		}
 	}
 	

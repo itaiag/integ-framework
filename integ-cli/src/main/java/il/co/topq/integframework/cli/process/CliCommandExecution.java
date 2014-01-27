@@ -1,5 +1,8 @@
 package il.co.topq.integframework.cli.process;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import il.co.topq.integframework.cli.conn.CliCommand;
@@ -11,6 +14,7 @@ public class CliCommandExecution {
 	private long timeout = -1;
 	private String title = "";
 	private String cmd = "";
+	private List<String> musts;
 
 	public CliCommandExecution(CliConnection cliConnection) {
 		this(cliConnection, "");
@@ -37,10 +41,18 @@ public class CliCommandExecution {
 		return this;
 	}
 
+	public CliCommandExecution mustHaveResponse(String... strings){
+		if (musts==null || musts.isEmpty()){
+			musts = new ArrayList<String>(strings.length);
+		}
+		musts.addAll(Arrays.asList(strings));
+		return this;
+	}
 	public void execute(String command) throws Exception {
 		this.cmd = command;
 		execute();
 	}
+	
 	
 
 	public void execute() throws Exception {
@@ -48,6 +60,9 @@ public class CliCommandExecution {
 			throw new NullPointerException("command is not set");
 		}
 		CliCommand cliCommand = new CliCommand(cmd);
+		if (!musts.isEmpty()){
+			cliCommand.addMusts(musts);
+		}
 		cliCommand.setTimeout(timeout);
 		this.cliConnection.handleCliCommand(title, cliCommand);
 	}

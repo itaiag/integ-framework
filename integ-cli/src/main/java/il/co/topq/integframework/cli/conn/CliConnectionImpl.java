@@ -6,6 +6,7 @@
 package il.co.topq.integframework.cli.conn;
 
 import il.co.topq.integframework.AbstractModuleImpl;
+import il.co.topq.integframework.assertion.AbstractAssertionLogic;
 import il.co.topq.integframework.assertion.IAssertionLogic;
 import il.co.topq.integframework.cli.terminal.BufferInputStream;
 import il.co.topq.integframework.cli.terminal.Cli;
@@ -397,7 +398,13 @@ implements CliConnection {
 			if (analyzers != null) {
 				for (IAssertionLogic<String> analyzer : analyzers) {
 					analyzer.setActual(cli.getActual(String.class));
-					analyzer.doAssertion();					
+					analyzer.doAssertion();
+					if (analyzer instanceof AbstractAssertionLogic<?> ){
+						AbstractAssertionLogic<String> stringAssertionLogic = (AbstractAssertionLogic<String>) analyzer;
+						if (!(command.isSilent() && stringAssertionLogic.isStatus())){
+							Reporter.log(stringAssertionLogic.getTitle(), stringAssertionLogic.getMessage(), stringAssertionLogic.isStatus());
+						}
+					}
 				}
 			}
 		}

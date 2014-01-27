@@ -20,17 +20,16 @@ public class CliCommandExecution {
 		this(cliConnection, "");
 	}
 
-	public CliCommandExecution(CliConnection cliConnection, String command){
+	public CliCommandExecution(CliConnection cliConnection, String command) {
 		this.cliConnection = cliConnection;
-		this.cmd = command;		
+		this.cmd = command;
 	}
-	
+
 	public CliCommandExecution withTimeout(long timeout) {
 		this.timeout = timeout;
 		return this;
 	}
-	
-	
+
 	public CliCommandExecution withTimeout(long duration, TimeUnit timeUnit) {
 		this.timeout = timeUnit.toMillis(duration);
 		return this;
@@ -41,26 +40,25 @@ public class CliCommandExecution {
 		return this;
 	}
 
-	public CliCommandExecution mustHaveResponse(String... strings){
-		if (musts==null || musts.isEmpty()){
+	public CliCommandExecution mustHaveResponse(String... strings) {
+		if (musts == null || musts.isEmpty()) {
 			musts = new ArrayList<String>(strings.length);
 		}
 		musts.addAll(Arrays.asList(strings));
 		return this;
 	}
+
 	public void execute(String command) throws Exception {
 		this.cmd = command;
 		execute();
 	}
-	
-	
 
 	public void execute() throws Exception {
 		if (StringUtils.isEmpty(cmd)) {
 			throw new NullPointerException("command is not set");
 		}
 		CliCommand cliCommand = new CliCommand(cmd);
-		if (!musts.isEmpty()){
+		if (!musts.isEmpty()) {
 			cliCommand.addMusts(musts);
 		}
 		cliCommand.setTimeout(timeout);

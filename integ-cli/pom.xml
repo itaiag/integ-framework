@@ -7,7 +7,22 @@
 			<artifactId>commons-exec</artifactId>
 			<version>1.1</version>
 		</dependency>  
-  </dependencies>
+		<dependency>
+			<groupId>ch.ethz.ganymed</groupId>
+			<artifactId>ganymed-ssh2</artifactId>
+			<version>LATEST</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.comm</groupId>
+			<artifactId>comm</artifactId>
+			<version>LATEST</version>
+		</dependency>
+		<dependency>
+			<groupId>il.co.topq.integframework</groupId>
+			<artifactId>integ-testng</artifactId>
+			<version>1.0.1-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
   <parent>
   	<groupId>il.co.topq.integframework</groupId>
   	<artifactId>integ-parent</artifactId>

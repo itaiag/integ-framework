@@ -23,7 +23,7 @@ public class ResultSetHTMLPrinter implements ResultSetPrinter {
 				sb.append("<tr>");
 				headerRow = false;
 				for (String header : row.keySet()) {
-					sb.append("<td>").append(header).append("</td>");
+					sb.append("<th><b>").append(header).append("</b></th>");
 				}
 				sb.append("</tr>");
 			}

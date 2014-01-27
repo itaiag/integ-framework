@@ -1,4 +1,4 @@
-package il.co.topq.integframework.hdfs.support;
+package il.co.topq.integframework.support;
 
 public class TimeoutException extends RuntimeException {
 	  /**

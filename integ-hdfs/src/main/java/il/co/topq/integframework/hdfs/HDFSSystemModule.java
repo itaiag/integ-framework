@@ -3,6 +3,7 @@ package il.co.topq.integframework.hdfs;
 import static org.apache.hadoop.io.IOUtils.copyBytes;
 import il.co.topq.integframework.hdfs.support.HdfsExpectedCondition;
 import il.co.topq.integframework.hdfs.support.HdfsWait;
+import il.co.topq.integframework.reporting.Reporter;
 import il.co.topq.integframework.support.TimeoutException;
 
 import java.io.BufferedInputStream;
@@ -79,6 +80,7 @@ public class HDFSSystemModule {
 	}
 
 	public <T> T validateThat(HdfsExpectedCondition<T> expectedCondition) throws Exception{
+		Reporter.log("Validating: " + expectedCondition.toString());
 		HdfsWait oldWait = this.wait;
 		this.wait = new HdfsWait(hdfs);
 		wait.withTimeout(0, TimeUnit.MILLISECONDS);
@@ -86,10 +88,6 @@ public class HDFSSystemModule {
 			return wait.until(expectedCondition);
 		}
 		catch (TimeoutException exception){
-			if (exception instanceof Exception) {
-				Exception ex = (Exception) exception;
-				throw ex;
-			}
 			throw new Exception(exception.getCause()); 
 		} finally {
 			this.wait=oldWait;

@@ -88,7 +88,7 @@ public class LinuxDefaultCliConnection extends CliConnectionImpl {
 			SSH ssh = (SSH) terminal;
 			return ssh.get(remoteFile);
 		}
-		return  null;
+		return null;
 	}
 	
 	public void get(String remoteFile, File dst) throws IOException {

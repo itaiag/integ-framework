@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import il.co.topq.integframework.AbstractModule;
 import il.co.topq.integframework.cli.conn.CliCommand;
 import il.co.topq.integframework.cli.conn.CliConnection;
 import il.co.topq.integframework.utils.StringUtils;
@@ -15,7 +16,7 @@ public class CliCommandExecution {
 	private String title = "";
 	private String cmd = "";
 	private List<String> musts;
-
+	protected String result;
 	public CliCommandExecution(CliConnection cliConnection) {
 		this(cliConnection, "");
 	}
@@ -58,11 +59,21 @@ public class CliCommandExecution {
 			throw new NullPointerException("command is not set");
 		}
 		CliCommand cliCommand = new CliCommand(cmd);
-		if (!musts.isEmpty()) {
+		if (musts!=null && !musts.isEmpty()) {
 			cliCommand.addMusts(musts);
 		}
 		cliCommand.setTimeout(timeout);
 		this.cliConnection.handleCliCommand(title, cliCommand);
+		if (cliConnection instanceof AbstractModule){
+			setResult(((AbstractModule)cliConnection).getActual(String.class));
+		}
 	}
 
+	public String getResult() {
+		return result;
+	}
+
+	protected void setResult(String result) {
+		this.result = result;
+	}
 }

@@ -20,7 +20,7 @@ public class Assert extends org.testng.Assert {
 			throw new IllegalArgumentException("logic can't be null");
 		}
 		if (!actual.contains(expected)) {
-			throw new AssertionError(expected + " is not contained in " + actual);
+			fail(expected + " is not contained in " + actual);
 		}
 
 	}
@@ -79,12 +79,12 @@ public class Assert extends org.testng.Assert {
 
 			}
 			if (!logic.isStatus()) {
-				throw new AssertionError(logic.getTitle());
+				fail(logic.getTitle());
 			}
 		} catch (Throwable t) {
 			if (timeout <= 0) {
 				Reporter.log("Assertion process failed due to " + t.getMessage());
-				throw new AssertionError("Assertion process failed ");
+				fail("Assertion process failed ",t);
 			} else {
 				try {
 					Thread.sleep(3000);

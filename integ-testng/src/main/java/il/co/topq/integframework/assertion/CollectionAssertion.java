@@ -92,7 +92,12 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 		if (this.comparators == null) {
 			comparator = simpleComparator;
 		} else {
-			comparator = new CombinedComparator<E>(comparators);
+			if (comparators.size()==1){
+				comparator = comparators.get(0);
+			}
+			else {
+				comparator = new CombinedComparator<E>(comparators);
+			}
 		}
 		List<E> sortedActual = actual.subList(0, actual.size());
 		List<E> sortedExpected = expected.subList(0, expected.size());
@@ -150,7 +155,7 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 
 	}
 
-	public CollectionAssertion<E> addComparator(Comparator<E> comparator) {
+	public CollectionAssertion<E> withComparator(Comparator<E> comparator) {
 		if (this.comparators == null) {
 			comparators = new ArrayList<Comparator<E>>();
 		}

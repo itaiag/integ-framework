@@ -1,10 +1,10 @@
 package il.co.topq.integframework.assertion;
 
-import java.util.concurrent.TimeoutException;
-
 import il.co.topq.integframework.reporting.Reporter;
 import il.co.topq.integframework.reporting.Reporter.Color;
 import il.co.topq.integframework.reporting.Reporter.Style;
+
+import java.util.concurrent.TimeoutException;
 
 /**
  * Class for comparing between actual and expected states
@@ -116,7 +116,7 @@ public class Assert extends org.testng.Assert {
 
 		assertLogic(actual, logic, timeout);
 		if (!silent && logic.isStatus()) {
-			Reporter.log("Assertion success ", Style.REGULAR, Color.GREEN);
+			Reporter.log("Assertion success: " + logic.getTitle(), Color.GREEN);
 		}
 	}
 }

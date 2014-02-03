@@ -63,18 +63,19 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 		expectedTitle = title;
 		return this;
 	}
-	public CollectionAssertion<E> andKeepMatchesForFurtherAnalysis(){
+
+	public CollectionAssertion<E> andKeepMatchesForFurtherAnalysis() {
 		keepMatches = true;
 		return this;
 	}
 
 	@Override
 	public String getTitle() {
-		StringBuilder titleBuilder = new StringBuilder("Assert that all items");
+		StringBuilder titleBuilder = new StringBuilder("all items");
 		if (!StringUtils.isEmpty(expectedTitle)) {
 			titleBuilder.append(" from ").append(expectedTitle);
 		}
-		titleBuilder.append(" exists");
+		titleBuilder.append(" should exists");
 		if (!StringUtils.isEmpty(actualTitle)) {
 			titleBuilder.append(" in ").append(actualTitle);
 		}
@@ -107,10 +108,8 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 
 			if (!allItems) {
 				if (expected.size() > actual.size()) {
-					report.append("Size of actual items is ").append(
-							actual.size());
-					report.append(", should be at least ")
-							.append(expected.size()).append("\n");
+					report.append("Size of actual items is ").append(actual.size());
+					report.append(", should be at least ").append(expected.size()).append("\n");
 					status = false;
 					if (exitIfSizeDoesNotMatch) {
 						return;
@@ -119,10 +118,8 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 				singlesInActual.addAll(actual);
 			} else {
 				if (expected.size() != actual.size()) {
-					report.append("Size of actual items is ").append(
-							actual.size());
-					report.append("instead of ").append(expected.size())
-							.append("\n");
+					report.append("Size of actual items is ").append(actual.size());
+					report.append("instead of ").append(expected.size()).append("\n");
 					status = false;
 					if (exitIfSizeDoesNotMatch) {
 						return;
@@ -141,8 +138,7 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 														// all expected items which
 														// had no actual - must be
 														// added to the singles list.
-					singlesInExpected.addAll(sortedExpected.subList(iexpected,
-							sortedExpected.size()));
+					singlesInExpected.addAll(sortedExpected.subList(iexpected, sortedExpected.size()));
 					break;
 				}
 				E currActual = sortedActual.get(iactual);
@@ -166,8 +162,7 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 			}
 			if (report != null) {
 				for (E e : singlesInExpected) {
-					report.append(e.toString()).append(
-							" was expected but not found");
+					report.append(e.toString()).append(" was expected but not found");
 					report.append("\n");
 				}
 
@@ -181,14 +176,15 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 
 			}
 
-			status = singlesInExpected.isEmpty()
-					&& (singlesInActual.isEmpty() || !allItems);
-		}
-		else if (matches!=null){
-			report.append("validating matches data");
+			status = singlesInExpected.isEmpty() && (singlesInActual.isEmpty() || !allItems);
+		} else if (matches != null) {
+			status = true;
+			report.append("Validating matches data:\n");
 			for (PairOfMatches<E> match : matches) {
-				if (comparator.compare(match.actual, match.expected)!=0){
-					report.append(match.actual).append(" did not match ").append(match.expected).append(" when comparing using ").append(comparator.toString()).append("\n");  
+				if (comparator.compare(match.actual, match.expected) != 0) {
+					status = false;
+					report.append(match.actual).append(" did not match ").append(match.expected).append(" when comparing using ")
+							.append(comparator.toString()).append("\n");
 				}
 			}
 		}
@@ -199,6 +195,14 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 			comparators = new ArrayList<Comparator<E>>();
 		}
 		comparators.add(comparator);
+		return this;
+	}
+
+	public CollectionAssertion<E> compareWith(Comparator<E>... comparators) {
+		for (int i = 0; i < comparators.length; i++) {
+			Comparator<E> comparator = comparators[i];
+			withComparator(comparator);
+		}
 		return this;
 	}
 

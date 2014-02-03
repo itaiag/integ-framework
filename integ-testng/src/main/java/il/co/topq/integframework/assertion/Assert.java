@@ -1,5 +1,7 @@
 package il.co.topq.integframework.assertion;
 
+import java.util.concurrent.TimeoutException;
+
 import il.co.topq.integframework.reporting.Reporter;
 import il.co.topq.integframework.reporting.Reporter.Color;
 import il.co.topq.integframework.reporting.Reporter.Style;
@@ -24,6 +26,35 @@ public class Assert extends org.testng.Assert {
 		}
 
 	}
+
+	/**
+	 * Execute the <code>logic</code> on the the <code>actual</code> object.
+	 * 
+	 * @param actual
+	 *            Object to perform assertion on
+	 * @param logic
+	 *            Logic to operate on the actual object
+	 * @throws Exception
+	 *             If exception occurced during assertion
+	 * @throws AssertionError
+	 *             If assertion fails
+	 */
+	static public <T> void assertLogic(final T actual, final AbstractAssertionLogic<T> logic, final long timeout) throws TimeoutException {
+		long timeUp = System.currentTimeMillis() + timeout;
+		do {
+			assertLogic(actual, logic,null);
+			if (!logic.status) {
+				try {
+					Thread.sleep(3000);
+				} catch (InterruptedException e) {
+					throw new TimeoutException("Assertion interrupted");
+				}
+			}
+		} while (timeUp < System.currentTimeMillis() || !logic.status);
+		if (!logic.status) {
+			throw new TimeoutException("Assertion failed");
+		}
+	}
 	
 	/**
 	 * Execute the <code>logic</code> on the the <code>actual</code> object.
@@ -32,15 +63,14 @@ public class Assert extends org.testng.Assert {
 	 *            Object to perform assertion on
 	 * @param logic
 	 *            Logic to operate on the actual object
-	 * @throws Exception
-	 *             If exception occurced during assertion
 	 * @throws AssertionError
 	 *             If assertion fails
 	 */
-	static public <T> void assertLogic(final T actual, final AbstractAssertionLogic<T> logic, final long timeout) throws Exception {
-		assertLogicHappens(actual, logic, timeout, true);
+	static public <T> void assertLogic(final T actual,
+			final AbstractAssertionLogic<T> logic) {
+		assertLogic(actual, logic, null);
 	}
-
+	
 
 	/**
 	 * Execute the <code>logic</code> on the the <code>actual</code> object.
@@ -48,52 +78,45 @@ public class Assert extends org.testng.Assert {
 	 * @param actual
 	 *            Object to perform assertion on
 	 * @param logic
-	 *            Logic to operate on the actual object
-	 * @throws Exception
-	 *             If exception occurced during assertion
+	 *            Logic to operate on the actual object // * @throws Exception
+	 *            // * If exception occurced during assertion
 	 * @throws AssertionError
 	 *             If assertion fails
 	 */
-	static public <T> void assertLogic(final T actual, final AbstractAssertionLogic<T> logic) throws Exception {
-		assertLogic(actual, logic, 0l);
-	}
-
-	static public <T> void assertLogicHappens(final T actual, final AbstractAssertionLogic<T> logic,
-			final long timeout, boolean silent) throws Exception {
+	static public <T> void assertLogic(final T actual, final AbstractAssertionLogic<T> logic, AssertionListener<T> listener) {
 		if (null == actual) {
 			throw new IllegalArgumentException("Actual can't be null");
 		}
 		if (null == logic) {
 			throw new IllegalArgumentException("logic can't be null");
 		}
-
+		if (null == listener) {
+			listener = new DefaultAssertionListener<T>();
+		}
 		logic.setActual(actual);
+
 		try {
 			logic.doAssertion();
 			if (logic.isStatus()) {
-				if (!silent) {
-					Reporter.log("Assertion success ", Style.REGULAR, Color.GREEN);
-				}
+				listener.assertionPassed(actual, logic);
 			} else {
-				Reporter.log("Assertion failure: " + logic.getTitle(), logic.getMessage(), Color.RED);
-
-			}
-			if (!logic.isStatus()) {
-				fail(logic.getTitle());
+				Reporter.log("Assertion failed: " + logic.getTitle(),
+						logic.getMessage(), false);
+				listener.assertionFailed(actual, logic);
 			}
 		} catch (Throwable t) {
-			if (timeout <= 0) {
-				Reporter.log("Assertion process failed due to " + t.getMessage());
-				fail("Assertion process failed ",t);
-			} else {
-				try {
-					Thread.sleep(3000);
-				} catch (InterruptedException interruptedException) {
+			Reporter.log("Assertion process failed: ", t);
+			listener.assertionFailed(actual, logic, t);
+		}
+	}
 
-				}
-				assertLogicHappens(actual, logic, timeout - 3000, silent);
-			}
+	static public <T> void assertLogicHappens(final T actual,
+			final AbstractAssertionLogic<T> logic, final long timeout,
+			boolean silent) throws TimeoutException {
 
+		assertLogic(actual, logic, timeout);
+		if (!silent && logic.isStatus()) {
+			Reporter.log("Assertion success ", Style.REGULAR, Color.GREEN);
 		}
 	}
 }

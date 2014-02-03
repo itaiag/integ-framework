@@ -12,6 +12,28 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 	private String expectedTitle = "", actualTitle = "";
 	final protected List<E> expected;
 	private List<E> singlesInActual, singlesInExpected;
+
+	private static final class PairOfMatches<E> {
+		final E actual, expected;
+
+		public PairOfMatches(E actual, E expected) {
+			this.actual = actual;
+			this.expected = expected;
+		}
+	}
+
+	protected boolean keepMatches = true;
+	private List<PairOfMatches<E>> matches;
+
+	protected void addMatch(E actual, E expected) {
+		if (keepMatches) {
+			if (matches == null) {
+				matches = new ArrayList<CollectionAssertion.PairOfMatches<E>>();
+			}
+			matches.add(new PairOfMatches<E>(actual, expected));
+		}
+	}
+
 	protected boolean allItems = false, exitIfSizeDoesNotMatch = true;
 
 	private List<Comparator<E>> comparators;
@@ -41,6 +63,10 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 		expectedTitle = title;
 		return this;
 	}
+	public CollectionAssertion<E> andKeepMatchesForFurtherAnalysis(){
+		keepMatches = true;
+		return this;
+	}
 
 	@Override
 	public String getTitle() {
@@ -65,94 +91,107 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 
 	@Override
 	public void doAssertion() {
-
-		singlesInExpected = new ArrayList<E>(expected.size());
-		singlesInActual = new ArrayList<E>(actual.size());
-
-		if (!allItems) {
-			if (expected.size() > actual.size()) {
-				report.append("Size of actual items is ").append(actual.size());
-				report.append(", should be at least ").append(expected.size()).append("\n");
-				status = false;
-				if (exitIfSizeDoesNotMatch)
-					return;
-			}
-			singlesInActual.addAll(actual);
-		} else {
-			if (expected.size() != actual.size()) {
-				report.append("Size of actual items is ").append(actual.size());
-				report.append("instead of ").append(expected.size()).append("\n");
-				status = false;
-				if (exitIfSizeDoesNotMatch)
-					return;
-			}
-		}
-		exitIfSizeDoesNotMatch = true;
 		Comparator<E> comparator;
 		if (this.comparators == null) {
 			comparator = simpleComparator;
 		} else {
-			if (comparators.size()==1){
+			if (comparators.size() == 1) {
 				comparator = comparators.get(0);
-			}
-			else {
+			} else {
 				comparator = new CombinedComparator<E>(comparators);
 			}
 		}
-		List<E> sortedActual = actual.subList(0, actual.size());
-		List<E> sortedExpected = expected.subList(0, expected.size());
-		Collections.sort(sortedActual, comparator);
-		Collections.sort(sortedExpected, comparator);
-		for (int iactual = 0, iexpected = 0; (iactual < sortedActual.size() || !allItems)
-				&& (iexpected < sortedExpected.size());) {
-			if (iactual >= sortedActual.size()) {// when atLeast flag is true,
-													// all expected items which
-													// had no actual - must be
-													// added to the singles
-													// list.
-				singlesInExpected.addAll(sortedExpected.subList(iexpected,
-						sortedExpected.size()));
-				break;
-			}
-			E currActual = sortedActual.get(iactual);
-			E currExpected = sortedExpected.get(iexpected);
+		if (keepMatches && matches == null || !keepMatches) {
+			singlesInExpected = new ArrayList<E>(expected.size());
+			singlesInActual = new ArrayList<E>(actual.size());
 
-			int comparison = comparator.compare(currActual, currExpected);
-			if (0 == comparison) {
-				// "Found " + currActual.toString());
-
-				// matches.add(Pair.with(currExpected, currActual));
-				singlesInActual.remove(currActual);
-				iexpected++;
-				iactual++;
-			} else if (comparison > 0) {
-				singlesInExpected.add(currExpected);
-				iexpected++;
-			} else {
-				singlesInActual.add(currActual);
-				iactual++;
-			}
-		}
-		if (report != null) {
-			for (E e : singlesInExpected) {
-				report.append(e.toString()).append(
-						" was expected but not found");
-				report.append("\n");
-			}
-
-			for (E e : singlesInActual) {
-				report.append(e.toString()).append(" was found");
-				if (!allItems) {
-					report.append(" unexpectedly");
+			if (!allItems) {
+				if (expected.size() > actual.size()) {
+					report.append("Size of actual items is ").append(
+							actual.size());
+					report.append(", should be at least ")
+							.append(expected.size()).append("\n");
+					status = false;
+					if (exitIfSizeDoesNotMatch) {
+						return;
+					}
 				}
-				report.append("\n");
+				singlesInActual.addAll(actual);
+			} else {
+				if (expected.size() != actual.size()) {
+					report.append("Size of actual items is ").append(
+							actual.size());
+					report.append("instead of ").append(expected.size())
+							.append("\n");
+					status = false;
+					if (exitIfSizeDoesNotMatch) {
+						return;
+					}
+				}
+			}
+			exitIfSizeDoesNotMatch = true;
+
+			List<E> sortedActual = actual.subList(0, actual.size());
+			List<E> sortedExpected = expected.subList(0, expected.size());
+			Collections.sort(sortedActual, comparator);
+			Collections.sort(sortedExpected, comparator);
+			for (int iactual = 0, iexpected = 0; (iactual < sortedActual.size() || !allItems)
+					&& (iexpected < sortedExpected.size());) {
+				if (iactual >= sortedActual.size()) {// when atLeast flag is true,
+														// all expected items which
+														// had no actual - must be
+														// added to the singles list.
+					singlesInExpected.addAll(sortedExpected.subList(iexpected,
+							sortedExpected.size()));
+					break;
+				}
+				E currActual = sortedActual.get(iactual);
+				E currExpected = sortedExpected.get(iexpected);
+
+				int comparison = comparator.compare(currActual, currExpected);
+				if (0 == comparison) {
+					// "Found " + currActual.toString());
+					addMatch(currActual, currExpected);
+
+					singlesInActual.remove(currActual);
+					iexpected++;
+					iactual++;
+				} else if (comparison > 0) {
+					singlesInExpected.add(currExpected);
+					iexpected++;
+				} else {
+					singlesInActual.add(currActual);
+					iactual++;
+				}
+			}
+			if (report != null) {
+				for (E e : singlesInExpected) {
+					report.append(e.toString()).append(
+							" was expected but not found");
+					report.append("\n");
+				}
+
+				for (E e : singlesInActual) {
+					report.append(e.toString()).append(" was found");
+					if (!allItems) {
+						report.append(" unexpectedly");
+					}
+					report.append("\n");
+				}
+
 			}
 
+			status = singlesInExpected.isEmpty()
+					&& (singlesInActual.isEmpty() || !allItems);
 		}
-
-		status = singlesInExpected.isEmpty()
-				&& (singlesInActual.isEmpty() || !allItems);
-
+		else if (matches!=null){
+			report.append("validating matches data");
+			for (PairOfMatches<E> match : matches) {
+				if (comparator.compare(match.actual, match.expected)!=0){
+					report.append(match.actual).append(" did not match ").append(match.expected).append(" when comparing using ").append(comparator.toString()).append("\n");  
+				}
+			}
+		}
 	}
 
 	public CollectionAssertion<E> withComparator(Comparator<E> comparator) {

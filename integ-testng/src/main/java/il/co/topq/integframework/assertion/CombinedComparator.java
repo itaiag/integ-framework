@@ -7,6 +7,7 @@ import java.util.List;
 class CombinedComparator<T> implements Comparator<T> {
 
 	private final List<Comparator<T>> comparators;
+	private Comparator<T> currComparator;
 
 	public CombinedComparator(List<Comparator<T>> comparators) {
 		this.comparators = comparators.subList(0, comparators.size());
@@ -16,9 +17,19 @@ class CombinedComparator<T> implements Comparator<T> {
 	public int compare(T o1, T o2) {
 		int comparisonResult = 0;
 		Iterator<Comparator<T>> comparatorsIterator = this.comparators.iterator();
-		while (comparisonResult == 0 && comparatorsIterator.hasNext())
-			comparisonResult = comparatorsIterator.next().compare(o1, o2);
+		while (comparisonResult == 0 && comparatorsIterator.hasNext()) {
+			currComparator = comparatorsIterator.next();
+			comparisonResult = currComparator.compare(o1, o2);
+		}
+		if (!comparatorsIterator.hasNext()){
+			currComparator = null; //cleanup for next iteration
+		}
 		return comparisonResult;
+	}
+
+	@Override
+	public String toString() {
+		return currComparator == null ? "" : currComparator.toString();
 	}
 
 }

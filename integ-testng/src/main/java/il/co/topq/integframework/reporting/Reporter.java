@@ -1,5 +1,7 @@
 package il.co.topq.integframework.reporting;
 
+import il.co.topq.integframework.utils.StringUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
@@ -65,6 +67,14 @@ public class Reporter extends org.testng.Reporter {
 	
 	public static void log(final String s, Style style, Color color) {
 		log(s, false, style, color);
+	}
+	
+	public static void log(final Throwable t) {
+		log(t.getMessage(), t);
+	}
+
+	public static void log(final String title, final Throwable t) {
+		log(title, StringUtils.getStackTrace(t), false);
 	}
 
 	/**
@@ -134,7 +144,7 @@ public class Reporter extends org.testng.Reporter {
 	}
 	
 	public static void log(String title, String body, boolean status) {
-		getCurrentTestResult().setStatus(ITestResult.FAILURE);
+		getCurrentTestResult().setStatus((!status || !getCurrentTestResult().isSuccess())?ITestResult.FAILURE:getCurrentTestResult().getStatus());
 		log(title, body, Color.RED);
 	}
 

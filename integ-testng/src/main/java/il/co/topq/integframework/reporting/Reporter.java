@@ -28,7 +28,7 @@ public class Reporter extends org.testng.Reporter {
 	}
 
 	public enum Style {
-		REGULAR("r"), BOLD("b"), ITALIC("i");
+		REGULAR(""), BOLD("b"), ITALIC("i"), PLAINTEXT("pre"), EMPHASIZED("em"), STRIKETHROUGH("strike");
 
 		private final String value;
 
@@ -68,7 +68,11 @@ public class Reporter extends org.testng.Reporter {
 	public static void log(final String s, Style style, Color color) {
 		log(s, false, style, color);
 	}
-	
+
+	public static void step(String step) {
+		log(step, Style.EMPHASIZED, Color.BLUE);
+
+	}
 	public static void log(final Throwable t) {
 		log(t.getMessage(), t);
 	}
@@ -305,4 +309,5 @@ public class Reporter extends org.testng.Reporter {
 	private static String toHtml(String str) {
 		return str.replace("\n", "<br/>");
 	}
+
 }

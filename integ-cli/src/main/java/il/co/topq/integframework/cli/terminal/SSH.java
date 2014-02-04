@@ -169,7 +169,7 @@ public class SSH extends Terminal {
 	 * @return
 	 * @throws IOException
 	 */
-	public OutputStream get(final String remoteFile, long length, String remoteTargetDirectory, String mode) throws IOException{
+	public OutputStream put(final String remoteFile, long length, String remoteTargetDirectory, String mode) throws IOException{
 		return new SCPClient(getConn()).put(remoteFile, length, remoteTargetDirectory, mode);
 	}
 	/**

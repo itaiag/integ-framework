@@ -3,6 +3,7 @@
  */
 package il.co.topq.integframework.cli.conn;
 
+import il.co.topq.integframework.cli.process.CliCommandExecution;
 import il.co.topq.integframework.cli.terminal.Prompt;
 import il.co.topq.integframework.cli.terminal.SSH;
 import il.co.topq.integframework.cli.terminal.VT100FilterInputStream;
@@ -13,6 +14,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 
 /**
  * Default CliConnection for a Cli connection to a linux machine. Protocol is
@@ -115,11 +118,12 @@ public class LinuxDefaultCliConnection extends CliConnectionImpl {
 	 * @param remoteDir
 	 *            The folder in which to put the file to
 	 * @param mode
-	 *            a Linux octal mode
+	 *            a Linux octal mode, default "0600" if null
 	 * @param length
 	 *            the total length of the file
 	 * @return an output stream to which put the file's data to
 	 * @throws IOException
+	 *             when
 	 */
 	public OutputStream put(String remoteDir, String remoteFile, String mode, long length) throws IOException {
 		if (terminal instanceof SSH) {
@@ -127,6 +131,19 @@ public class LinuxDefaultCliConnection extends CliConnectionImpl {
 			return ssh.put(remoteFile, length, remoteDir, mode);
 		}
 		return null;
+	}
+
+	public Iterator<String> fileList(String directory) throws Exception {
+		CliCommandExecution execution = new CliCommandExecution(this, "find '" + directory + "' -maxdepth 1 -type f");
+		execution.withTitle("list files in " + directory).error("No such file or directory").execute();
+		String[] files = execution.getResult().split("\n");
+		return Arrays.asList(files).iterator();
+	}
+
+	public boolean isProccessRunning(String name) throws Exception {
+		CliCommandExecution execution = new CliCommandExecution(this, "ps -C '" + name + "' -o pid= |wc -l");
+		execution.withTitle("check if process " + name + " is running").execute();
+		return "1".equals(execution.getResult());
 	}
 
 }

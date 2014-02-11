@@ -2,7 +2,6 @@ package il.co.topq.integframework.assertion;
 
 import il.co.topq.integframework.reporting.Reporter;
 import il.co.topq.integframework.reporting.Reporter.Color;
-import il.co.topq.integframework.reporting.Reporter.Style;
 
 import java.util.concurrent.TimeoutException;
 
@@ -34,6 +33,10 @@ public class Assert extends org.testng.Assert {
 	 *            Object to perform assertion on
 	 * @param logic
 	 *            Logic to operate on the actual object
+	 * @param timeout
+	 *            in milliseconds
+	 * @throws TimeoutException
+	 *             when time is up and the assertion is not successful
 	 * @throws Exception
 	 *             If exception occurced during assertion
 	 * @throws AssertionError
@@ -78,8 +81,10 @@ public class Assert extends org.testng.Assert {
 	 * @param actual
 	 *            Object to perform assertion on
 	 * @param logic
-	 *            Logic to operate on the actual object // * @throws Exception
-	 *            // * If exception occurced during assertion
+	 *            Logic to operate on the actual object
+	 * @param listener
+	 *            an {@link AssertionListener} to fire the events of success,
+	 *            failure and {@link Exception} thrown.
 	 * @throws AssertionError
 	 *             If assertion fails
 	 */

@@ -149,7 +149,7 @@ public class Reporter extends org.testng.Reporter {
 	
 	public static void log(String title, String body, boolean status) {
 		getCurrentTestResult().setStatus((!status || !getCurrentTestResult().isSuccess())?ITestResult.FAILURE:getCurrentTestResult().getStatus());
-		log(title, body, Color.RED);
+		log(title, body, status ? Color.BLUE : Color.RED);
 	}
 
 	/**
@@ -307,7 +307,7 @@ public class Reporter extends org.testng.Reporter {
 	}
 	
 	private static String toHtml(String str) {
-		return str.replace("\n", "<br/>");
+		return str.contains("<pre>") ? str : str.replace("\n", "<br/>");
 	}
 
 }

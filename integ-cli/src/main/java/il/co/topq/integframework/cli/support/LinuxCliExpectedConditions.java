@@ -171,7 +171,7 @@ public abstract class LinuxCliExpectedConditions {
 
 			@Override
 			public String toString() {
-				return "the process " + processName + " is running";
+				return "the process " + processName + " to be running";
 			}
 
 			@Override
@@ -198,7 +198,7 @@ public abstract class LinuxCliExpectedConditions {
 
 			@Override
 			public String toString() {
-				return "the process " + processName + " is running";
+				return "the process " + processName + " to be not running";
 			}
 
 			@Override

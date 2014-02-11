@@ -96,6 +96,8 @@ public class HDFSSystemModule {
 	}
 	
 	public boolean validateThat(Predicate<Hdfs> predicate){
+		// TODO AssertTrue
+		Reporter.log("Validating " + predicate.toString());
 		return predicate.apply(hdfs);
 	}
 }

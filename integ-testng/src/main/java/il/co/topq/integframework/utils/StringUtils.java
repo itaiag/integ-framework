@@ -66,14 +66,42 @@ public abstract class StringUtils {
 		return orAll ? s.substring(1 + s.lastIndexOf(delim)) : getSuffix(s, delim);
 	}
 
-
+	/**
+	 * get the suffix of the source string, after finding the longest substring
+	 * of prefix.
+	 * 
+	 * @param src
+	 *            the source to find the prefix in
+	 * @param prefix
+	 *            the prefix to find.
+	 * @return the first suffix after the largest substring of prefix.
+	 */
 	public static String getFirstSubStringSuffix(String src, String prefix) {
-		StringBuilder builder = new StringBuilder();
+		return getFirstSubStringSuffix(src, prefix, null);
+	}
+
+	/**
+	 * get the suffix of the source string, after finding the longest substring
+	 * of prefix.
+	 * 
+	 * @param src
+	 *            the source to find the prefix in
+	 * @param prefix
+	 *            the prefix to find.
+	 * @param prefixLeftovers
+	 *            a buffer to put the rest of the prefix. ignored if set to null
+	 * @return the first suffix after the largest substring of prefix.
+	 */
+
+	public static String getFirstSubStringSuffix(String src, String prefix, StringBuffer prefixLeftovers) {
 		int srcIndex = src.indexOf(prefix);
 		String subPrefix = prefix;
 		while (srcIndex < 0 && subPrefix.length() > 0) {
 			subPrefix = subPrefix.substring(0, subPrefix.length() - 1);
 			srcIndex = src.indexOf(subPrefix);
+		}
+		if (prefixLeftovers != null && prefixLeftovers.length() == 0 && subPrefix.length() < prefix.length()) {
+			prefixLeftovers.append(getSuffix(prefix, subPrefix));
 		}
 		return getSuffix(src, subPrefix);
 	}

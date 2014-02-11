@@ -114,13 +114,18 @@ public abstract class HdfsExpectedConditions {
 	}
 
 	/**
-	 * find the first file/folder that matches the file name (or file pattern if the isRegexp set to true)
+	 * find the first file/folder that matches the file name (or file pattern if
+	 * the isRegexp set to true)
+	 * 
 	 * @param directory
+	 *            the directory to search a file in
 	 * @param file
+	 *            the file name or expression
 	 * @param isRegexp
-	 * @return
+	 *            set to true for regular expression
+	 * @return the path of the found file
 	 */
-	public static HdfsExpectedCondition<Path> directoryConatins(final Path directory, final String file, final boolean isRegexp){
+	public static HdfsExpectedCondition<Path> directoryContains(final Path directory, final String file, final boolean isRegexp) {
 		if (!isRegexp) return directoryConatins(directory, file);
 		return new HdfsExpectedCondition<Path> () {
 			@Override

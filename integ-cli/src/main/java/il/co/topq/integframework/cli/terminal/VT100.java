@@ -50,6 +50,7 @@ public class VT100 {
 	 * @param cmd
 	 *            String of the command
 	 * @throws Exception
+	 *             when writing or flushing data to the socket fails
 	 */
 	public void sendCommand(String cmd) throws Exception {
 		long timeToWait = basicDelay - (System.currentTimeMillis() - lastCommand);

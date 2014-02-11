@@ -308,6 +308,7 @@ public class Cli {
 	 * Close the il.co.topq.integframework.cli.terminal.Cli connection.
 	 * 
 	 * @exception IOException
+	 *                when disconnection fails
 	 */
 	public void close() throws IOException {
 		if (terminal != null && terminal.isConnected()) {
@@ -316,8 +317,11 @@ public class Cli {
 	}
 
 	/**
-	 * Reads the stream in the input buffer 
-	 * and returns it as a String.
+	 * Reads the stream in the input buffer and returns it as a String.
+	 * 
+	 * @return the streamed data as string
+	 * @throws Exception
+	 *             when read fails
 	 */
 	public String read() throws Exception {
 		return terminal.readInputBuffer();
@@ -325,7 +329,9 @@ public class Cli {
 
 	/**
 	 * connect the related terminal if it is not connected already
+	 * 
 	 * @throws IOException
+	 *             when connection fails
 	 */
 	public void connect() throws IOException {
 		if (terminal != null && !terminal.isConnected()) {
@@ -335,7 +341,10 @@ public class Cli {
 
 	/**
 	 * disconnects the related terminal and then reconnects
+	 * 
 	 * @throws IOException
+	 *             when either {@link #close()} or {@link #connect()} throws an
+	 *             exception
 	 */
 	public void reconnect() throws IOException {
 		
@@ -424,9 +433,11 @@ public class Cli {
 
 	/**
 	 * if set to True then enter String will be sent after Timeout was reached.<br>
-	 * the number of times the enter string will be sent can be configured using the <I>setWaitWithGraceCounter(int)</I>
+	 * the number of times the enter string will be sent can be configured using
+	 * the <I>setWaitWithGraceCounter(int)</I>
 	 * 
 	 * @param graceful
+	 *            the new value to set
 	 */
 	public void setGraceful(boolean graceful) {
 		this.graceful = graceful;

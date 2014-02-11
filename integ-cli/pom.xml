@@ -20,9 +20,14 @@
 		<dependency>
 			<groupId>il.co.topq.integframework</groupId>
 			<artifactId>integ-testng</artifactId>
-			<version>1.0.1-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
-	</dependencies>
+		<dependency>
+			<groupId>il.co.topq.integframework</groupId>
+			<artifactId>integ-support</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+  </dependencies>
   <parent>
   	<groupId>il.co.topq.integframework</groupId>
   	<artifactId>integ-parent</artifactId>

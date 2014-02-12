@@ -78,12 +78,10 @@ public class CliCommandExecution {
 		if (cliConnection instanceof AbstractModule) {
 			String result = ((AbstractModule) cliConnection).getActual(String.class);
 			String commandLine = cmd + this.cliConnection.getEnterStr();
-
-			result = StringUtils.getFirstSubStringSuffix(result, commandLine);
-
-			result = StringUtils.getPrefix(result, this.cliConnection.getEnterStr());
-
-
+			result = StringUtils.getFirstSubStringSuffix(result, commandLine, true);
+			if (result.contains(this.cliConnection.getEnterStr())) {
+				result = StringUtils.getPrefix(result, this.cliConnection.getEnterStr());
+			}
 			setResult(result.trim());
 		}
 	}

@@ -198,9 +198,8 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 		return this;
 	}
 
-	public CollectionAssertion<E> compareWith(Comparator<E>... comparators) {
-		for (int i = 0; i < comparators.length; i++) {
-			Comparator<E> comparator = comparators[i];
+	public CollectionAssertion<E> compareWith(List<Comparator<E>> comparators) {
+		for (Comparator<E> comparator : comparators) {
 			withComparator(comparator);
 		}
 		return this;

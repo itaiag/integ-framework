@@ -4,10 +4,10 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-class CombinedComparator<T> implements Comparator<T> {
+public class CombinedComparator<T> implements Comparator<T> {
 
 	private final List<Comparator<T>> comparators;
-	private Comparator<T> currComparator;
+	private String lastFailedComparatorName;
 
 	public CombinedComparator(List<Comparator<T>> comparators) {
 		this.comparators = comparators.subList(0, comparators.size());
@@ -18,18 +18,20 @@ class CombinedComparator<T> implements Comparator<T> {
 		int comparisonResult = 0;
 		Iterator<Comparator<T>> comparatorsIterator = this.comparators.iterator();
 		while (comparisonResult == 0 && comparatorsIterator.hasNext()) {
-			currComparator = comparatorsIterator.next();
+			Comparator<T> currComparator = comparatorsIterator.next();
 			comparisonResult = currComparator.compare(o1, o2);
+			lastFailedComparatorName = currComparator.toString();
 		}
-		if (!comparatorsIterator.hasNext()){
-			currComparator = null; //cleanup for next iteration
+		if (0 == comparisonResult) {
+			lastFailedComparatorName = ""; // no one failed. cleanup for next
+											// comparison
 		}
 		return comparisonResult;
 	}
 
 	@Override
 	public String toString() {
-		return currComparator == null ? "" : currComparator.toString();
+		return lastFailedComparatorName;
 	}
 
 }

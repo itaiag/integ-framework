@@ -1,11 +1,14 @@
 package il.co.topq.integframework.assertion;
 
+import il.co.topq.integframework.reporting.Reporter;
 import il.co.topq.integframework.utils.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
+import org.testng.xml.XmlSuite;
 
 public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 
@@ -37,8 +40,6 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 	protected boolean allItems = false, exitIfSizeDoesNotMatch = true;
 
 	private List<Comparator<E>> comparators;
-
-	StringBuilder report = new StringBuilder();
 
 	public CollectionAssertion(List<E> expected) {
 		this.expected = new ArrayList<E>(expected);
@@ -86,8 +87,7 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 	}
 
 	public String getMessage() {
-		message = report.toString();
-		return message;
+		return status ? "passed" : "failed";
 	}
 
 	@Override
@@ -108,9 +108,9 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 
 			if (!allItems) {
 				if (expected.size() > actual.size()) {
-					report.append("Size of actual items is ").append(actual.size());
-					report.append(", should be at least ").append(expected.size()).append("\n");
 					status = false;
+					Reporter.log(new AssertionError(new StringBuilder("Size of actual items is ").append(actual.size())
+							.append(", should be at least ").append(expected.size()).append("\n")));
 					if (exitIfSizeDoesNotMatch) {
 						return;
 					}
@@ -118,8 +118,8 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 				singlesInActual.addAll(actual);
 			} else {
 				if (expected.size() != actual.size()) {
-					report.append("Size of actual items is ").append(actual.size());
-					report.append("instead of ").append(expected.size()).append("\n");
+					Reporter.log(new AssertionError(new StringBuilder("Size of actual items is ").append(actual.size())
+							.append("instead of ").append(expected.size()).append("\n")));
 					status = false;
 					if (exitIfSizeDoesNotMatch) {
 						return;
@@ -134,10 +134,9 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 			Collections.sort(sortedExpected, comparator);
 			for (int iactual = 0, iexpected = 0; (iactual < sortedActual.size() || !allItems)
 					&& (iexpected < sortedExpected.size());) {
-				if (iactual >= sortedActual.size()) {// when atLeast flag is true,
-														// all expected items which
-														// had no actual - must be
-														// added to the singles list.
+				if (iactual >= sortedActual.size()) {
+					// when atLeast flag is true, all expected items which had
+					// no actual - must be added to the singles list.
 					singlesInExpected.addAll(sortedExpected.subList(iexpected, sortedExpected.size()));
 					break;
 				}
@@ -160,33 +159,47 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 					iactual++;
 				}
 			}
-			if (report != null) {
-				for (E e : singlesInExpected) {
-					report.append(e.toString()).append(" was expected but not found");
-					report.append("\n");
-				}
 
-				for (E e : singlesInActual) {
-					report.append(e.toString()).append(" was found");
-					if (!allItems) {
-						report.append(" unexpectedly");
-					}
-					report.append("\n");
+			for (E e : singlesInExpected) {
+				Reporter.log(new AssertionError(new StringBuilder(e.toString()).append(" was expected but not found")));
+
+			}
+
+			for (E e : singlesInActual) {
+				StringBuilder itemFound = new StringBuilder(e.toString()).append(" was found");
+
+				if (!allItems) {
+					itemFound.append(" unexpectedly");
+					Reporter.log(new AssertionError(itemFound));
+				} else {
+					Reporter.log(itemFound.toString(), XmlSuite.DEFAULT_VERBOSE + 1);
 				}
 
 			}
 
 			status = singlesInExpected.isEmpty() && (singlesInActual.isEmpty() || !allItems);
+			if (!status) {
+				message = "Total items not found: " + singlesInExpected.size();
+				if (allItems) {
+					message = message + "\nTotal unexpected items found: " + singlesInActual.size();
+				}
+			}
 		} else if (matches != null) {
 			status = true;
-			report.append("Validating matches data:\n");
+			Reporter.step("Validating matches data:\n");
+			long mismatchCounter = 0;
 			for (PairOfMatches<E> match : matches) {
 				if (comparator.compare(match.actual, match.expected) != 0) {
 					status = false;
-					report.append(match.actual).append(" did not match ").append(match.expected).append(" when comparing using ")
-							.append(comparator.toString()).append("\n");
+					StringBuilder itemMismatch = new StringBuilder("The item [").append(match.actual)
+							.append("]\n, which was acually found, did not match the expected item \n[")
+							.append(match.expected.toString()).append("]\n when comparing ").append(comparator.toString())
+							.append("\n");
+					Reporter.log(new AssertionError(itemMismatch));
+					mismatchCounter++;
 				}
 			}
+			message = message + "\nTotal mismatch data items found:" + mismatchCounter;
 		}
 	}
 

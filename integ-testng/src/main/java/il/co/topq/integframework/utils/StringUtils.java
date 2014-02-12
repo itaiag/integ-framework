@@ -105,4 +105,15 @@ public abstract class StringUtils {
 		}
 		return getSuffix(src, subPrefix);
 	}
+
+	public static String getFirstSubStringSuffix(String src, String prefix, boolean loopUntilPrefixIsCleared) {
+		String result;
+		StringBuffer prefixLeftovers = new StringBuffer();
+		result = getFirstSubStringSuffix(src, prefix, prefixLeftovers);
+		while (prefixLeftovers.length() > 0) {
+			prefix = prefixLeftovers.toString();
+			result = getFirstSubStringSuffix(src, prefix, prefixLeftovers = new StringBuffer());
+		}
+		return result;
+	}
 }

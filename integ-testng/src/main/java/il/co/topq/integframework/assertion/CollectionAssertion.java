@@ -103,6 +103,7 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 			}
 		}
 		if (keepMatches && matches == null || !keepMatches) {
+			message = "";
 			singlesInExpected = new ArrayList<E>(expected.size());
 			singlesInActual = new ArrayList<E>(actual.size());
 
@@ -179,9 +180,9 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 
 			status = singlesInExpected.isEmpty() && (singlesInActual.isEmpty() || !allItems);
 			if (!status) {
-				message = "Total items not found: " + singlesInExpected.size();
+				message = "Total items not found: " + singlesInExpected.size() + "\n";
 				if (allItems) {
-					message = message + "\nTotal unexpected items found: " + singlesInActual.size();
+					message = message + "Total unexpected items found: " + singlesInActual.size() + "\n";
 				}
 			}
 		} else if (matches != null) {
@@ -199,7 +200,11 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 					mismatchCounter++;
 				}
 			}
-			message = message + "\nTotal mismatch data items found:" + mismatchCounter;
+			message = message + "Total reproccessed items:" + matches.size() + "\n";
+			if (mismatchCounter > 0) {
+				message = message + "Total mismatch data items found:" + mismatchCounter + "\n";
+			}
+
 		}
 	}
 

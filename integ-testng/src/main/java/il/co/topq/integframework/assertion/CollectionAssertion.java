@@ -229,6 +229,31 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 		return this;
 	}
 
+	/**
+	 * reset {@link Comparator}s list to the new given comparators
+	 * 
+	 * @param comparators
+	 * @return
+	 */
+	public CollectionAssertion<E> andNowCompareWith(Comparator<E>... comparators) {
+		this.comparators = null;
+		return andNowCompareWith(Arrays.asList(comparators));
+	}
+
+	/**
+	 * reset {@link Comparator}s list to the new given comparators
+	 * 
+	 * @param comparators
+	 * @return
+	 */
+	public CollectionAssertion<E> andNowCompareWith(List<Comparator<E>> comparators) {
+		this.comparators = null;
+		for (Comparator<E> comparator : comparators) {
+			withComparator(comparator);
+		}
+		return this;
+	}
+
 	protected final Comparator<E> simpleComparator = new Comparator<E>() {
 
 		@Override

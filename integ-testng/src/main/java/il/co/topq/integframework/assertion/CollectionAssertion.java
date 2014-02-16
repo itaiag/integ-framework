@@ -4,6 +4,7 @@ import il.co.topq.integframework.reporting.Reporter;
 import il.co.topq.integframework.utils.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -214,6 +215,11 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 		}
 		comparators.add(comparator);
 		return this;
+	}
+
+	@SafeVarargs
+	public CollectionAssertion<E> compareWith(Comparator<E>... comparators) {
+		return compareWith(Arrays.asList(comparators));
 	}
 
 	public CollectionAssertion<E> compareWith(List<Comparator<E>> comparators) {

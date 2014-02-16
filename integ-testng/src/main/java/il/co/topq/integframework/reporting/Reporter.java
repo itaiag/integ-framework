@@ -1,5 +1,7 @@
 package il.co.topq.integframework.reporting;
 
+import il.co.topq.integframework.utils.StringUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
@@ -8,6 +10,7 @@ import java.util.Date;
 import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
+import org.testng.ITestResult;
 
 /**
  * Wrapper for the TestNG HTML report
@@ -25,7 +28,7 @@ public class Reporter extends org.testng.Reporter {
 	}
 
 	public enum Style {
-		REGULAR("r"), BOLD("b"), ITALIC("i");
+		REGULAR(""), BOLD("b"), ITALIC("i"), PLAINTEXT("pre"), EMPHASIZED("em"), STRIKETHROUGH("strike");
 
 		private final String value;
 
@@ -64,6 +67,18 @@ public class Reporter extends org.testng.Reporter {
 	
 	public static void log(final String s, Style style, Color color) {
 		log(s, false, style, color);
+	}
+
+	public static void step(String step) {
+		log(step, Style.EMPHASIZED, Color.BLUE);
+
+	}
+	public static void log(final Throwable t) {
+		log(t.getMessage(), t);
+	}
+
+	public static void log(final String title, final Throwable t) {
+		log(title, StringUtils.getStackTrace(t), false);
 	}
 
 	/**
@@ -131,6 +146,37 @@ public class Reporter extends org.testng.Reporter {
 		stopLogToggle();
 
 	}
+	
+	public static void log(String title, String body, boolean status) {
+		getCurrentTestResult().setStatus((!status || !getCurrentTestResult().isSuccess())?ITestResult.FAILURE:getCurrentTestResult().getStatus());
+		log(title, body, status ? Color.BLUE : Color.RED);
+	}
+
+	/**
+	 * report a 
+	 * @param title
+	 * @param body
+	 * @param status
+	 */
+	public static void log(String title, String body, int status) {
+		getCurrentTestResult().setStatus(status);
+		Color statusColor;
+		switch (status) {
+		case ITestResult.FAILURE:
+			statusColor=Color.RED;
+			break;
+		case ITestResult.SUCCESS_PERCENTAGE_FAILURE:
+			statusColor=Color.YELLOW;
+			break;
+		case ITestResult.SUCCESS:
+			statusColor=Color.GREEN;
+			break;
+		default:
+			statusColor=Color.BLUE;
+		}
+		log(title, body, statusColor);
+	}
+	
 
 	public static void startLogToggle(String title) {
 		startLogToggle(title, null);
@@ -145,7 +191,7 @@ public class Reporter extends org.testng.Reporter {
 			title = "link";
 		}
 		StringBuilder toggleElement = new StringBuilder();
-		final long id = System.currentTimeMillis() + new Random().nextInt(10000);
+		final String id = System.currentTimeMillis() + "_" + new Random().nextInt(10000);
 
 		// Creating link
 		toggleElement.append(" <a href=\"javascript:toggleElement('");
@@ -261,6 +307,7 @@ public class Reporter extends org.testng.Reporter {
 	}
 	
 	private static String toHtml(String str) {
-		return str.replace("\n", "<br/>");
+		return str.contains("<pre>") ? str : str.replace("\n", "<br/>");
 	}
+
 }

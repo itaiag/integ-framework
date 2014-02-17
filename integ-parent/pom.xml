@@ -77,5 +77,8 @@
 		<module>../integ-testng</module>
 		<module>../integ-webdriver</module>
 		<module>../integ-image-validator</module>
+		<module>../integ-hdfs</module>
+		<module>../integ-support</module>
+		<module>../integ-rest</module>
 	</modules>
 </project>

@@ -1,5 +1,6 @@
 package il.co.topq.integframework.db;
 
+import il.co.topq.integframework.AbstractModuleImpl;
 import il.co.topq.integframework.assertion.Assert;
 import il.co.topq.integframework.assertion.NumberCompareAssertion;
 import il.co.topq.integframework.assertion.NumberCompareAssertion.CompareMethod;
@@ -8,12 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 
-public class DatabaseSystemModule {
+public class DatabaseSystemModule extends AbstractModuleImpl {
 
 	protected final JdbcTemplate template;
 	private List<ResultSetPrinter> resultSetPrinterList;
@@ -23,7 +23,11 @@ public class DatabaseSystemModule {
 		this.template = new JdbcTemplate(dataSource);
 	}
 
-	@PostConstruct
+	@Override
+	public void init() throws Exception {
+		initResultSetPrinters();
+	}
+	
 	public void initResultSetPrinters() {
 		resultSetPrinterList = new ArrayList<ResultSetPrinter>();
 		resultSetPrinterList.addAll(tablePrinters());
@@ -55,6 +59,7 @@ public class DatabaseSystemModule {
 		for (ResultSetPrinter printer : resultSetPrinterList) {
 			printer.print(resultList);
 		}
+		setActual(resultList);
 		return resultList;
 	}
 

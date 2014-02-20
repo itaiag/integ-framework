@@ -80,5 +80,6 @@
 		<module>../integ-hdfs</module>
 		<module>../integ-support</module>
 		<module>../integ-rest</module>
+		<module>../integ-wget</module>
 	</modules>
 </project>

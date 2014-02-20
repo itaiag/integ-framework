@@ -1,6 +1,7 @@
 package il.co.topq.integframework.utils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Random;
 
 /**
@@ -233,6 +234,11 @@ public class RandomUtils {
 		}
 
 		return toReturn;
+	}
+
+	public static <E> E getRandomItemFrom(Collection<E> collection) {
+		return new ArrayList<E>(collection).get(getRandomInt(0, collection.size(), new Random()));
+
 	}
 
 }

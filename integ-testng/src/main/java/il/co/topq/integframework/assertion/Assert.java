@@ -18,7 +18,7 @@ public class Assert extends org.testng.Assert {
 			throw new IllegalArgumentException("Actual can't be null");
 		}
 		if (null == expected) {
-			throw new IllegalArgumentException("logic can't be null");
+			throw new IllegalArgumentException("expected can't be null");
 		}
 		if (!actual.contains(expected)) {
 			fail(expected + " is not contained in " + actual);

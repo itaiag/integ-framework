@@ -53,7 +53,7 @@ public class Assert extends org.testng.Assert {
 					throw new TimeoutException("Assertion interrupted");
 				}
 			}
-		} while (timeUp < System.currentTimeMillis() || !logic.status);
+		} while (timeUp < System.currentTimeMillis() && !logic.status);
 		if (!logic.status) {
 			throw new TimeoutException("Assertion failed");
 		}

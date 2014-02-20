@@ -235,6 +235,7 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 	 * @param comparators
 	 * @return
 	 */
+	@SafeVarargs
 	public CollectionAssertion<E> andNowCompareWith(Comparator<E>... comparators) {
 		this.comparators = null;
 		return andNowCompareWith(Arrays.asList(comparators));

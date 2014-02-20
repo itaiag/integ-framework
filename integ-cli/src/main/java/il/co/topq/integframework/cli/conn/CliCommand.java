@@ -396,6 +396,9 @@ public class CliCommand {
 	 * @param musts
 	 */
 	public void addMusts(List<String> musts) {
+		if (this.musts == null) {
+			this.musts = new ArrayList<String>();
+		}
 		this.musts.addAll(musts);
 		for (String must: musts){
 			addAnalyzers(new FindTextAssertion(must));

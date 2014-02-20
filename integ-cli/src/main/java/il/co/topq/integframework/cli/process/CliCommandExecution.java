@@ -1,7 +1,10 @@
 package il.co.topq.integframework.cli.process;
 
 import il.co.topq.integframework.AbstractModule;
+import il.co.topq.integframework.assertion.Assert;
+import il.co.topq.integframework.assertion.FindTextAssertion;
 import il.co.topq.integframework.assertion.IAssertionLogic;
+import il.co.topq.integframework.assertion.TextNotFoundAssertion;
 import il.co.topq.integframework.cli.conn.CliCommand;
 import il.co.topq.integframework.cli.conn.CliConnection;
 import il.co.topq.integframework.utils.StringUtils;
@@ -15,7 +18,7 @@ public class CliCommandExecution {
 	private final CliConnection cliConnection;
 	private long timeout = -1;
 	private String title = "";
-	private String cmd = "";
+	protected String cmd = "";
 	private List<String> musts, errors;
 	protected String result;
 	protected final List<IAssertionLogic<String>> assrtions;
@@ -46,7 +49,7 @@ public class CliCommandExecution {
 	}
 
 	public CliCommandExecution mustHaveResponse(String... strings) {
-		if (musts == null || musts.isEmpty()) {
+		if (musts == null) {
 			musts = new ArrayList<String>(strings.length);
 		}
 		musts.addAll(Arrays.asList(strings));
@@ -64,25 +67,39 @@ public class CliCommandExecution {
 		}
 
 		CliCommand cliCommand = new CliCommand(cmd);
-		if (musts != null && !musts.isEmpty()) {
-			cliCommand.addMusts(musts);
-		}
-		if (errors != null && !errors.isEmpty()) {
-			for (String error : errors) {
-				cliCommand.addErrors(error);
+		if (!(cliConnection instanceof AbstractModule)) {
+			if (musts != null && !musts.isEmpty()) {
+				cliCommand.addMusts(musts);
+			}
+			if (errors != null && !errors.isEmpty()) {
+				for (String error : errors) {
+					cliCommand.addErrors(error);
+				}
 			}
 		}
 		cliCommand.setTimeout(timeout);
 		this.cliConnection.handleCliCommand(title, cliCommand);
 
 		if (cliConnection instanceof AbstractModule) {
-			String result = ((AbstractModule) cliConnection).getActual(String.class);
+			AbstractModule cliModule = (AbstractModule) cliConnection;
+			String result = cliModule.getActual(String.class);
 			String commandLine = cmd + this.cliConnection.getEnterStr();
 			result = StringUtils.getFirstSubStringSuffix(result, commandLine, true);
 			if (result.contains(this.cliConnection.getEnterStr())) {
 				result = StringUtils.getPrefix(result, this.cliConnection.getEnterStr());
 			}
 			setResult(result.trim());
+			cliModule.setActual(this.result);
+			if (musts != null && !musts.isEmpty()) {
+				for (String must : musts) {
+					Assert.assertLogic(cliModule.getActual(String.class), new FindTextAssertion(must));
+				}
+			}
+			if (errors != null && !errors.isEmpty()) {
+				for (String error : errors) {
+					Assert.assertLogic(cliModule.getActual(String.class), new TextNotFoundAssertion(error));
+				}
+			}
 		}
 	}
 
@@ -115,7 +132,7 @@ public class CliCommandExecution {
 	// }
 
 	public CliCommandExecution error(String... errors) {
-		if (this.errors == null || this.errors.isEmpty()) {
+		if (this.errors == null) {
 			this.errors = new ArrayList<String>(errors.length);
 		}
 		this.errors.addAll(Arrays.asList(errors));

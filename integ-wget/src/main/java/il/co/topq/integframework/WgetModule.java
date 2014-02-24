@@ -66,7 +66,7 @@ public class WgetModule extends CommandLineModule {
 		}
 
 		public WgetCommand post(CharSequence data) {
-			command.append(" --post-data=\"").append(data).append('"');
+			command.append(" --post-data=\'").append(data).append('\'');
 			return this;
 		}
 

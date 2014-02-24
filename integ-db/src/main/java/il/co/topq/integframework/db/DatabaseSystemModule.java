@@ -95,8 +95,7 @@ public class DatabaseSystemModule extends AbstractModuleImpl {
 		}
 		int rows = template.update(sql);
 		if (expectedNumOfAffectedRows >= 0) {
-			Assert.assertLogicHappens(rows,
-					new NumberCompareAssertion(expectedNumOfAffectedRows, CompareMethod.EQUALS), 0l, true);
+			Assert.assertLogic(rows, new NumberCompareAssertion(expectedNumOfAffectedRows, CompareMethod.EQUALS));
 		}
 	}
 
@@ -115,7 +114,7 @@ public class DatabaseSystemModule extends AbstractModuleImpl {
 	 */
 	public void assertNumOfRows(final String sql, int expectedNumOfRows, CompareMethod compareMethod) throws Exception {
 		int actual = getResultList(sql).size();
-		Assert.assertLogicHappens(actual, new NumberCompareAssertion(expectedNumOfRows, compareMethod), 0l, true);
+		Assert.assertLogic(actual, new NumberCompareAssertion(expectedNumOfRows, compareMethod));
 	}
 
 	public void assertNumOfRows(final String sql, int expectedNumOfRows) throws Exception {

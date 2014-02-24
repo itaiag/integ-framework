@@ -61,7 +61,7 @@ public class LinuxFileInfoExecutionBuilder {
 					long result;
 					input.execute();
 					LongCompareAssertion compareAssertion = new LongCompareAssertion(expected, compareMethod);
-					Assert.assertLogicHappens(result = resultType.parser.parse(input.getResult()), compareAssertion, 0l, true);
+					Assert.assertLogic(result = resultType.parser.parse(input.getResult()), compareAssertion);
 					return result;
 				} catch (Exception e) {
 					throw new RuntimeException(e);

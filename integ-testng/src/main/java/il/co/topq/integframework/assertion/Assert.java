@@ -115,6 +115,7 @@ public class Assert extends org.testng.Assert {
 		}
 	}
 
+	@Deprecated
 	static public <T> void assertLogicHappens(final T actual,
 			final AbstractAssertionLogic<T> logic, final long timeout,
 			boolean silent) throws TimeoutException {

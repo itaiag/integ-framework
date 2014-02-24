@@ -219,5 +219,4 @@ public abstract class LinuxCliExpectedConditions {
 			}
 		};
 	}
-
 }

@@ -2,11 +2,6 @@ package il.co.topq.integframework.assertion;
 
 public class NumberCompareAssertion extends AbstractAssertionLogic<Integer> {
 
-	public enum CompareMethod {
-		BIGGER, BIGGER_OR_EQUALS, EQUALS, SMALLER_OR_EQUALS, SMALLER
-
-	}
-
 	private final int expected;
 
 	private int actualInt;

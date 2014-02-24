@@ -2,8 +2,8 @@ package il.co.topq.integframework.db;
 
 import il.co.topq.integframework.AbstractModuleImpl;
 import il.co.topq.integframework.assertion.Assert;
+import il.co.topq.integframework.assertion.CompareMethod;
 import il.co.topq.integframework.assertion.NumberCompareAssertion;
-import il.co.topq.integframework.assertion.NumberCompareAssertion.CompareMethod;
 
 import java.util.ArrayList;
 import java.util.List;

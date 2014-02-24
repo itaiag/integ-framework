@@ -4,7 +4,7 @@
     <groupId>il.co.topq.integframework</groupId>
     <artifactId>integ-parent</artifactId>
     <version>1.0.2-SNAPSHOT</version>
-    <relativePath>../../integ/integ-parent</relativePath>
+    <relativePath>../integ-parent</relativePath>
   </parent>
   <artifactId>integ-rest</artifactId>
   <dependencies>

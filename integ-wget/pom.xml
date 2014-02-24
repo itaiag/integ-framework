@@ -4,13 +4,14 @@
     <groupId>il.co.topq.integframework</groupId>
     <artifactId>integ-parent</artifactId>
     <version>1.0.2-SNAPSHOT</version>
+    <relativePath>../integ-parent</relativePath>
   </parent>
   <artifactId>integ-wget</artifactId>
   <dependencies>
   	<dependency>
   		<groupId>il.co.topq.integframework</groupId>
   		<artifactId>integ-cli</artifactId>
-  		<version>1.0.1-SNAPSHOT</version>
+  		<version>${project.version}</version>
   	</dependency>
   </dependencies>
 </project>

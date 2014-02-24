@@ -10,7 +10,7 @@
 		<dependency>
 			<groupId>il.co.topq.integframework</groupId>
 			<artifactId>integ-testng</artifactId>
-			<version>1.0.1-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-dbcp</groupId>
@@ -32,7 +32,7 @@
 		<dependency>
 			<groupId>il.co.topq.integframework</groupId>
 			<artifactId>integ-support</artifactId>
-			<version>1.0.1-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 	<parent>

@@ -20,14 +20,14 @@
 		<dependency>
 			<groupId>il.co.topq.integframework</groupId>
 			<artifactId>integ-testng</artifactId>
-			<version>1.0.1-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<!-- <dependency> <groupId>com.google.guava</groupId> <artifactId>guava</artifactId> 
 			<version>14.0.1</version> <type>bundle</type> </dependency> -->
 		<dependency>
 			<groupId>il.co.topq.integframework</groupId>
 			<artifactId>integ-junit</artifactId>
-			<version>1.0.1-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.detro.ghostdriver</groupId>

@@ -105,12 +105,12 @@ public class Assert extends org.testng.Assert {
 			if (logic.isStatus()) {
 				listener.assertionPassed(actual, logic);
 			} else {
-				Reporter.log("Assertion failed: " + logic.getTitle(),
-						logic.getMessage(), false);
+				// Reporter.log("Assertion failed: " + logic.getTitle(),
+				// logic.getMessage(), false);
 				listener.assertionFailed(actual, logic);
 			}
 		} catch (Throwable t) {
-			Reporter.log("Assertion process failed: ", t);
+			// Reporter.log("Assertion process failed: ", t);
 			listener.assertionFailed(actual, logic, t);
 		}
 	}

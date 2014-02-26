@@ -1,7 +1,36 @@
 package il.co.topq.integframework.assertion;
 
 public enum CompareMethod {
-	BIGGER, BIGGER_OR_EQUALS, EQUALS, SMALLER_OR_EQUALS, SMALLER;
+	BIGGER {
+		@Override
+		public <T extends Comparable<T>> boolean compare(T o1, T o2) {
+			return o1.compareTo(o2) > 0;
+		}
+	},
+	BIGGER_OR_EQUALS {
+		@Override
+		public <T extends Comparable<T>> boolean compare(T o1, T o2) {
+			return o1.compareTo(o2) >= 0;
+		}
+	},
+	EQUALS {
+		@Override
+		public <T extends Comparable<T>> boolean compare(T o1, T o2) {
+			return o1.compareTo(o2) == 0;
+		}
+	},
+	SMALLER_OR_EQUALS {
+		@Override
+		public <T extends Comparable<T>> boolean compare(T o1, T o2) {
+			return o1.compareTo(o2) <= 0;
+		}
+	},
+	SMALLER {
+		@Override
+		public <T extends Comparable<T>> boolean compare(T o1, T o2) {
+			return o1.compareTo(o2) < 0;
+		}
+	};
 	public String toString() {
 		switch (this) {
 		case BIGGER:
@@ -19,4 +48,6 @@ public enum CompareMethod {
 		}
 
 	};
+
+	public abstract <T extends Comparable<T>> boolean compare(T o1, T o2);
 }

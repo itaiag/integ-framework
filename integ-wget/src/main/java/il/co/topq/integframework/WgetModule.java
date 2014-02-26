@@ -35,13 +35,23 @@ public class WgetModule extends CommandLineModule {
 
 	public class WgetCommand extends CliCommandExecution {
 		private final StringBuilder command = new StringBuilder("wget");
-
+		private boolean userAgentSet = false, downloadSet = false, bindAddressSet = false, referrerSet = false,
+				postDataSet = false,
+				alreadyRun = false;
 		public WgetCommand() {
 			super(getCliConnectionImpl());
 			withTitle("wget");
 		}
 
+		private boolean setFlag(boolean flag, String exceptionString) {
+			if (flag) {
+				throw new IllegalStateException(exceptionString);
+			}
+			return true;
+		}
+
 		public WgetCommand withUserAgent(String userAgent) {
+			userAgentSet = setFlag(userAgentSet, "User agent" + " already set!");
 			command.append(" --user-agent='").append(userAgent).append("' ");
 			return this;
 		}
@@ -51,27 +61,38 @@ public class WgetModule extends CommandLineModule {
 		}
 
 		public WgetCommand downloadTo(String target) {
+			downloadSet = setFlag(downloadSet, "Download target" + " already set!");
 			command.append("-O ").append(target);
 			return this;
 		}
 
 		public WgetCommand bindAddress(String address) {
+			bindAddressSet = setFlag(bindAddressSet, "Bind address" + " already set!");
 			command.append(" --bind-address=").append(address);
 			return this;
 		}
 
 		public WgetCommand referer(URL url) {
+			referrerSet = setFlag(referrerSet, "Referrer" + " already set!");
 			command.append(" --referer='").append(url).append("' ");
 			return this;
 		}
 
 		public WgetCommand post(CharSequence data) {
+			postDataSet = setFlag(postDataSet, "Post data" + " already set!");
 			command.append(" --post-data=\'").append(data).append('\'');
+			return this;
+		}
+
+		public WgetCommand postFile(String name) {
+			postDataSet = setFlag(postDataSet, "Post data" + " already set!");
+			command.append(" --post-file=\'").append(name).append('\'');
 			return this;
 		}
 
 		@Override
 		public void execute() throws Exception {
+			alreadyRun = setFlag(alreadyRun, "A client can execute only once!");
 			if (StringUtils.isEmpty(cmd)) {
 				cmd = command.append(' ').append(url).toString();
 			}

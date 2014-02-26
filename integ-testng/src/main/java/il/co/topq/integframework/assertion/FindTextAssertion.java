@@ -13,8 +13,6 @@ public class FindTextAssertion extends AbstractAssertionLogic<String> {
 
 	private final String expectedText;
 
-	private String actualText;
-
 	private final boolean isRegex;
 
 	/**
@@ -37,7 +35,7 @@ public class FindTextAssertion extends AbstractAssertionLogic<String> {
 
 	@Override
 	public void doAssertion() {
-		if (actualText == null) {
+		if (actual == null) {
 			status = false;
 			title = "Actual text can't be null";
 			return;
@@ -51,7 +49,7 @@ public class FindTextAssertion extends AbstractAssertionLogic<String> {
 		if (isRegex) {
 			try {
 				Pattern pattern = Pattern.compile(expectedText);
-				Matcher matcher = pattern.matcher(actualText);
+				Matcher matcher = pattern.matcher(actual);
 				status = matcher.find();
 
 			} catch (Throwable t) {
@@ -59,7 +57,7 @@ public class FindTextAssertion extends AbstractAssertionLogic<String> {
 			}
 
 		} else {
-			status = actualText.contains(expectedText);
+			status = actual.contains(expectedText);
 		}
 		if (status) {
 			title = "Expected text was found in actual text";
@@ -70,19 +68,8 @@ public class FindTextAssertion extends AbstractAssertionLogic<String> {
 		messageBuilder.append("Text to find: \n");
 		messageBuilder.append(expectedText).append("\n\n");
 		messageBuilder.append("Actual text\n");
-		messageBuilder.append(actualText);
+		messageBuilder.append(actual);
 		message = messageBuilder.toString();
 
 	}
-
-	
-
-	@Override
-	public void setActual(String actual) {
-		this.actual = actual;
-		if (actual != null) {
-			actualText = (String) actual;
-		}
-	}
-
 }

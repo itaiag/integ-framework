@@ -1,8 +1,8 @@
 package il.co.topq.integframework.cli.support;
 
-import il.co.topq.integframework.assertion.Assert;
+import static il.co.topq.integframework.assertion.Assert.assertLogic;
+import il.co.topq.integframework.assertion.ComparableAssertion;
 import il.co.topq.integframework.assertion.CompareMethod;
-import il.co.topq.integframework.assertion.LongCompareAssertion;
 import il.co.topq.integframework.cli.conn.CliConnection;
 import il.co.topq.integframework.cli.process.CliCommandExecution;
 
@@ -51,17 +51,24 @@ public class LinuxFileInfoExecutionBuilder {
 		return execute(resultType, expectedSize, compareMethod);
 	}
 
-	private static CliExecutionExpectedCondition<Long> execute(final ResultType resultType, final long expected,
+	private CliExecutionExpectedCondition<Long> execute(final ResultType resultType, final long expected,
 			final CompareMethod compareMethod) {
 		return new CliExecutionExpectedCondition<Long>() {
-
+			@Override
+			public String toString() {
+				StringBuilder builder = new StringBuilder("the file ");
+				builder.append(name).append(" ");
+				builder.append(resultType.name()).append(" to be ");
+				builder.append(compareMethod.toString()).append(" ").append(resultType.format(expected));
+				return builder.toString();
+			}
 			@Override
 			public Long apply(CliCommandExecution input) {
 				try {
 					long result;
 					input.execute();
-					LongCompareAssertion compareAssertion = new LongCompareAssertion(expected, compareMethod);
-					Assert.assertLogic(result = resultType.parser.parse(input.getResult()), compareAssertion);
+					assertLogic(result = resultType.parser.parse(input.getResult()), new ComparableAssertion<Long>(expected,
+							compareMethod));
 					return result;
 				} catch (Exception e) {
 					throw new RuntimeException(e);
@@ -71,17 +78,23 @@ public class LinuxFileInfoExecutionBuilder {
 		};
 	}
 
+	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS Z");
+
 	public enum ResultType {
 		FileDate("$6,$7,$8", new Parser<Long>() {
-			private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS Z");
-
 			@Override
 			public Long parse(String s) throws ParseException {
 				Date actual = dateFormat.parse(s);
 				return actual.getTime();
 			}
 
-		}),
+		}) {
+			@Override
+			String format(long l) {
+				return dateFormat.format(l);
+			}
+
+		},
 
 		FileSize("$5", new Parser<Long>() {
 			@Override
@@ -89,20 +102,22 @@ public class LinuxFileInfoExecutionBuilder {
 				long actual = Long.parseLong(s);
 				return actual;
 			}
-		});
+		}) {
+			@Override
+			String format(long l) {
+				return Long.toString(l);
+			}
+		};
 
 		final String awkPrint;
-		final Parser<?> parser;
+		final Parser<Long> parser;
 
-		ResultType(final String awkPrint, final Parser<?> parser) {
+		ResultType(final String awkPrint, final Parser<Long> parser) {
 			this.awkPrint = awkPrint;
 			this.parser = parser;
 		}
 
-		private interface Parser<T extends Comparable<T>> {
-
-			Long parse(String result) throws ParseException;
-		}
+		abstract String format(long l);
 	}
 
 }

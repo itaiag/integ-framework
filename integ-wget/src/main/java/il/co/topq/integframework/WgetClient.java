@@ -1,11 +1,16 @@
 package il.co.topq.integframework;
 
+import il.co.topq.integframework.cli.conn.LinuxDefaultCliConnection;
+
+import java.io.ByteArrayInputStream;
+import java.io.OutputStream;
+
+import org.apache.commons.io.IOUtils;
 
 public class WgetClient {
 	final String userAgent, ip;
 
 	private final WgetModule module;
-
 
 	public WgetClient(WgetModule module, String ip, String userAgent) {
 		this.module = module;
@@ -24,6 +29,23 @@ public class WgetClient {
 	public void post(CharSequence data) throws Exception {
 		module.new WgetCommand().bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything().post(data).error("failed")
 				.execute();
+	}
+
+	public void postFile(String remoteFile) throws Exception {
+		module.new WgetCommand().bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything().postFile(remoteFile)
+				.error("failed").execute();
+	}
+
+	public void post(byte[] data, String remoteDir, String remoteFile) throws Exception {
+		LinuxDefaultCliConnection linux = null;
+		if (module.getCliConnectionImpl() instanceof LinuxDefaultCliConnection) {
+			linux = (LinuxDefaultCliConnection) module.getCliConnectionImpl();
+		}
+		OutputStream put = linux.put(remoteDir, remoteFile, null, data.length);
+		IOUtils.copy(new ByteArrayInputStream(data), put);
+		IOUtils.closeQuietly(put);
+
+		postFile(remoteDir + "/" + remoteFile);
 	}
 
 	public void bindAddress() throws Exception {

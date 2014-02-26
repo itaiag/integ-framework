@@ -52,4 +52,21 @@ public class LinuxFileContentExecutionBuilder {
 		};
 
 	}
+
+	public CliExecutionExpectedCondition<String> notContainingText(final String expected) {
+
+		return new CliExecutionExpectedCondition<String>() {
+
+			@Override
+			public String apply(CliCommandExecution input) {
+				try {
+					input.error(expected).execute();
+				} catch (Exception e) {
+					Assert.fail("execution failed", e);
+				}
+				return input.getResult();
+			}
+		};
+
+	}
 }

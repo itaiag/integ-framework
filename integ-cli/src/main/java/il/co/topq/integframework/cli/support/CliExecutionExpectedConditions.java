@@ -71,7 +71,7 @@ public abstract class CliExecutionExpectedConditions {
 	 * @param parser
 	 *            an object that gets the string from the execution and
 	 *            translates it to a T.<br>
-	 *            a parser should be aware of all fields in the result.
+	 *            the parser should be able to crop the result.
 	 * @param logic
 	 *            the logic and sometimes the expected value to examine.
 	 * @return the parsed value

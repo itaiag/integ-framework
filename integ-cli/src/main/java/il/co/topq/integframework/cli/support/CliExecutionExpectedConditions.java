@@ -7,6 +7,7 @@ import il.co.topq.integframework.assertion.CompareMethod;
 import il.co.topq.integframework.assertion.FailSafeAssertionListener;
 import il.co.topq.integframework.assertion.FindTextAssertion;
 import il.co.topq.integframework.cli.process.CliCommandExecution;
+import il.co.topq.integframework.utils.Parser;
 
 public abstract class CliExecutionExpectedConditions {
 	final Object __;

@@ -37,8 +37,11 @@ public class LinuxFileContentExecutionBuilder {
 	}
 
 	public CliExecutionExpectedCondition<String> containingText(final String expected) {
-
 		return new CliExecutionExpectedCondition<String>() {
+			@Override
+			public String toString() {
+				return "the file " + name + " to contain [" + expected + "]";
+			}
 
 			@Override
 			public String apply(CliCommandExecution input) {
@@ -56,6 +59,10 @@ public class LinuxFileContentExecutionBuilder {
 	public CliExecutionExpectedCondition<String> notContainingText(final String expected) {
 
 		return new CliExecutionExpectedCondition<String>() {
+			@Override
+			public String toString() {
+				return "the file " + name + " not to contain [" + expected + "]";
+			}
 
 			@Override
 			public String apply(CliCommandExecution input) {

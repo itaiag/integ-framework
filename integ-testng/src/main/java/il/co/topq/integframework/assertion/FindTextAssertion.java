@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 /**
  * Asserts that given text exists in an actual text
  * 
- * @author Ita Agmon
+ * @author Itai Agmon
  * 
  */
 public class FindTextAssertion extends AbstractAssertionLogic<String> {

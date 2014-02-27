@@ -9,4 +9,13 @@ public class AbstractModuleImpl extends AbstractModule {
 	public void close() throws Exception {
 	}
 
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+
 }

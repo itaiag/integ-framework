@@ -7,7 +7,7 @@ public class ComparableAssertion<T extends Comparable<T>> extends AbstractAssert
 
 	private final T expected;
 
-	private String titleOfExaminedObject = "";
+	private String titleOfExaminedObject = "value";
 	private Formatter<T> formatter = new FormatterImpl<>();
 
 	private final CompareMethod compareMethod;
@@ -43,6 +43,7 @@ public class ComparableAssertion<T extends Comparable<T>> extends AbstractAssert
 			titleBuilder.append("NOT ");
 		}
 		titleBuilder.append(compareMethod.toString()).append(" [").append(formatter.toString(expected)).append("]");
+		this.title = titleBuilder.toString();
 	}
 
 	@Override

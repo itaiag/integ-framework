@@ -31,6 +31,11 @@ public class WgetClient {
 				.execute();
 	}
 
+	public void silentlyPost(CharSequence data) throws Exception {
+		module.new WgetCommand().bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything().post(data).error("failed")
+				.silently().execute();
+
+	}
 	public void postFile(String remoteFile) throws Exception {
 		module.new WgetCommand().bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything().postFile(remoteFile)
 				.error("failed").execute();
@@ -47,6 +52,7 @@ public class WgetClient {
 
 		postFile(remoteDir + "/" + remoteFile);
 	}
+
 
 	public void bindAddress() throws Exception {
 		module.new AddIpCommand(ip).execute();
@@ -97,5 +103,6 @@ public class WgetClient {
 		builder.append("]");
 		return builder.toString();
 	}
+
 
 }

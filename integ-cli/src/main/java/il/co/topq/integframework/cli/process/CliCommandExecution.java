@@ -21,6 +21,7 @@ public class CliCommandExecution {
 	protected String cmd = "";
 	private List<String> musts, errors;
 	protected String result;
+	private boolean silently = false;
 	protected final List<IAssertionLogic<String>> assrtions;
 
 	public CliCommandExecution(CliConnection cliConnection) {
@@ -78,6 +79,7 @@ public class CliCommandExecution {
 			}
 		}
 		cliCommand.setTimeout(timeout);
+		cliCommand.setSilent(silently);
 		this.cliConnection.handleCliCommand(title, cliCommand);
 
 		if (cliConnection instanceof AbstractModule) {
@@ -136,6 +138,11 @@ public class CliCommandExecution {
 			this.errors = new ArrayList<String>(errors.length);
 		}
 		this.errors.addAll(Arrays.asList(errors));
+		return this;
+	}
+
+	public CliCommandExecution silently() {
+		this.silently = true;
 		return this;
 	}
 }

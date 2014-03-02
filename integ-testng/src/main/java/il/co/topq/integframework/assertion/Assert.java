@@ -3,7 +3,10 @@ package il.co.topq.integframework.assertion;
 import il.co.topq.integframework.reporting.Reporter;
 import il.co.topq.integframework.reporting.Reporter.Color;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import com.google.common.base.Function;
 
 /**
  * Class for comparing between actual and expected states
@@ -113,6 +116,48 @@ public class Assert extends org.testng.Assert {
 			// Reporter.log("Assertion process failed: ", t);
 			listener.assertionFailed(actual, logic, t);
 		}
+	}
+
+	/**
+	 * Execute the <code>logic</code> and repeating on the the
+	 * <code>actual</code> object, as gained from the actualValueGenerator
+	 * 
+	 * @param <A>
+	 *            the type of actual to examine
+	 * @param <R>
+	 *            the type of the resource to gain the actual value from
+	 * @param resource
+	 *            a {@link il.co.topq.integframework.Module} or another kind of
+	 *            external {@link Object}, from which the actual value is
+	 *            gained.
+	 * @param actualValueGenerator
+	 *            a function from the resource above to the actual value- on
+	 *            which to perform assertion on
+	 * @param logic
+	 *            Logic to operate on the actual object
+	 * @param timeout
+	 *            maximum time for this operation
+	 * @param timeoutUnit
+	 *            time unit for the parameter above
+	 * @param interval
+	 *            time to sleep between assertions
+	 * @param intervalUnit
+	 *            time unit for the parameter above
+	 * @throws AssertionError
+	 *             If assertion fails
+	 */
+	static public <A, R> void assertLogic(R resource, final Function<R, A> actualValueGenerator,
+			AbstractAssertionLogic<A> logic, long timeout, TimeUnit timeoutUnit, long interval, TimeUnit intervalUnit)
+			throws InterruptedException {
+		long end = System.currentTimeMillis() + timeoutUnit.toMillis(timeout);
+		while (true) {
+			Assert.assertLogic(actualValueGenerator.apply(resource), logic);
+			Thread.sleep(intervalUnit.toMillis(interval));
+			if (end > System.currentTimeMillis()) {
+				return;
+			}
+		}
+
 	}
 
 	@Deprecated

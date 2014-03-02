@@ -113,5 +113,9 @@ public class LinuxFileInfoExecutionBuilder {
 			this.awkPrint = awkPrint;
 			this.parser = parser;
 		}
+
+		public Parser<Long> getParser() {
+			return parser;
+		}
 	}
 }

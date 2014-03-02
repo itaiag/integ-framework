@@ -96,6 +96,11 @@ public abstract class CliExecutionExpectedConditions {
 				}
 				return null;
 			}
+
+			@Override
+			public String toString() {
+				return logic.toString();
+			}
 		};
 
 	}

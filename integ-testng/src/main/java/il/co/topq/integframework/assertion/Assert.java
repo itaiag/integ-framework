@@ -44,11 +44,17 @@ public class Assert extends org.testng.Assert {
 	 *             If exception occurced during assertion
 	 * @throws AssertionError
 	 *             If assertion fails
+	 * @deprecated actual value is set only once, loop has no meaning! <br>
+	 *             use
+	 *             {@link #assertLogic(Object, Function, AbstractAssertionLogic, long, TimeUnit, long, TimeUnit)}
+	 *             instead
 	 */
-	static public <T> void assertLogic(final T actual, final AbstractAssertionLogic<T> logic, final long timeout) throws TimeoutException {
+	@Deprecated
+	static public <T> void assertLogic(final T actual, final AbstractAssertionLogic<T> logic, final long timeout)
+			throws TimeoutException {
 		long timeUp = System.currentTimeMillis() + timeout;
 		do {
-			assertLogic(actual, logic,null);
+			assertLogic(actual, logic, null);
 			if (!logic.status) {
 				try {
 					Thread.sleep(3000);
@@ -61,7 +67,7 @@ public class Assert extends org.testng.Assert {
 			throw new TimeoutException("Assertion failed");
 		}
 	}
-	
+
 	/**
 	 * Execute the <code>logic</code> on the the <code>actual</code> object.
 	 * 
@@ -72,11 +78,9 @@ public class Assert extends org.testng.Assert {
 	 * @throws AssertionError
 	 *             If assertion fails
 	 */
-	static public <T> void assertLogic(final T actual,
-			final AbstractAssertionLogic<T> logic) {
+	static public <T> void assertLogic(final T actual, final AbstractAssertionLogic<T> logic) {
 		assertLogic(actual, logic, null);
 	}
-	
 
 	/**
 	 * Execute the <code>logic</code> on the the <code>actual</code> object.
@@ -120,7 +124,13 @@ public class Assert extends org.testng.Assert {
 
 	/**
 	 * Execute the <code>logic</code> and repeating on the the
-	 * <code>actual</code> object, as gained from the actualValueGenerator
+	 * <code>actual</code> object, as gained from the actualValueGenerator<br>
+	 * stop when either one of the following occurs:
+	 * <ol>
+	 * <li>the actual object is null</li>
+	 * <li>the thread was interrupted while sleeping</li>
+	 * <li>timeout expires</li>
+	 * </ol>
 	 * 
 	 * @param <A>
 	 *            the type of actual to examine
@@ -145,24 +155,81 @@ public class Assert extends org.testng.Assert {
 	 *            time unit for the parameter above
 	 * @throws AssertionError
 	 *             If assertion fails
+	 * @return true if assertion finished due to timeout i.e. the assertion
+	 *         passed on all invocations of
+	 *         {@link AbstractAssertionLogic#doAssertion()}
 	 */
-	static public <A, R> void assertLogic(R resource, final Function<R, A> actualValueGenerator,
-			AbstractAssertionLogic<A> logic, long timeout, TimeUnit timeoutUnit, long interval, TimeUnit intervalUnit)
-			throws InterruptedException {
-		long end = System.currentTimeMillis() + timeoutUnit.toMillis(timeout);
-		while (true) {
-			Assert.assertLogic(actualValueGenerator.apply(resource), logic);
-			Thread.sleep(intervalUnit.toMillis(interval));
-			if (end > System.currentTimeMillis()) {
-				return;
-			}
-		}
-
+	static public <A, R> void assertLogic(R resource, final Function<R, A> actualValueGenerator, AbstractAssertionLogic<A> logic,
+			long timeout, TimeUnit timeoutUnit, long interval, TimeUnit intervalUnit) {
+		assertLogic(resource, actualValueGenerator, logic, new DefaultAssertionListener<A>(), timeout, timeoutUnit, interval,
+				intervalUnit);
 	}
 
+	/**
+	 * Execute the <code>logic</code> and repeating on the the
+	 * <code>actual</code> object, as gained from the actualValueGenerator<br>
+	 * stop when either one of the following occurs:
+	 * <ol>
+	 * <li>the actual object is null</li>
+	 * <li>the thread was interrupted while sleeping</li>
+	 * <li>timeout expires</li>
+	 * </ol>
+	 * 
+	 * @param <A>
+	 *            the type of actual to examine
+	 * @param <R>
+	 *            the type of the resource to gain the actual value from
+	 * @param resource
+	 *            a {@link il.co.topq.integframework.Module} or another kind of
+	 *            external {@link Object}, from which the actual value is
+	 *            gained.
+	 * @param actualValueGenerator
+	 *            a function from the resource above to the actual value- on
+	 *            which to perform assertion on
+	 * @param logic
+	 *            Logic to operate on the actual object
+	 * @param listener
+	 *            an {@link AssertionListener} for ssertion events.
+	 * @param timeout
+	 *            maximum time for this operation
+	 * @param timeoutUnit
+	 *            time unit for the parameter above
+	 * @param interval
+	 *            time to sleep between assertions
+	 * @param intervalUnit
+	 *            time unit for the parameter above
+	 * @throws AssertionError
+	 *             If assertion fails
+	 * @return true if assertion finished due to timeout i.e. the assertion
+	 *         passed on all invocations of
+	 *         {@link AbstractAssertionLogic#doAssertion()}
+	 */
+	static public <A, R> void assertLogic(R resource, final Function<R, A> actualValueGenerator, AbstractAssertionLogic<A> logic,
+			AssertionListener<A> listener, long timeout, TimeUnit timeoutUnit, long interval, TimeUnit intervalUnit) {
+		long end = System.currentTimeMillis() + timeoutUnit.toMillis(timeout);
+		A actual;
+		do {
+			actual = actualValueGenerator.apply(resource);
+			if (actual == null) {
+				listener.assertionFailed(actual, logic);
+			}
+			Assert.assertLogic(actual, logic, listener);
+			try {
+				Thread.sleep(intervalUnit.toMillis(interval));
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				listener.assertionFailed(actual, logic);
+			}
+		} while (end < System.currentTimeMillis());
+		listener.assertionPassed(actual, logic);
+	}
+
+	/**
+	 * @deprecated use
+	 *             {@link Assert#assertLogic(Object, Function, AbstractAssertionLogic, long, TimeUnit, long, TimeUnit) 
+	 */
 	@Deprecated
-	static public <T> void assertLogicHappens(final T actual,
-			final AbstractAssertionLogic<T> logic, final long timeout,
+	static public <T> void assertLogicHappens(final T actual, final AbstractAssertionLogic<T> logic, final long timeout,
 			boolean silent) throws TimeoutException {
 
 		assertLogic(actual, logic, timeout);

@@ -1,16 +1,23 @@
 package il.co.topq.integframework;
 
+import il.co.topq.integframework.WgetModule.WgetCommand;
 import il.co.topq.integframework.cli.conn.LinuxDefaultCliConnection;
+import il.co.topq.integframework.utils.StringUtils;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
+import java.io.StringReader;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 
-public class WgetClient {
+public class WgetClient implements Callable<String> {
 	final String userAgent, ip;
 
 	private final WgetModule module;
+	private PostDataGenerator dataGenerator;
 
 	public WgetClient(WgetModule module, String ip, String userAgent) {
 		this.module = module;
@@ -26,16 +33,24 @@ public class WgetClient {
 		return ip;
 	}
 
+	public synchronized void setDataGenerator(PostDataGenerator postDataGenerator) {
+		if (null == this.dataGenerator) {
+			this.dataGenerator = postDataGenerator;
+		}
+	}
+
 	public void post(CharSequence data) throws Exception {
 		module.new WgetCommand().bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything().post(data).error("failed")
 				.execute();
 	}
 
 	public void silentlyPost(CharSequence data) throws Exception {
-		module.new WgetCommand().bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything().post(data).error("failed")
+		module.new WgetCommand().bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything().post(data)
+				.withTimeout(30, TimeUnit.SECONDS).error("failed")
 				.silently().execute();
 
 	}
+
 	public void postFile(String remoteFile) throws Exception {
 		module.new WgetCommand().bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything().postFile(remoteFile)
 				.error("failed").execute();
@@ -52,7 +67,6 @@ public class WgetClient {
 
 		postFile(remoteDir + "/" + remoteFile);
 	}
-
 
 	public void bindAddress() throws Exception {
 		module.new AddIpCommand(ip).execute();
@@ -104,5 +118,22 @@ public class WgetClient {
 		return builder.toString();
 	}
 
+	@Override
+	public String call() throws Exception {
+		WgetCommand wgetCommand = module.new WgetCommand();
+		wgetCommand.bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything().post(this.dataGenerator.generateData(this));
+		wgetCommand.error("failed").silently().execute();
+		String httpRequestSentMessage = "HTTP request sent, awaiting response... ";
+		wgetCommand.mustHaveResponse(httpRequestSentMessage);
+		BufferedReader responseReader = new BufferedReader(new StringReader(wgetCommand.getResult()));
+		String resultLine;
+
+		while (null != (resultLine = responseReader.readLine())) {
+			if (resultLine.startsWith(httpRequestSentMessage)) {
+				return StringUtils.getFirstSubStringSuffix(resultLine, httpRequestSentMessage);
+			}
+		}
+		return null;
+	}
 
 }

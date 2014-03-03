@@ -42,7 +42,7 @@ public abstract class CliExecutionExpectedConditions {
 
 	}
 
-	public static CliExecutionExpectedCondition<String> executionResponseReturn(final String expectedResponse) {
+	public static CliExecutionExpectedCondition<String> executionResultContains(final String expectedResponse) {
 		return executionLogicHappens(new FindTextAssertion(expectedResponse) {
 			@Override
 			public String toString() {
@@ -51,7 +51,7 @@ public abstract class CliExecutionExpectedConditions {
 		});
 	}
 
-	public static CliExecutionExpectedCondition<String> executionResponseReturnExactly(final String expectedResponse) {
+	public static CliExecutionExpectedCondition<String> executionResultIs(final String expectedResponse) {
 		return executionLogicHappens(new ComparableAssertion<String>(expectedResponse, CompareMethod.EQUALS) {
 			@Override
 			public String toString() {
@@ -100,6 +100,33 @@ public abstract class CliExecutionExpectedConditions {
 			@Override
 			public String toString() {
 				return logic.toString();
+			}
+		};
+
+	}
+
+	/**
+	 * execute the given execution and parse the result.
+	 * 
+	 * @param parser
+	 *            for parsing the result. the parser may return null.
+	 * @return the result
+	 */
+	public static <T> CliExecutionExpectedCondition<T> executionResult(final Parser<T> parser) {
+		return new CliExecutionExpectedCondition<T>() {
+
+			@Override
+			public T apply(CliCommandExecution execution) {
+				try {
+					execution.execute();
+					T actual = parser.parse(execution.getResult());
+					if (actual == null) {
+						throw new NullPointerException(execution.toString() + " result parsed to null\n" + execution.getResult());
+					}
+					return actual;
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
 			}
 		};
 

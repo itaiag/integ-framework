@@ -115,7 +115,36 @@ public class Reporter extends org.testng.Reporter {
 	 *            Will appear when clicking on the title.
 	 */
 	public static void log(String title, String body) {
-		log(title, body, null);
+		log(title, body, Style.REGULAR);
+	}
+
+	/**
+	 * Adds toggle element to the report
+	 * 
+	 * @param title
+	 *            Will appear as link. If none given the link will appear with
+	 *            the test 'link'
+	 * @param body
+	 *            Will appear when clicking on the title.
+	 * @param style
+	 *            The {@link Style} to style the body
+	 */
+	public static void log(String title, String body, Style style) {
+		if (null == title) {
+			title = "title";
+		}
+		System.out.println(title + "\n");
+		if (body != null) {
+			System.out.println(body + "\n");
+		}
+		if (null == body || body.isEmpty()) {
+			log(title, style);
+			return;
+		}
+		startLogToggle(title);
+		log(body, style);
+		stopLogToggle();
+
 	}
 
 	/**
@@ -260,6 +289,10 @@ public class Reporter extends org.testng.Reporter {
 		final StringBuilder sb = new StringBuilder();
 		sb.append("<p>");
 		sb.append("<").append(style.value).append(">");
+		if (Style.PLAINTEXT.equals(style)) {
+			s = s.replaceAll("<", "&lt;");
+			s = s.replaceAll(">", "&gt;");
+		}
 		sb.append(s);
 		sb.append("</").append(style.value).append(">");
 		sb.append("</p>");

@@ -4,7 +4,9 @@ import static com.sun.jersey.api.client.Client.create;
 import il.co.topq.integframework.AbstractModuleImpl;
 import il.co.topq.integframework.reporting.Reporter;
 import il.co.topq.integframework.reporting.Reporter.Color;
+import il.co.topq.integframework.reporting.Reporter.Style;
 
+import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import com.sun.jersey.api.client.ClientResponse;
@@ -13,8 +15,7 @@ public class RESTClientModule extends AbstractModuleImpl {
 	String uri;
 
 	public ClientResponse post(JSONObject input, String action) throws Exception {
-		Reporter.log("Request", Color.BLUE);
-		Reporter.log("<pre>\n" + input.toString() + "</pre>\n");
+		Reporter.log("Request", input.toString(3), Style.PLAINTEXT);
 		StringBuilder builder = new StringBuilder(uri);
 		if (!uri.endsWith("/")) {
 			builder.append("/");
@@ -24,8 +25,15 @@ public class RESTClientModule extends AbstractModuleImpl {
 				.accept("application/json").post(ClientResponse.class, input);
 
 		setActual(clientResponse.getEntity(String.class));
-		Reporter.log("Response", Color.BLUE);
-		Reporter.log("<pre>\n" + getActual(String.class) + "</pre>\n");
+		try {
+			JSONObject response = new JSONObject(getActual(String.class));
+			Reporter.log("Response", response.toString(3), Style.PLAINTEXT);
+		} catch (JSONException e) {
+			Reporter.log("Response", getActual(String.class), Style.PLAINTEXT);// should
+																				// never
+																				// happen!!
+		}
+
 		return clientResponse;
 	}
 

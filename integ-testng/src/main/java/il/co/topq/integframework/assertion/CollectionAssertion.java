@@ -188,7 +188,7 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 			}
 		} else if (matches != null) {
 			status = true;
-			Reporter.step("Validating matches data:\n");
+			Reporter.step("Validating matches data using " + comparator.toString());
 			long mismatchCounter = 0;
 			for (PairOfMatches<E> match : matches) {
 				if (comparator.compare(match.actual, match.expected) != 0) {
@@ -201,9 +201,10 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 					mismatchCounter++;
 				}
 			}
-			message = message + "Total reproccessed items:" + matches.size() + "\n";
+			message = "Total reproccessed items:" + matches.size() + "\n";
 			if (mismatchCounter > 0) {
-				message = message + "Total mismatch data items found:" + mismatchCounter + "\n";
+				message = message + "Total mismatch data items found:" + mismatchCounter + "\n when comparing "
+						+ comparator.toString();
 			}
 
 		}

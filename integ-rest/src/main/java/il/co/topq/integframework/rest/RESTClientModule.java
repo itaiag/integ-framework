@@ -47,7 +47,7 @@ public class RESTClientModule extends AbstractModuleImpl {
 
 	public ClientResponse put(JSONObject input, String action) {
 		Reporter.log("Request", Color.BLUE);
-		Reporter.log("<pre>\n" + input.toString() + "</pre>\n");
+		Reporter.log(input.toString(), Style.PLAINTEXT);
 		StringBuilder builder = new StringBuilder(uri);
 		if (!uri.endsWith("/")) {
 			builder.append("/");
@@ -58,7 +58,7 @@ public class RESTClientModule extends AbstractModuleImpl {
 
 		setActual(clientResponse.getEntity(String.class));
 		Reporter.log("Response", Color.BLUE);
-		Reporter.log("<pre>\n" + getActual(String.class) + "</pre>\n");
+		Reporter.log(getActual(String.class), Style.PLAINTEXT);
 		return clientResponse;
 	}
 

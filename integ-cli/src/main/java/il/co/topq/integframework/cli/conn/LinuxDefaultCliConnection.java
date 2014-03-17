@@ -15,7 +15,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Iterator;
+import java.util.TimeZone;
 
 /**
  * Default CliConnection for a Cli connection to a linux machine. Protocol is
@@ -141,9 +145,37 @@ public class LinuxDefaultCliConnection extends CliConnectionImpl {
 	}
 
 	public boolean isProccessRunning(String name) throws Exception {
-		CliCommandExecution execution = new CliCommandExecution(this, "ps -C '" + name + "' -o pid= |wc -l");
+		CliCommandExecution execution = new CliCommandExecution(this, processInstancesCounterCommand(name));
 		execution.withTitle("check if process " + name + " is running").execute();
-		return "1".equals(execution.getResult());
+		return !"0".equals(execution.getResult());
 	}
 
+	public boolean isProccessNotRunning(String name) throws Exception {
+		CliCommandExecution execution = new CliCommandExecution(this, processInstancesCounterCommand(name));
+		execution.withTitle("check if process " + name + " is running").execute();
+		return "0".equals(execution.getResult());
+	}
+
+	public static String processInstancesCounterCommand(String cmd) {
+		return "ps -C '" + cmd + "' -o pid= |wc -l";
+	}
+
+	public Date getRemoteMachineDate() throws Exception {
+		CliCommandExecution execution = new CliCommandExecution(this, "date +%s");
+		// seconds since epoch
+		execution.execute();
+		return new Date(Long.parseLong(execution.getResult() + "000"));
+	}
+
+	public Calendar getRemoteMachineCalendar() throws Exception {
+		Calendar calendar = new GregorianCalendar(getRemoteMachineTimeZone());
+		calendar.setTimeInMillis(getRemoteMachineDate().getTime());
+		return calendar;
+	}
+
+	public TimeZone getRemoteMachineTimeZone() throws Exception {
+		CliCommandExecution execution = new CliCommandExecution(this, "date +%Z");
+		execution.execute();
+		return TimeZone.getTimeZone(execution.getResult());
+	}
 }

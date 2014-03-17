@@ -256,7 +256,7 @@ public abstract class LinuxCliExpectedConditions {
 			}
 
 			public Boolean apply(LinuxDefaultCliConnection linux) throws Exception {
-				return !linux.isProccessRunning(processName);
+				return linux.isProccessNotRunning(processName);
 			}
 		};
 	}

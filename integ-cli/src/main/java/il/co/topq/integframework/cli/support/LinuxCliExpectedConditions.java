@@ -61,7 +61,7 @@ public abstract class LinuxCliExpectedConditions {
 
 			@Override
 			public String toString() {
-				return "the file in " + path.toString() + " to be openable";
+				return "the file in " + path.toString() + " to be readable";
 			};
 
 			public InputStream apply(LinuxDefaultCliConnection cliConnection) {

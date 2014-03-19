@@ -57,11 +57,8 @@ public class WgetClient implements Callable<String> {
 	}
 
 	public void post(byte[] data, String remoteDir, String remoteFile) throws Exception {
-		LinuxDefaultCliConnection linux = null;
-		if (module.getCliConnectionImpl() instanceof LinuxDefaultCliConnection) {
-			linux = (LinuxDefaultCliConnection) module.getCliConnectionImpl();
-		}
-		OutputStream put = linux.put(remoteDir, remoteFile, null, data.length);
+		OutputStream put = ((LinuxDefaultCliConnection) module.getCliConnectionImpl())
+				.put(remoteDir, remoteFile, null, data.length);
 		IOUtils.copy(new ByteArrayInputStream(data), put);
 		IOUtils.closeQuietly(put);
 

@@ -51,6 +51,23 @@ public class WgetClient implements Callable<String> {
 
 	}
 
+	public Runnable silentlyPostLater(final CharSequence data) {
+		return new Runnable() {
+			@Override
+			public void run() {
+				try {
+					synchronized (this) {
+						silentlyPost(data);
+					}
+				} catch (Exception e) {
+
+				}
+
+			}
+		};
+
+	}
+
 	public void postFile(String remoteFile) throws Exception {
 		module.new WgetCommand().bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything().postFile(remoteFile)
 				.error("failed").execute();

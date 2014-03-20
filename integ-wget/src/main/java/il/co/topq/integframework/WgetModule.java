@@ -1,14 +1,14 @@
 package il.co.topq.integframework;
 
 import il.co.topq.integframework.cli.process.CliCommandExecution;
-import il.co.topq.integframework.cli.process.CommandLineModule;
+import il.co.topq.integframework.cli.process.LinuxCommandLineModule;
 import il.co.topq.integframework.utils.StringUtils;
 
 import java.net.URL;
 
 import org.testng.Assert;
 
-public class WgetModule extends CommandLineModule {
+public class WgetModule extends LinuxCommandLineModule {
 
 	String url;
 
@@ -21,14 +21,14 @@ public class WgetModule extends CommandLineModule {
 	}
 	public class AddIpCommand extends CliCommandExecution {
 		public AddIpCommand(String ipAddress) {
-			super(getCliConnectionImpl(), "sudo ip -4 addr add " + ipAddress + "/32 dev lo scope host");
+			super(linux, "sudo ip -4 addr add " + ipAddress + "/32 dev lo scope host");
 			withTitle("add ip address");
 		}
 	}
 
 	public class DeleteIpCommand extends CliCommandExecution {
 		public DeleteIpCommand(String ipAddress) {
-			super(getCliConnectionImpl(), "sudo ip -4 addr del " + ipAddress + "/32 dev lo scope host");
+			super(linux, "sudo ip -4 addr del " + ipAddress + "/32 dev lo scope host");
 			withTitle("remove ip address");
 		}
 	}
@@ -39,7 +39,7 @@ public class WgetModule extends CommandLineModule {
 				postDataSet = false,
 				alreadyRun = false;
 		public WgetCommand() {
-			super(getCliConnectionImpl());
+			super(linux);
 			withTitle("wget");
 		}
 

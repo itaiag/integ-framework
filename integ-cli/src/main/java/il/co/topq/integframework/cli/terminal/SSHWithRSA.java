@@ -65,6 +65,7 @@ public class SSHWithRSA extends SSH {
 				} else {
 					System.out
 							.println("Auth Error - The privateKeyFile should be init from the SUT with a valid path to ppk/pem RSA private key");
+					System.out.println(privateKeyFile);
 				}
 			} catch (Exception e) {
 				System.out.println(e.getMessage());

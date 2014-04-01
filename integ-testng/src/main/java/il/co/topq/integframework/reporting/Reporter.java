@@ -88,9 +88,10 @@ public class Reporter extends org.testng.Reporter {
 	 * @param s
 	 */
 	public static void log(String s, boolean logToStandardOut, Style style, Color color) {
+		String reportDate = "";
 		if(!s.startsWith("</")){ // No need to add time stamp for close tag 
-			String reportDate = df.format(new Date(System.currentTimeMillis()));
-			s = reportDate + " - " + s + "\n";
+			reportDate = df.format(new Date(System.currentTimeMillis())) + " - ";
+			// s = reportDate + s + "\n";
 		}
 		String newS = s;
 		if (null == style) {
@@ -102,7 +103,7 @@ public class Reporter extends org.testng.Reporter {
 		if (style != Style.REGULAR) {
 			newS = appendStyleParagraph(newS, style);
 		}
-		writeToLog(newS, logToStandardOut);
+		writeToLog(reportDate + newS + ((StringUtils.isEmpty(reportDate)) ? "" : "\n"), logToStandardOut);
 	}
 
 	/**

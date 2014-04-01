@@ -81,6 +81,7 @@ public class Reporter extends org.testng.Reporter {
 		log(title, StringUtils.getStackTrace(t), false);
 	}
 
+	protected static DateFormat df = new SimpleDateFormat("HH:mm:ss.SSS");
 	/**
 	 * Appending <code>s</code> to the report with time stamp
 	 * 
@@ -88,7 +89,6 @@ public class Reporter extends org.testng.Reporter {
 	 */
 	public static void log(String s, boolean logToStandardOut, Style style, Color color) {
 		if(!s.startsWith("</")){ // No need to add time stamp for close tag 
-			DateFormat df = new SimpleDateFormat("HH:mm:ss:SS");
 			String reportDate = df.format(new Date(System.currentTimeMillis()));
 			s = reportDate + " - " + s + "\n";
 		}

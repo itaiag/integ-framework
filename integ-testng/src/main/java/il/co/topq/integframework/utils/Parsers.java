@@ -8,6 +8,8 @@ public class Parsers {
 
 	private Parsers() {
 		__ = null;
+		if (__ == null)
+			;
 	}
 
 	public static final Parser<Long> longParser = new Parser<Long>() {

@@ -28,7 +28,7 @@ public class Reporter extends org.testng.Reporter {
 	}
 
 	public enum Style {
-		REGULAR(""), BOLD("b"), ITALIC("i"), PLAINTEXT("pre"), EMPHASIZED("em"), STRIKETHROUGH("strike");
+		REGULAR(""), BOLD("b"), ITALIC("i"), PLAINTEXT("pre"), EMPHASIZED("em"), STRIKETHROUGH("strike"), CENTER("center");
 
 		private final String value;
 
@@ -94,14 +94,11 @@ public class Reporter extends org.testng.Reporter {
 			// s = reportDate + s + "\n";
 		}
 		String newS = s;
-		if (null == style) {
-			style = Style.REGULAR;
+		if (null != style && !Style.REGULAR.equals(style)) {
+			newS = appendStyleParagraph(newS, style);
 		}
 		if (null != color) {
 			newS = appendColorParagraph(newS, color);
-		}
-		if (style != Style.REGULAR) {
-			newS = appendStyleParagraph(newS, style);
 		}
 		writeToLog(reportDate + newS + ((StringUtils.isEmpty(reportDate)) ? "" : "\n"), logToStandardOut);
 	}
@@ -227,13 +224,13 @@ public class Reporter extends org.testng.Reporter {
 		toggleElement.append(" <a href=\"javascript:toggleElement('");
 		toggleElement.append(id);
 		toggleElement.append("', 'block')\" title=\"Click to expand/collapse\"><b>");
-		toggleElement.append(title).append("</b></a><br>");
+		toggleElement.append(appendColorParagraph(title, color)).append("</b></a><br>");
 
 		// Creating body
 		toggleElement.append("<div class='stackTrace' id='");
 		toggleElement.append(id);
 		toggleElement.append("' style='display: none;'>");
-		log(toggleElement.toString(), false, null, color);
+		log(toggleElement.toString(), false, null, null);
 	}
 
 	public static void stopLogToggle() {
@@ -247,7 +244,7 @@ public class Reporter extends org.testng.Reporter {
 	public static void logImage(String title, final File file) {
 		File newFile = copyFileToReporterFolder(file);
 		if (null == newFile) {
-			return;
+			// return;
 		}
 		if (null == title) {
 			title = file.getName();
@@ -288,7 +285,6 @@ public class Reporter extends org.testng.Reporter {
 	
 	private static String appendStyleParagraph(String s, Style style) {
 		final StringBuilder sb = new StringBuilder();
-		sb.append("<p>");
 		sb.append("<").append(style.value).append(">");
 		if (Style.PLAINTEXT.equals(style)) {
 			s = s.replaceAll("<", "&lt;");
@@ -296,7 +292,6 @@ public class Reporter extends org.testng.Reporter {
 		}
 		sb.append(s);
 		sb.append("</").append(style.value).append(">");
-		sb.append("</p>");
 		return sb.toString();
 	}
 
@@ -305,9 +300,9 @@ public class Reporter extends org.testng.Reporter {
 			return s;
 		}
 		final StringBuilder sb = new StringBuilder();
-		sb.append("<p style='color:").append(color.name()).append("'>");
+		sb.append("<span style='color:").append(color.name()).append("'>");
 		sb.append(s);
-		sb.append("</p>");
+		sb.append("</span>");
 		return sb.toString();
 	}
 	

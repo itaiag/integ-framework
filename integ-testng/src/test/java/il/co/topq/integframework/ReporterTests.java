@@ -46,11 +46,27 @@ public class ReporterTests {
 		Reporter.log("In yellow", Style.ITALIC, Color.YELLOW);
 		Reporter.log("In green", Style.ITALIC, Color.GREEN);
 
+		Reporter.step("All colors and styles in a loop:");
+		for (Color color : Color.values()) {
+			for (Style style : Style.values()) {
+				Reporter.log(color.name() + " log with a " + style.name() + " style", style, color);
+			}
+		}
+		Reporter.step("****** All colors in a loop ******");
 	}
 	
 	@Test
 	public void testLogImage(){
-		Reporter.logImage("my title", new File("src/test/resources/screenshot.png"));
+		Reporter.logImage("my title", new File(this.getClass().getResource("/screenshot.png").getPath()));
+	}
+
+	@Test
+	public void testException() {
+		Reporter.log(new RuntimeException());
+		Reporter.log(new RuntimeException("with message"));
+		Reporter.log("with my own title", new RuntimeException());
+		Reporter.log("with my own title", new RuntimeException("with message"));
+		Reporter.getCurrentTestResult().setStatus(0);
 	}
 
 	@Test
@@ -101,8 +117,10 @@ public class ReporterTests {
 
 	@Test
 	public void testStyle() {
-		Reporter.log("In bold", Style.BOLD);
-		Reporter.log("In italic", Style.ITALIC);
+		for (Style style : Style.values()) {
+			Reporter.log("Style is " + style.name(), style);
+		}
 	}
+
 
 }

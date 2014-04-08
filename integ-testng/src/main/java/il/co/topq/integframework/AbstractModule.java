@@ -16,12 +16,19 @@ public abstract class AbstractModule implements Module {
 		return actual;
 	}
 
-	@SuppressWarnings("unchecked")
+	/**
+	 * Casts the actual object to the class or interface represented by the
+	 * given {@code Class} object.
+	 * 
+	 * @return the object after casting, or null if obj is null
+	 * 
+	 * @throws ClassCastException
+	 *             if the object is not null and is not assignable to the type
+	 *             T.
+	 */
 	public <T> T getActual(Class<T> clazz) {
-		if (clazz.isInstance(actual)) {
-			return (T) getActual();
-		}
-		throw new ClassCastException(actual.toString() + " is not castable to "	+ clazz.getName());
+		return clazz.cast(getActual());
+
 	}
 
 	/* (non-Javadoc)

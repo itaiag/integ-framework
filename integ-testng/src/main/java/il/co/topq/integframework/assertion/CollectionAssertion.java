@@ -5,6 +5,7 @@ import il.co.topq.integframework.utils.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -42,7 +43,7 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 
 	private List<Comparator<E>> comparators;
 
-	public CollectionAssertion(List<E> expected) {
+	public CollectionAssertion(Collection<E> expected) {
 		this.expected = new ArrayList<E>(expected);
 	}
 

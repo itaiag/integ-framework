@@ -1,7 +1,12 @@
 package il.co.topq.integframework.cli.support;
 
+import static il.co.topq.integframework.cli.support.CliExecutionExpectedConditions.executionLogicHappens;
+import static il.co.topq.integframework.utils.Parsers.intParser;
+import il.co.topq.integframework.assertion.ComparableAssertion;
+import il.co.topq.integframework.assertion.CompareMethod;
 import il.co.topq.integframework.cli.conn.CliConnection;
 import il.co.topq.integframework.cli.conn.LinuxDefaultCliConnection;
+import il.co.topq.integframework.cli.process.CliCommandExecution;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -257,6 +262,38 @@ public abstract class LinuxCliExpectedConditions {
 
 			public Boolean apply(LinuxDefaultCliConnection linux) throws Exception {
 				return linux.isProccessNotRunning(processName);
+			}
+		};
+	}
+
+	public enum DirectoryItemType {
+		File("f"), Directory("d"), SymbolicLink("l");
+		final String typeCmd;
+
+		private DirectoryItemType(String typeCmd) {
+			this.typeCmd = typeCmd;
+		}
+	}
+
+	public static CliExpectedCondition<Integer> directoryHas(final String directory, final CompareMethod compareMethod,
+			final int expectedAmount, final DirectoryItemType itemType) {
+
+		StringBuilder commandBuilder = new StringBuilder().append("find ").append(directory).append(" -maxdepth 1 -type ")
+				.append(itemType.typeCmd).append(" | wc -l");
+		final String findCommand = commandBuilder.toString();
+		final ComparableAssertion<Integer> amountOfItemsAssertion = new ComparableAssertion<Integer>(compareMethod, expectedAmount);
+		return new CliExpectedCondition<Integer>() {
+
+			@Override
+			public Integer apply(CliConnection cliConnection) {
+				return executionLogicHappens(amountOfItemsAssertion, intParser).apply(
+						new CliCommandExecution(cliConnection, findCommand).silently());
+			}
+
+			@Override
+			public String toString() {
+				return "the directory's " + directory + " amount of " + itemType.name() + "(s) to be " + compareMethod.toString()
+						+ " " + expectedAmount;
 			}
 		};
 	}

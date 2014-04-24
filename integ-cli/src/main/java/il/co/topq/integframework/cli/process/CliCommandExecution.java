@@ -16,7 +16,8 @@ import java.util.concurrent.TimeUnit;
 
 public class CliCommandExecution {
 	private final CliConnection cliConnection;
-	private long timeout = -1;
+	// setting default timeout to 1 minute.
+	private long timeout = TimeUnit.MINUTES.toMillis(1);
 	private String title = "";
 	protected String cmd = "";
 	private List<String> musts, errors;

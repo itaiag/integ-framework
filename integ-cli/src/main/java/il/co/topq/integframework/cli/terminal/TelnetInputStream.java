@@ -38,9 +38,9 @@ package il.co.topq.integframework.cli.terminal;
 
 //package net.mpowers.telnet;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
 
 /**
 * A minimal telnet protocol filter that handles only
@@ -212,11 +212,11 @@ public class TelnetInputStream extends InOutInputStream
         in.close();
     }
 
-    private void write( byte inByte ) throws IOException
-    {
-        output.write( inByte );
-        output.flush();
-    }
+	// private void write( byte inByte ) throws IOException
+	// {
+	// output.write( inByte );
+	// output.flush();
+	// }
 
     private void write( byte[] inBytes ) throws IOException
     {
@@ -246,17 +246,17 @@ public class TelnetInputStream extends InOutInputStream
     private final static byte IAC  = (byte) 255; // -1
 
     // options
-    private final static byte TRANSMIT_BINARY = (byte) 0;
-    private final static byte ECHO = (byte) 1;
-    private final static byte SUPPRESS_GO_AHEAD = (byte) 3;
-    private final static byte STATUS = (byte) 5;
-    private final static byte TIMING_MARK = (byte) 6;
+	// private final static byte TRANSMIT_BINARY = (byte) 0;
+	// private final static byte ECHO = (byte) 1;
+	// private final static byte SUPPRESS_GO_AHEAD = (byte) 3;
+	// private final static byte STATUS = (byte) 5;
+	// private final static byte TIMING_MARK = (byte) 6;
     private final static byte TERMINAL_TYPE = (byte) 24;
-    private final static byte END_OF_RECORD = (byte) 25;
+	// private final static byte END_OF_RECORD = (byte) 25;
     private final static byte WINDOW_SIZE = (byte) 31;
 
     // used with END_OF_RECORD
-    private final static byte EOR  = (byte) 239;
+	// private final static byte EOR = (byte) 239;
 
     // used with TERMINAL_TYPE
     private final static byte TERMINAL_IS = (byte) 0;

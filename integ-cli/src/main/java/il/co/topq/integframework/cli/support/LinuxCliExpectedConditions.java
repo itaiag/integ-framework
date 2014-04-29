@@ -275,11 +275,12 @@ public abstract class LinuxCliExpectedConditions {
 		}
 	}
 
-	public static CliExpectedCondition<Integer> directoryHas(final String directory, final CompareMethod compareMethod,
+	public static CliExpectedCondition<Integer> directoryHas(final String directory, final String filenamePattern,
+			final CompareMethod compareMethod,
 			final int expectedAmount, final DirectoryItemType itemType) {
 
 		StringBuilder commandBuilder = new StringBuilder().append("find ").append(directory).append(" -maxdepth 1 -type ")
-				.append(itemType.typeCmd).append(" | wc -l");
+				.append(itemType.typeCmd).append(" -name ").append(filenamePattern).append(" | wc -l");
 		final String findCommand = commandBuilder.toString();
 		final ComparableAssertion<Integer> amountOfItemsAssertion = new ComparableAssertion<Integer>(compareMethod, expectedAmount);
 		return new CliExpectedCondition<Integer>() {
@@ -296,5 +297,11 @@ public abstract class LinuxCliExpectedConditions {
 						+ " " + expectedAmount;
 			}
 		};
+	}
+
+	public static CliExpectedCondition<Integer> directoryHas(final String directory, final CompareMethod compareMethod,
+			final int expectedAmount, final DirectoryItemType itemType) {
+
+		return directoryHas(directory, "'*'", compareMethod, expectedAmount, itemType);
 	}
 }

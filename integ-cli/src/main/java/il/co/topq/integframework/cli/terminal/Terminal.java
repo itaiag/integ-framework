@@ -220,6 +220,8 @@ public abstract class Terminal {
             }
             int avail = in.available();
             if (avail > 0) {
+            	sb.ensureCapacity(sb.length() + avail);
+            	result.ensureCapacity(result.length() + avail);
                 while (avail > 0) {
                     int b = in.read();
                     if (b < 0) {

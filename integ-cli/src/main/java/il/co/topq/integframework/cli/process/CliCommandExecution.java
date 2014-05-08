@@ -9,10 +9,13 @@ import il.co.topq.integframework.cli.conn.CliCommand;
 import il.co.topq.integframework.cli.conn.CliConnection;
 import il.co.topq.integframework.utils.StringUtils;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.io.output.NullOutputStream;
 
 public class CliCommandExecution {
 	private final CliConnection cliConnection;
@@ -24,6 +27,7 @@ public class CliCommandExecution {
 	protected String result;
 	private boolean silently = false;
 	protected final List<IAssertionLogic<String>> assrtions;
+	protected final PrintStream silentPrintStream = new PrintStream(new NullOutputStream());
 
 	public CliCommandExecution(CliConnection cliConnection) {
 		this(cliConnection, "");
@@ -81,6 +85,9 @@ public class CliCommandExecution {
 		}
 		cliCommand.setTimeout(timeout);
 		cliCommand.setSilent(silently);
+		if (silently) {
+			cliConnection.setPrintStream(silentPrintStream);
+		}
 		this.cliConnection.handleCliCommand(title, cliCommand);
 
 		if (cliConnection instanceof AbstractModule) {

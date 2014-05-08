@@ -131,10 +131,12 @@ public class Reporter extends org.testng.Reporter {
 		if (null == title) {
 			title = "title";
 		}
-		System.out.println(title + "\n");
-		if (body != null) {
-			System.out.println(body + "\n");
-		}
+		// if i want to print to output stream, is should really use
+		// log(title, true);
+		// System.out.println(title + "\n");
+		// if (body != null) {
+		// System.out.println(body + "\n");
+		// }
 		if (null == body || body.isEmpty()) {
 			log(title, style);
 			return;

@@ -29,7 +29,7 @@ public class ResultSetHTMLPrinter implements ResultSetPrinter {
 			}
 			sb.append("<tr>");
 			for (Object column : row.values()) {
-				sb.append("<td>").append(column).append("</td>");
+				sb.append("<td><pre>").append(column).append("</pre></td>");
 			}
 			sb.append("</tr>");
 		}

@@ -25,7 +25,9 @@ public class DatabaseSystemModule extends AbstractModuleImpl {
 
 	@Override
 	public void init() throws Exception {
-		initResultSetPrinters();
+		if (resultSetPrinterList == null) {
+			initResultSetPrinters();
+		}
 	}
 	
 	public void initResultSetPrinters() {
@@ -130,6 +132,18 @@ public class DatabaseSystemModule extends AbstractModuleImpl {
 			throw new IllegalArgumentException("Table name can't be empty");
 		}
 		return getResultList(String.format("SELECT * FROM %s", table)).size();
+	}
+
+	public List<ResultSetPrinter> getResultSetPrinterList() {
+		return resultSetPrinterList;
+	}
+
+	public void setResultSetPrinterList(List<ResultSetPrinter> resultSetPrinterList) {
+		if (resultSetPrinterList == null) {
+			this.resultSetPrinterList = new ArrayList<ResultSetPrinter>();
+		} else {
+			this.resultSetPrinterList = resultSetPrinterList;
+		}
 	}
 
 }

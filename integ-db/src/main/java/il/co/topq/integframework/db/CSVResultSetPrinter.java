@@ -56,15 +56,19 @@ public class CSVResultSetPrinter implements ResultSetPrinter {
 	public void print(List<Map<String, Object>> resultList) {
 
 		File file = null;
+		boolean headerLine = true;
 		try {
 			file = File.createTempFile("resultsTable", ".csv");
 			file.deleteOnExit();
 
 			try {
 				Writer writer = new FileWriter(file);
-
 				for (Map<String, Object> map : resultList) {
 					Set<String> fields = map.keySet();
+					if (headerLine) {
+						writeNext(new ArrayList<String>(fields), writer);
+						headerLine = false;
+					}
 					List<String> nextLine = new ArrayList<String>(fields.size());
 
 					for (String field : fields) {
@@ -85,7 +89,9 @@ public class CSVResultSetPrinter implements ResultSetPrinter {
 			Reporter.log("failed to print resultset", e);
 		}
 		if (file != null && file.exists()) {
-			Reporter.logFile("SQL Table", file);
+			if (!headerLine) {
+				Reporter.logFile("SQL Table", file);
+			}
 		} else {
 			Reporter.log("failed to print resultset", ITestResult.SUCCESS_PERCENTAGE_FAILURE);
 		}

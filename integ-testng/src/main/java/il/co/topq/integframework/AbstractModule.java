@@ -12,7 +12,7 @@ public abstract class AbstractModule implements Module {
 	 * @see il.co.topq.integframework.Module#getActual()
 	 */
 	@Override
-	public Object getActual() {
+	public final Object getActual() {
 		return actual;
 	}
 
@@ -26,7 +26,7 @@ public abstract class AbstractModule implements Module {
 	 *             if the object is not null and is not assignable to the type
 	 *             T.
 	 */
-	public <T> T getActual(Class<T> clazz) {
+	public final <T> T getActual(Class<T> clazz) {
 		return clazz.cast(getActual());
 
 	}
@@ -35,17 +35,17 @@ public abstract class AbstractModule implements Module {
 	 * @see il.co.topq.integframework.Module#setActual(java.lang.Object)
 	 */
 	@Override
-	public void setActual(Object actual) {
+	public final void setActual(Object actual) {
 		this.actual = actual;
 	}
 
 	@PostConstruct
-	public void initializeObject() throws Exception{
+	public final void initializeObject() throws Exception {
 		init();
 	}
 	
 	@PreDestroy
-	public void closeObject() throws Exception{
+	public final void closeObject() throws Exception {
 		close();
 	}
 	

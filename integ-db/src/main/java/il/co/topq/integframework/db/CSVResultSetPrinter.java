@@ -1,5 +1,8 @@
 package il.co.topq.integframework.db;
 
+/**
+ * based on code of au.com.bytecode.opencsv
+ */
 import il.co.topq.integframework.reporting.Reporter;
 
 import java.io.File;
@@ -18,13 +21,13 @@ public class CSVResultSetPrinter implements ResultSetPrinter {
 	public static final int INITIAL_STRING_SIZE = 128;
 
 
-	private char separator;
+	private char separator = DEFAULT_ESCAPE_CHARACTER;
 
-	private char quotechar;
+	private char quotechar = DEFAULT_QUOTE_CHARACTER;
 
-	private char escapechar;
+	private char escapechar = DEFAULT_ESCAPE_CHARACTER;
 
-	private String lineEnd;
+	private String lineEnd = DEFAULT_LINE_END;
 
 	private String nullString = "~NULL~";
 
@@ -97,22 +100,22 @@ public class CSVResultSetPrinter implements ResultSetPrinter {
 		for (int i = 0; i < nextLine.size(); i++) {
 
 			if (i != 0) {
-				sb.append(separator);
+				sb.append(getSeparator());
 			}
 
 			String nextElement = nextLine.get(i);
 			if (nextElement == null)
 				continue;
-			if (quotechar != NO_QUOTE_CHARACTER)
-				sb.append(quotechar);
+			if (getQuotechar() != NO_QUOTE_CHARACTER)
+				sb.append(getQuotechar());
 
 			sb.append(stringContainsSpecialCharacters(nextElement) ? processLine(nextElement) : nextElement);
 
-			if (quotechar != NO_QUOTE_CHARACTER)
-				sb.append(quotechar);
+			if (getQuotechar() != NO_QUOTE_CHARACTER)
+				sb.append(getQuotechar());
 		}
 
-		sb.append(lineEnd);
+		sb.append(getLineEnd());
 		pw.write(sb.toString());
 
 	}
@@ -154,5 +157,25 @@ public class CSVResultSetPrinter implements ResultSetPrinter {
 
 	public void setNullString(String nullString) {
 		this.nullString = nullString;
+	}
+
+	public char getSeparator() {
+		return separator;
+	}
+
+	public char getQuotechar() {
+		return quotechar;
+	}
+
+	public char getEscapechar() {
+		return escapechar;
+	}
+
+	public String getLineEnd() {
+		return lineEnd;
+	}
+
+	public String getNullString() {
+		return nullString;
 	}
 }

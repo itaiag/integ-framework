@@ -46,4 +46,11 @@ public class FailSafeAssertionListener<T> implements AssertionListener<T> {
 		return new ArrayList<Throwable>(suppressed).iterator();
 	}
 
+	public Throwable getLastSuppressedThrowable() {
+		if (suppressed.size() > 0) {
+			return suppressed.get(suppressed.size() - 1);
+		}
+		return null;
+	}
+
 }

@@ -2,6 +2,7 @@ package il.co.topq.integframework;
 
 import il.co.topq.integframework.WgetModule.WgetCommand;
 import il.co.topq.integframework.cli.conn.LinuxDefaultCliConnection;
+import il.co.topq.integframework.cli.process.CliCommandExecution;
 import il.co.topq.integframework.utils.StringUtils;
 
 import java.io.BufferedReader;
@@ -18,6 +19,8 @@ public class WgetClient implements Callable<String> {
 
 	private final WgetModule module;
 	private PostDataGenerator dataGenerator;
+
+	private String response;
 
 	public WgetClient(WgetModule module, String ip, String userAgent) {
 		this.module = module;
@@ -40,15 +43,17 @@ public class WgetClient implements Callable<String> {
 	}
 
 	public void post(CharSequence data) throws Exception {
-		module.new WgetCommand().bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything().post(data).error("failed")
-				.execute();
+		CliCommandExecution execution = module.new WgetCommand().bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything()
+				.post(data).error("failed");
+		execution.execute();
+		response = execution.getResult();
 	}
 
 	public void silentlyPost(CharSequence data) throws Exception {
-		module.new WgetCommand().bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything().post(data)
-				.withTimeout(30, TimeUnit.SECONDS).error("failed")
-				.silently().execute();
-
+		CliCommandExecution execution = module.new WgetCommand().bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything()
+				.post(data).withTimeout(30, TimeUnit.SECONDS).error("failed").silently();
+		execution.execute();
+		response = execution.getResult();
 	}
 
 	public Runnable silentlyPostLater(final CharSequence data) {
@@ -69,8 +74,10 @@ public class WgetClient implements Callable<String> {
 	}
 
 	public void postFile(String remoteFile) throws Exception {
-		module.new WgetCommand().bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything().postFile(remoteFile)
-				.error("failed").execute();
+		CliCommandExecution execution = module.new WgetCommand().bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything()
+				.postFile(remoteFile).error("failed");
+		execution.execute();
+		response = execution.getResult();
 	}
 
 	public void post(byte[] data, String remoteDir, String remoteFile) throws Exception {
@@ -148,6 +155,10 @@ public class WgetClient implements Callable<String> {
 			}
 		}
 		return null;
+	}
+
+	public synchronized String getResponse() {
+		return response;
 	}
 
 }

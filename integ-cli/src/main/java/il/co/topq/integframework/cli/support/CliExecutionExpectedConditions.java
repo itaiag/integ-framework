@@ -125,6 +125,9 @@ public abstract class CliExecutionExpectedConditions {
 					}
 					return actual;
 				} catch (Exception e) {
+					if (e instanceof RuntimeException) {
+						throw (RuntimeException) e;
+					}
 					throw new RuntimeException(e);
 				}
 			}

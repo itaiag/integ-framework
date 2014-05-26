@@ -16,6 +16,21 @@ public abstract class CliExecutionExpectedConditions {
 		__ = null; // util class, do not init!
 	}
 
+	public static CliExecutionExpectedCondition<String> executionResult() {
+		return new CliExecutionExpectedCondition<String>() {
+
+			@Override
+			public String apply(CliCommandExecution execution) {
+				try {
+					execution.execute();
+					return execution.getResult();
+				} catch (Exception e) {
+					return null;
+				}
+			}
+		};
+	}
+
 	public static CliExecutionExpectedCondition<String> executionLogicHappens(final AbstractAssertionLogic<String> logic) {
 		return new CliExecutionExpectedCondition<String>() {
 			@Override

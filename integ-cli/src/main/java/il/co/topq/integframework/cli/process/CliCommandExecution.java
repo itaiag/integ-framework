@@ -1,7 +1,9 @@
 package il.co.topq.integframework.cli.process;
 
 import il.co.topq.integframework.AbstractModule;
+import il.co.topq.integframework.assertion.AbstractAssertionLogic;
 import il.co.topq.integframework.assertion.Assert;
+import il.co.topq.integframework.assertion.DefaultAssertionListener;
 import il.co.topq.integframework.assertion.FindTextAssertion;
 import il.co.topq.integframework.assertion.IAssertionLogic;
 import il.co.topq.integframework.assertion.TextNotFoundAssertion;
@@ -67,6 +69,18 @@ public class CliCommandExecution {
 		execute();
 	}
 
+	/**
+	 * execute the command on the {@link CliConnection}. you can gain the result
+	 * by {@link #getResult()}. if any error string was provided in
+	 * {@link #error(String...)}, the result will <b>be</b> the error string
+	 * instance<br>
+	 * note that the actual result will be set to the {@link CliConnection}'s
+	 * actual, if it is an {@link AbstractModule}, accessible by
+	 * {@link AbstractModule#getActual()}. the value could contain either the
+	 * first or last prompt.
+	 * 
+	 * @throws Exception
+	 */
 	public void execute() throws Exception {
 		if (StringUtils.isEmpty(cmd)) {
 			throw new NullPointerException("command is not set");
@@ -106,10 +120,26 @@ public class CliCommandExecution {
 				}
 			}
 			if (errors != null && !errors.isEmpty()) {
-				for (String error : errors) {
-					Assert.assertLogic(cliModule.getActual(String.class), new TextNotFoundAssertion(error));
+				for (final String error : errors) {
+					Assert.assertLogic(cliModule.getActual(String.class), new TextNotFoundAssertion(error), new setResultOnError(
+							error));
 				}
 			}
+		}
+	}
+
+	private final class setResultOnError extends DefaultAssertionListener<String> {
+
+		private final String error;
+
+		public setResultOnError(String error) {
+			this.error = error;
+		}
+
+		@Override
+		public void assertionFailed(String actual, AbstractAssertionLogic<String> logic) {
+			setResult(error);
+			super.assertionFailed(actual, logic);
 		}
 	}
 

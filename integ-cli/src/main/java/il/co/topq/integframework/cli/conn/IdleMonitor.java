@@ -24,10 +24,12 @@ public class IdleMonitor extends Thread {
 	 * @param timeout (miliSeconds) the maximum idleTime
 	 */
 	public IdleMonitor(CliConnectionImpl cli, long timeout){
+		super("Idle monitor for " + cli.getName());
 		this.cli = cli;
 		this.timeout = timeout;
 	}
 	
+	@Override
 	public void run(){
 		System.out.println("Idle monitor was started");
 		while(!stop){

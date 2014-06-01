@@ -91,15 +91,16 @@ public class LinuxDefaultCliConnection extends CliConnectionImpl {
 	 * @return
 	 * @throws IOException
 	 */
-	public InputStream get(String remoteFile) throws IOException {
-		if (terminal instanceof SSH) {
-			SSH ssh = (SSH) terminal;
-			return ssh.get(remoteFile);
-		}
+	public synchronized InputStream get(String remoteFile) throws IOException {
+
+			if (terminal instanceof SSH) {
+				SSH ssh = (SSH) terminal;
+				return ssh.get(remoteFile);
+			}
 		return null;
 	}
 
-	public void get(String remoteFile, File dst) throws IOException {
+	public synchronized void get(String remoteFile, File dst) throws IOException {
 		byte buf[] = new byte[10240];
 		InputStream in = get(remoteFile);
 		OutputStream out = new FileOutputStream(dst);
@@ -129,7 +130,7 @@ public class LinuxDefaultCliConnection extends CliConnectionImpl {
 	 * @throws IOException
 	 *             when
 	 */
-	public OutputStream put(String remoteDir, String remoteFile, String mode, long length) throws IOException {
+	public synchronized OutputStream put(String remoteDir, String remoteFile, String mode, long length) throws IOException {
 		if (terminal instanceof SSH) {
 			SSH ssh = (SSH) terminal;
 			return ssh.put(remoteFile, length, remoteDir, mode);

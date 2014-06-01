@@ -59,7 +59,7 @@ implements CliConnection {
 		}
 	}
 
-	protected Cli cli;
+	protected volatile Cli cli;
 
 	protected Terminal terminal;
 
@@ -216,34 +216,67 @@ implements CliConnection {
 		navigate(command, false);
 	}
 
-	
+	private boolean useThreads = false;
+	private Thread initializer = null;
+
 	public void init() throws Exception {
-		
-		if (isConnectOnInit()) {
-			connect();
+		final List<Exception> ex = new ArrayList<Exception>();
+		Runnable r = new Runnable() {
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				if (isConnectOnInit()) {
+					try {
+						connect();
+					} catch (Exception e) {
+						ex.add(e);
+					}
+				}
+			}
+		};
+		name = this.getName() != null ? this.getName() : this.getHost();
+		initializer = new Thread(null, r, getName() + " initializer");
+		initializer.setDaemon(true);
+
+		if (useThreads) {
+			initializer.start();
+		} else {
+			r.run();
+			if (ex.size() == 1) {
+				throw ex.get(0);
+			}
 		}
+
 	}
 
 	public void connect() throws Exception {
 		activateIdleMonitor();
 		connectRetries = connectRetries <= 0 ? 1 : connectRetries;
+		if (!Thread.currentThread().equals(initializer)) {
+			initializer.join();
+		}
+		synchronized (this) {
 
-		for (int retriesCounter = 0; retriesCounter < connectRetries; retriesCounter++) {
-			try {
-				//TODO: Reporter.getCurrentTestResult().setStatus(ITestResult.SUCCESS);
-				internalConnect();
-				break;
-			} catch (Exception e) {
-				Reporter.log("Failed connecting  " + getHost() + ". Attempt " + (retriesCounter + 1) + ".  " + e.getMessage());
+			for (int retriesCounter = 0; retriesCounter < connectRetries; retriesCounter++) {
 				try {
-					disconnect();
-				} catch (Throwable t) {
+					// TODO:
+					// Reporter.getCurrentTestResult().setStatus(ITestResult.SUCCESS);
+					internalConnect();
+					break;
+				} catch (Exception e) {
+					Reporter.log("Failed connecting  " + getHost() + ". Attempt " + (retriesCounter + 1) + ".  " + e.getMessage());
+					try {
+						disconnect();
+					} catch (Throwable t) {
+					}
+					if (retriesCounter == connectRetries - 1) {
+						throw e;
+					}
+				} finally {
+					// TODO:
+					// Reporter.getCurrentTestResult().setStatus(ITestResult.FAILURE);
 				}
-				if (retriesCounter == connectRetries - 1) {
-					throw e;
-				}
-			} finally {
-				//TODO: Reporter.getCurrentTestResult().setStatus(ITestResult.FAILURE);
 			}
 		}
 	}
@@ -351,7 +384,6 @@ implements CliConnection {
 			try {
 				handleCliCommand(cloned, title, command);
 				setActual(cloned.getActual());
-				//setTestAgainstObject(cloned.getTestAgainstObject());
 			} finally {
 				cloned.close();
 			}
@@ -373,14 +405,16 @@ implements CliConnection {
 	 * (and ignore error flags were not raised)
 	 */
 	public static void handleCliCommand(CliConnectionImpl cli, String title, CliCommand command) throws Exception {
-		if (!cli.isConnectOnInit() && !cli.isConnected()) {
+		synchronized (cli) {
+
+		if (!cli.isConnectOnInit() && !cli.isConnected() || cli.useThreads) {
 			cli.connect();
 		}
 		cli.command(command);
 
 		cli.setActual(command.getResult());
 		if (command.isFailed() && (!command.isIgnoreErrors()) && (!cli.isForceIgnoreAnyErrors())) {
-			Reporter.log(title + ", " + command.getFailCause(), command.getResult(),Color.RED);
+			Reporter.log(title + ", " + command.getFailCause(), command.getResult(), Color.RED);
 			Exception e = command.getThrown();
 			if (e != null) {
 				throw e;
@@ -399,16 +433,18 @@ implements CliConnection {
 				for (IAssertionLogic<String> analyzer : analyzers) {
 					analyzer.setActual(cli.getActual(String.class));
 					analyzer.doAssertion();
-					if (analyzer instanceof AbstractAssertionLogic<?> ){
+					if (analyzer instanceof AbstractAssertionLogic<?>){
 						AbstractAssertionLogic<String> stringAssertionLogic = (AbstractAssertionLogic<String>) analyzer;
 						if (!(command.isSilent() && stringAssertionLogic.isStatus())){
-							Reporter.log(stringAssertionLogic.getTitle(), stringAssertionLogic.getMessage(), stringAssertionLogic.isStatus());
+							Reporter.log(stringAssertionLogic.getTitle(), stringAssertionLogic.getMessage(),
+									stringAssertionLogic.isStatus());
 						}
 					}
 				}
 			}
 		}
 		cli.setForceIgnoreAnyErrors(false);
+		}
 	}
 
 	public synchronized void command(CliCommand command) {
@@ -459,7 +495,7 @@ implements CliConnection {
 
 				command.addResult(lastResult);
 				command.setResultPrompt(cli.getResultPrompt());
-				setActual(command.getResult());				
+				setActual(command.getResult());
 
 				// If log file name (+path) defined at the sut, CLI results will
 				// be save also to this file
@@ -606,7 +642,7 @@ implements CliConnection {
     public void activateIdleMonitor() {
 		if (maxIdleTime > 0 ) {
 			lastCommandTime = System.currentTimeMillis();
-			idleMonitor = new IdleMonitor(this,maxIdleTime);
+			idleMonitor = new IdleMonitor(this, maxIdleTime);
 			idleMonitor.start();
 		}
     }
@@ -788,7 +824,7 @@ implements CliConnection {
 	public void setLeadingEnter(boolean leadingEnter) {
 		this.leadingEnter = leadingEnter;
 	}
-	
+
 	public long getKeyTypingDelay() {
 		if (terminal != null) {
 			return terminal.getKeyTypingDelay();
@@ -798,7 +834,7 @@ implements CliConnection {
 
 	public void setKeyTypingDelay(long keyTypingDelay) {
 		this.keyTypingDelay = keyTypingDelay;
-		if (terminal !=null) {
+		if (terminal != null) {
 			terminal.setKeyTypingDelay(keyTypingDelay);
 		}
 	}
@@ -811,7 +847,7 @@ implements CliConnection {
 	public boolean isIgnoreBackSpace() {
 		return ignoreBackSpace;
 	}
-	
+
 	/**
 	 * Whether to ignore backspace characters or not
 	 * 
@@ -819,7 +855,7 @@ implements CliConnection {
 	 */
 	public void setIgnoreBackSpace(boolean ignoreBackSpace) {
 		this.ignoreBackSpace = ignoreBackSpace;
-		
+
 		if (terminal != null) {
 			terminal.setIgnoreBackSpace(ignoreBackSpace);
 		}
@@ -839,6 +875,10 @@ implements CliConnection {
 
 	public void setPrivateKey(File privateKey) {
 		this.privateKey = privateKey;
+	}
+
+	public void setUseThreads(boolean useThreads) {
+		this.useThreads = useThreads;
 	}
 
 }

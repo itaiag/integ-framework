@@ -3,6 +3,7 @@ package il.co.topq.integframework.reporting;
 import il.co.topq.integframework.utils.StringUtils;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -52,19 +53,19 @@ public class Reporter extends org.testng.Reporter {
 	public static void log(String s) {
 		log(s, false, null, null);
 	}
-	
+
 	public static void log(String s, boolean logToStandardOut) {
 		log(s, logToStandardOut, null, null);
 	}
-	
+
 	public static void log(final String s, Style style) {
 		log(s, false, style, null);
 	}
-	
+
 	public static void log(final String s, Color color) {
 		log(s, false, null, color);
 	}
-	
+
 	public static void log(final String s, Style style, Color color) {
 		log(s, false, style, color);
 	}
@@ -73,6 +74,7 @@ public class Reporter extends org.testng.Reporter {
 		log(step, Style.EMPHASIZED, Color.BLUE);
 
 	}
+
 	public static void log(final Throwable t) {
 		log(t.getMessage(), t);
 	}
@@ -82,6 +84,7 @@ public class Reporter extends org.testng.Reporter {
 	}
 
 	protected static DateFormat df = new SimpleDateFormat("HH:mm:ss.SSS");
+
 	/**
 	 * Appending <code>s</code> to the report with time stamp
 	 * 
@@ -89,7 +92,7 @@ public class Reporter extends org.testng.Reporter {
 	 */
 	public static void log(String s, boolean logToStandardOut, Style style, Color color) {
 		String reportDate = "";
-		if(!s.startsWith("</")){ // No need to add time stamp for close tag 
+		if (!s.startsWith("</")) { // No need to add time stamp for close tag
 			reportDate = df.format(new Date(System.currentTimeMillis())) + " - ";
 			// s = reportDate + s + "\n";
 		}
@@ -175,14 +178,42 @@ public class Reporter extends org.testng.Reporter {
 		stopLogToggle();
 
 	}
-	
+
+	/**
+	 * Adds toggle element to the report
+	 * 
+	 * @param title
+	 *            Will appear as link. If none given the link will appear with
+	 *            the test 'link'
+	 * @param body
+	 *            Will appear when clicking on the title.
+	 * @param color
+	 *            The color of the link element
+	 */
+	public static void logToFile(String title, String body, Color color) {
+		if (null == title) {
+			title = "title";
+		}
+		System.out.println(title + "\n");
+		if (body != null) {
+			System.out.println(body + "\n");
+		}
+		if (null == body || body.isEmpty()) {
+			log(title, color);
+			return;
+		}
+		fileToggle(title, body);
+	}
+
 	public static void log(String title, String body, boolean status) {
-		getCurrentTestResult().setStatus((!status || !getCurrentTestResult().isSuccess())?ITestResult.FAILURE:getCurrentTestResult().getStatus());
+		getCurrentTestResult().setStatus(
+				(!status || !getCurrentTestResult().isSuccess()) ? ITestResult.FAILURE : getCurrentTestResult().getStatus());
 		log(title, body, status ? Color.BLUE : Color.RED);
 	}
 
 	/**
-	 * report a 
+	 * report a
+	 * 
 	 * @param title
 	 * @param body
 	 * @param status
@@ -192,23 +223,59 @@ public class Reporter extends org.testng.Reporter {
 		Color statusColor;
 		switch (status) {
 		case ITestResult.FAILURE:
-			statusColor=Color.RED;
+			statusColor = Color.RED;
 			break;
 		case ITestResult.SUCCESS_PERCENTAGE_FAILURE:
-			statusColor=Color.YELLOW;
+			statusColor = Color.YELLOW;
 			break;
 		case ITestResult.SUCCESS:
-			statusColor=Color.GREEN;
+			statusColor = Color.GREEN;
 			break;
 		default:
-			statusColor=Color.BLUE;
+			statusColor = Color.BLUE;
 		}
 		log(title, body, statusColor);
 	}
-	
 
 	public static void startLogToggle(String title) {
 		startLogToggle(title, null);
+	}
+
+	public static void fileToggle(String title, String body) {
+
+		if (null == title) {
+			title = "file";
+		}
+		StringBuilder toggleElement = new StringBuilder();
+		final String id = System.currentTimeMillis() + "_" + new Random().nextInt(10000);
+		File file;
+		try {
+			file = File.createTempFile(title, ".partial", null);
+			file.renameTo(new File(id));
+			try (FileWriter writer = new FileWriter(file)) {
+				writer.write(body);
+			}
+			file = copyFileToReporterFolder(file);
+		} catch (IOException e) {
+			log(title, body);
+			return;
+		}
+
+		// Creating link
+		toggleElement.append("<a href='#' onclick=\"toggleElement('");
+		toggleElement.append(id);
+		toggleElement.append("', 'block');").append("loadExternal('").append(id).append("','").append(file.getName())
+				.append("');return false;\" title=\"Click to expand/collapse\">");
+		toggleElement.append("<b>").append(title);
+		toggleElement.append("</b></a><br>");
+
+		// Creating body
+		toggleElement.append("<div class='stackTrace' id='");
+		toggleElement.append(id);
+		toggleElement.append("' style='display: none;'>");
+		toggleElement.append("</div>");
+		log(toggleElement.toString(), false, null, null);
+
 	}
 
 	public static void startLogToggle(String title, Color color) {
@@ -270,7 +337,7 @@ public class Reporter extends org.testng.Reporter {
 			return;
 		}
 		// Creating link
-		
+
 		if (null == title || title.isEmpty()) {
 			title = file.getName();
 		}
@@ -278,13 +345,13 @@ public class Reporter extends org.testng.Reporter {
 		log("<a href='" + newFile.getName() + "'>" + title + "</a>", false);
 	}
 
-	private static void writeToLog(String s, boolean logToStandardOut){
+	private static void writeToLog(String s, boolean logToStandardOut) {
 		org.testng.Reporter.log(toHtml(s), false);
 		if (logToStandardOut) {
 			System.out.println(s);
 		}
 	}
-	
+
 	private static String appendStyleParagraph(String s, Style style) {
 		final StringBuilder sb = new StringBuilder();
 		sb.append("<").append(style.value).append(">");
@@ -307,7 +374,7 @@ public class Reporter extends org.testng.Reporter {
 		sb.append("</span>");
 		return sb.toString();
 	}
-	
+
 	private static File copyFileToReporterFolder(File file) {
 		if (null == file || !file.exists() || !file.isFile()) {
 			// File is not exist
@@ -315,9 +382,8 @@ public class Reporter extends org.testng.Reporter {
 		}
 
 		// Creating parent folder
-		final File parentFolder = new File(
-				new File(getCurrentTestResult().getTestContext().getOutputDirectory()).getParent() + File.separator
-						+ "html");
+		final File parentFolder = new File(new File(getCurrentTestResult().getTestContext().getOutputDirectory()).getParent()
+				+ File.separator + "html");
 		if (!parentFolder.exists()) {
 			if (!parentFolder.mkdirs()) {
 				log("Failed to create folder for logging file");
@@ -336,7 +402,7 @@ public class Reporter extends org.testng.Reporter {
 		}
 		return newFile;
 	}
-	
+
 	private static String toHtml(String str) {
 		return str.contains("<pre>") ? str : str.replace("\n", "<br/>");
 	}

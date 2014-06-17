@@ -94,6 +94,14 @@ public class ReporterTests {
 		Reporter.log(null, "Some body", Color.BLUE);
 	}
 
+	@Test
+	public void testToggleFile() {
+		Reporter.logToFile("Simple toggle", generateLines(50, 10), Color.GREEN);
+		Reporter.logToFile("Toggle with empty body and color blue", "", Color.BLUE);
+		Reporter.log("About to test toggle with null title. The title should be changed to 'file' automatically");
+		Reporter.logToFile(null, "Some body", Color.BLUE);
+	}
+
 	private String generateLines(int numOfLines, int lengthOfLine) {
 		StringBuilder body = new StringBuilder();
 		for (int i = 0; i < numOfLines; i++) {

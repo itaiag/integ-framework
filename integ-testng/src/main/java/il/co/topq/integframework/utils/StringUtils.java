@@ -2,6 +2,10 @@ package il.co.topq.integframework.utils;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.List;
+import java.util.Set;
+
+import org.testng.collections.Lists;
 
 public abstract class StringUtils {
 	@SuppressWarnings("unused")
@@ -21,6 +25,32 @@ public abstract class StringUtils {
 			PrintWriter printWriter = new PrintWriter(stringWriter);
 			t.printStackTrace(printWriter);
 			return stringWriter.toString();
+		}
+		return "";
+	}
+
+	public static String getStackTrace(Throwable t, Set<String> packagesToFilter) {
+		if (t != null) {
+			StackTraceElement[] stackTrace = t.getStackTrace();
+			List<StackTraceElement> filteredStackTrace = Lists.newArrayList();
+			for (StackTraceElement stackTraceElement : stackTrace) {
+				String className = stackTraceElement.getClassName();
+				boolean toAdd = true;
+				for (String packageToFilter : packagesToFilter) {
+					if (className.startsWith(packageToFilter)) {
+						toAdd = false;
+						break;
+					}
+				}
+				if (toAdd) {
+					filteredStackTrace.add(stackTraceElement);
+				}
+
+			}
+			StackTraceElement[] elements = new StackTraceElement[] {};
+			t.setStackTrace(Lists.newArrayList(filteredStackTrace).toArray(elements));
+
+			return getStackTrace(t);
 		}
 		return "";
 	}

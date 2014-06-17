@@ -7,8 +7,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Random;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.testng.ITestResult;
@@ -80,7 +82,15 @@ public class Reporter extends org.testng.Reporter {
 	}
 
 	public static void log(final String title, final Throwable t) {
-		log(title, StringUtils.getStackTrace(t), false);
+		log(title, t, Collections.<String> emptySet());
+	}
+
+	public static void log(final Throwable t, final Set<String> packagesToFilter) {
+		log(t.getMessage(), t, packagesToFilter);
+	}
+
+	public static void log(final String title, final Throwable t, final Set<String> packagesToFilter) {
+		log(title, StringUtils.getStackTrace(t, packagesToFilter), false);
 	}
 
 	protected static DateFormat df = new SimpleDateFormat("HH:mm:ss.SSS");

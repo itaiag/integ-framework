@@ -11,6 +11,7 @@ import java.util.Random;
 
 import org.testng.annotations.Test;
 
+import com.google.common.collect.Sets;
 
 public class ReporterTests {
 
@@ -130,5 +131,13 @@ public class ReporterTests {
 		}
 	}
 
+	@Test
+	public void testFilterException() {
+		Exception e = new RuntimeException("Exception with small stackTrace");
+		Reporter.log(e, Sets.newHashSet("sun.reflect", "java.lang.reflect", "org.testng", "org.apache.maven.surefire"));
+		e = new RuntimeException("Exception with large stackTrace");
+		Reporter.log(e);
+
+	}
 
 }

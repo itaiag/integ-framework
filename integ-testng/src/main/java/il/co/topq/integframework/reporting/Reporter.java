@@ -334,12 +334,12 @@ public class Reporter extends org.testng.Reporter {
 		toggleElement.append(" <a href=\"javascript:toggleElement('");
 		toggleElement.append(id);
 		toggleElement.append("', 'block')\" title=\"Click to expand/collapse\"><b>");
-		toggleElement.append(appendColorParagraph(title, color)).append("</b></a><br>");
+		toggleElement.append(appendColorParagraph(title, color)).append("</b></a>");
 
 		// Creating body
 		toggleElement.append("<div class='stackTrace' id='");
 		toggleElement.append(id);
-		toggleElement.append("' style='display: none;'>");
+		toggleElement.append("' style='display: none;'><br />");
 		log(toggleElement.toString(), false, null, null);
 	}
 

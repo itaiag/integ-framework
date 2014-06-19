@@ -113,6 +113,18 @@ public class Reporter extends org.testng.Reporter {
 		log(title, StringUtils.getStackTrace(t, packagesToFilter), false);
 	}
 
+	public static void logToFile(Throwable t) {
+		logToFile(t.getMessage(), t);
+	}
+
+	public static void logToFile(final String title, Throwable t) {
+		logToFile(title, t, packagesToFilter);
+	}
+
+	public static void logToFile(final String title, final Throwable t, final Set<String> packagesToFilter) {
+		logToFile(title, StringUtils.getStackTrace(t, packagesToFilter), Color.RED);
+	}
+
 	protected static DateFormat df = new SimpleDateFormat("HH:mm:ss.SSS");
 
 	/**
@@ -296,8 +308,7 @@ public class Reporter extends org.testng.Reporter {
 		toggleElement.append(id);
 		toggleElement.append("', 'block');").append("loadExternal('").append(id).append("','").append(file.getName())
 				.append("');return false;\" title=\"Click to expand/collapse\">");
-		toggleElement.append("<b>").append(title);
-		toggleElement.append("</b></a><br>");
+		toggleElement.append("<b>").append(title).append("</b></a>");
 
 		// Creating body
 		toggleElement.append("<div class='stackTrace' id='");

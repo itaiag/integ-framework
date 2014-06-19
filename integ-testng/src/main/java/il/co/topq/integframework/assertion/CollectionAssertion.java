@@ -1,6 +1,7 @@
 package il.co.topq.integframework.assertion;
 
 import il.co.topq.integframework.reporting.Reporter;
+import il.co.topq.integframework.reporting.Reporter.Color;
 import il.co.topq.integframework.utils.StringUtils;
 
 import java.util.ArrayList;
@@ -112,7 +113,7 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 			if (!allItems) {
 				if (expected.size() > actual.size()) {
 					status = false;
-					Reporter.log(new AssertionError(new StringBuilder("Size of actual items is ").append(actual.size())
+					Reporter.logToFile(new AssertionError(new StringBuilder("Size of actual items is ").append(actual.size())
 							.append(", should be at least ").append(expected.size()).append("\n")));
 					if (exitIfSizeDoesNotMatch) {
 						return;
@@ -121,7 +122,7 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 				singlesInActual.addAll(actual);
 			} else {
 				if (expected.size() != actual.size()) {
-					Reporter.log(new AssertionError(new StringBuilder("Size of actual items is ").append(actual.size())
+					Reporter.logToFile(new AssertionError(new StringBuilder("Size of actual items is ").append(actual.size())
 							.append("instead of ").append(expected.size()).append("\n")));
 					status = false;
 					if (exitIfSizeDoesNotMatch) {
@@ -164,7 +165,7 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 			}
 
 			for (E e : singlesInExpected) {
-				Reporter.log(new AssertionError(new StringBuilder(e.toString()).append(" was expected but not found")));
+				Reporter.logToFile(new AssertionError(new StringBuilder(e.toString()).append(" was expected but not found")));
 
 			}
 
@@ -173,7 +174,7 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 
 				if (!allItems) {
 					itemFound.append(" unexpectedly");
-					Reporter.log(new AssertionError(itemFound));
+					Reporter.logToFile(new AssertionError(itemFound));
 				} else {
 					Reporter.log(itemFound.toString(), XmlSuite.DEFAULT_VERBOSE + 1);
 				}
@@ -191,14 +192,14 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 			status = true;
 			Reporter.step("Validating matches data using " + comparator.toString());
 			long mismatchCounter = 0;
+			String itemMismatchTitle = "Item mismatch when comparing " + comparator.toString();
 			for (PairOfMatches<E> match : matches) {
 				if (comparator.compare(match.actual, match.expected) != 0) {
 					status = false;
-					StringBuilder itemMismatch = new StringBuilder("The item [").append(match.actual)
-							.append("]\n, which was acually found, did not match the expected item \n[")
-							.append(match.expected.toString()).append("]\n when comparing ").append(comparator.toString())
-							.append("\n");
-					Reporter.log(new AssertionError(itemMismatch));
+					StringBuilder itemMismatch = new StringBuilder("The item:\n[").append(match.actual)
+							.append("]\nwhich was acually found, did not match the expected item\n[")
+							.append(match.expected.toString()).append("]");
+					Reporter.logToFile(itemMismatchTitle, itemMismatch.toString(), Color.RED);
 					mismatchCounter++;
 				}
 			}

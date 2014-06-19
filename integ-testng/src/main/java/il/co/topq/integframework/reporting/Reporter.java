@@ -7,13 +7,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Random;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.testng.ITestResult;
+
+import com.google.common.collect.Sets;
 
 /**
  * Wrapper for the TestNG HTML report
@@ -77,12 +78,31 @@ public class Reporter extends org.testng.Reporter {
 
 	}
 
+	private static Set<String> packagesToFilter = Sets.newHashSet();
+
+	public static void filterPackagesOnThrowables(String packageName) {
+		if (StringUtils.isEmpty(packageName)) {
+			packagesToFilter = Sets.newHashSet();
+		} else {
+			packagesToFilter.add(packageName);
+		}
+	}
+
+	public static void filterPackagesOnThrowables(Set<String> packages) {
+		for (String packageName : packages) {
+			filterPackagesOnThrowables(packageName);
+			if (StringUtils.isEmpty(packageName)) {
+				return;
+			}
+		}
+	}
+
 	public static void log(final Throwable t) {
 		log(t.getMessage(), t);
 	}
 
 	public static void log(final String title, final Throwable t) {
-		log(title, t, Collections.<String> emptySet());
+		log(title, t, packagesToFilter);
 	}
 
 	public static void log(final Throwable t, final Set<String> packagesToFilter) {

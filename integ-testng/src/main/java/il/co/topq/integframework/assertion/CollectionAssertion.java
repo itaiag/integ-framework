@@ -165,7 +165,8 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 			}
 
 			for (E e : singlesInExpected) {
-				Reporter.logToFile(new AssertionError(new StringBuilder(e.toString()).append(" was expected but not found")));
+				Reporter.logToFile("Item not found",
+						new AssertionError(new StringBuilder(e.toString()).append(" was expected but not found")));
 
 			}
 
@@ -174,7 +175,7 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 
 				if (!allItems) {
 					itemFound.append(" unexpectedly");
-					Reporter.logToFile(new AssertionError(itemFound));
+					Reporter.logToFile("Unexpected item found", new AssertionError(itemFound));
 				} else {
 					Reporter.log(itemFound.toString(), XmlSuite.DEFAULT_VERBOSE + 1);
 				}

@@ -313,8 +313,7 @@ public class Reporter extends org.testng.Reporter {
 		// Creating body
 		toggleElement.append("<div class='stackTrace' id='");
 		toggleElement.append(id);
-		toggleElement.append("' style='display: none;'>");
-		toggleElement.append("</div>");
+		toggleElement.append("' style='display: none;'><br />");
 		log(toggleElement.toString(), false, null, null);
 
 	}

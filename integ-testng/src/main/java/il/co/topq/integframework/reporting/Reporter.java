@@ -1,5 +1,6 @@
 package il.co.topq.integframework.reporting;
 
+import il.co.topq.integframework.utils.RandomUtils;
 import il.co.topq.integframework.utils.StringUtils;
 
 import java.io.File;
@@ -191,6 +192,7 @@ public class Reporter extends org.testng.Reporter {
 	}
 
 	protected static DateFormat df = new SimpleDateFormat("HH:mm:ss.SSS");
+	private static Random random = new Random(System.currentTimeMillis());
 
 	/**
 	 * Appending <code>s</code> to the report with time stamp
@@ -354,15 +356,18 @@ public class Reporter extends org.testng.Reporter {
 			title = "file";
 		}
 		StringBuilder toggleElement = new StringBuilder();
-		final String id = System.currentTimeMillis() + "_" + new Random().nextInt(10000);
+		final String id = System.currentTimeMillis() + "_" + RandomUtils.getRandomInt(1000, 9999, random);
 		File file;
 		try {
-			file = File.createTempFile(title, ".partial", null);
-			file.renameTo(new File(id));
+			file = File.createTempFile(title, ".partial", null);// work directly
+																// on report
+																// file
+			File newfile = copyFileToReporterFolder(file);
+			file.delete();
+			file = newfile;
 			try (FileWriter writer = new FileWriter(file)) {
 				writer.write(body);
 			}
-			file = copyFileToReporterFolder(file);
 		} catch (IOException e) {
 			log(title, body);
 			return;
@@ -392,7 +397,7 @@ public class Reporter extends org.testng.Reporter {
 			title = "link";
 		}
 		StringBuilder toggleElement = new StringBuilder();
-		final String id = System.currentTimeMillis() + "_" + new Random().nextInt(10000);
+		final String id = System.currentTimeMillis() + "_" + RandomUtils.getRandomInt(1000, 9999, random);
 
 		// Creating link
 		toggleElement.append(" <a href=\"javascript:toggleElement('");

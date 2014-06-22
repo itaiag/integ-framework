@@ -373,12 +373,12 @@ public class Reporter extends org.testng.Reporter {
 		toggleElement.append(id);
 		toggleElement.append("', 'block');").append("loadExternal('").append(id).append("','").append(file.getName())
 				.append("');return false;\" title=\"Click to expand/collapse\">");
-		toggleElement.append("<b>").append(title).append("</b></a>");
+		toggleElement.append("<b>").append(title).append("</b></a><br />");
 
 		// Creating body
 		toggleElement.append("<div class='stackTrace' id='");
 		toggleElement.append(id);
-		toggleElement.append("' style='display: none;'><br />");
+		toggleElement.append("' style='display: none;'>");
 		log(toggleElement.toString(), false, null, null);
 
 	}
@@ -398,12 +398,12 @@ public class Reporter extends org.testng.Reporter {
 		toggleElement.append(" <a href=\"javascript:toggleElement('");
 		toggleElement.append(id);
 		toggleElement.append("', 'block')\" title=\"Click to expand/collapse\"><b>");
-		toggleElement.append(appendColorParagraph(title, color)).append("</b></a>");
+		toggleElement.append(appendColorParagraph(title, color)).append("</b></a><br />");
 
 		// Creating body
 		toggleElement.append("<div class='stackTrace' id='");
 		toggleElement.append(id);
-		toggleElement.append("' style='display: none;'><br />");
+		toggleElement.append("' style='display: none;'>");
 		log(toggleElement.toString(), false, null, null);
 	}
 

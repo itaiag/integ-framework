@@ -97,20 +97,85 @@ public class Reporter extends org.testng.Reporter {
 		}
 	}
 
+	/**
+	 * report an error or exception
+	 * 
+	 * @param t
+	 *            the {@link Throwable} to be reported
+	 */
 	public static void log(final Throwable t) {
 		log(t.getMessage(), t);
 	}
 
+	/**
+	 * report an error or exception
+	 * 
+	 * @param t
+	 * @param status
+	 *            a status to set.<br>
+	 *            shuold be either {@link ITestResult#SUCCESS},
+	 *            {@link ITestResult#FAILURE} or
+	 *            {@link ITestResult#SUCCESS_PERCENTAGE_FAILURE}<br>
+	 *            default is {@link ITestResult#FAILURE}
+	 * 
+	 */
+	public static void log(final Throwable t, int status) {
+		log(t.getMessage(), t, status);
+	}
+
+	/**
+	 * report an error or exception
+	 * 
+	 * @param title
+	 *            the title of the link to put
+	 * @param t
+	 *            the {@link Throwable} to be reported
+	 */
 	public static void log(final String title, final Throwable t) {
 		log(title, t, packagesToFilter);
 	}
 
+	/**
+	 * report an error or exception
+	 * 
+	 * @param title
+	 *            the title of the link to put
+	 * @param t
+	 *            the {@link Throwable} to be reported
+	 * @param status
+	 *            a status to set.<br>
+	 *            shuold be either {@link ITestResult#SUCCESS},
+	 *            {@link ITestResult#FAILURE} or
+	 *            {@link ITestResult#SUCCESS_PERCENTAGE_FAILURE}<br>
+	 *            default is {@link ITestResult#FAILURE}
+	 */
+	public static void log(final String title, final Throwable t, int status) {
+		log(title, t, packagesToFilter, status);
+	}
+
+	/**
+	 * report an error or exception
+	 * 
+	 * @param title
+	 *            the title of the link to put
+	 * @param t
+	 *            the {@link Throwable} to be reported
+	 * @param packagesToFilter
+	 *            a set of packages (as can be gained from
+	 *            {@link Class#getPackage()})
+	 *            {@link StackTraceElement#getClassName()} to be omitted from
+	 *            the reported StackTrace of <i>t</i>
+	 */
 	public static void log(final Throwable t, final Set<String> packagesToFilter) {
 		log(t.getMessage(), t, packagesToFilter);
 	}
 
 	public static void log(final String title, final Throwable t, final Set<String> packagesToFilter) {
 		log(title, StringUtils.getStackTrace(t, packagesToFilter), false);
+	}
+
+	public static void log(final String title, final Throwable t, final Set<String> packagesToFilter, int status) {
+		log(title, StringUtils.getStackTrace(t, packagesToFilter), status);
 	}
 
 	public static void logToFile(Throwable t) {

@@ -118,7 +118,7 @@ public class ReporterTests {
 
 	@Test
 	public void testToggleFile() {
-		logToFile("Simple toggle", generateLines(50, 10), GREEN);
+		logToFile("Simple File toggle", generateLines(50, 10), GREEN);
 		logToFile("Toggle with empty body and color blue", "", BLUE);
 		log("About to test toggle with null title. The title should be changed to 'file' automatically");
 		logToFile(null, "Some body", BLUE);

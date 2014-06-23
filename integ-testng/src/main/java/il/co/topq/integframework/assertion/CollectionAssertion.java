@@ -220,10 +220,9 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 					StringBuilder itemMismatch = new StringBuilder("The item:\n[").append(match.actual)
 							.append("]\nwhich was acually found, did not match the expected item\n[")
 							.append(match.expected.toString()).append("]");
-					if (mismatchCounter > maxMismatchesToReport) {
+					if (++mismatchCounter <= maxMismatchesToReport) {
 						Reporter.logToFile(itemMismatchTitle, itemMismatch.toString(), Color.RED);
 					}
-					mismatchCounter++;
 				}
 			}
 			message = "Total reproccessed items:" + matches.size() + "\n";

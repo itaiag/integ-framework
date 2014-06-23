@@ -18,7 +18,7 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 	private String expectedTitle = "", actualTitle = "";
 	final protected List<E> expected;
 	private List<E> singlesInActual, singlesInExpected;
-
+	private long maxMismatchesToReport = -1, maxNotFoundToReport = -1, maxUnexpectedToReport = -1;
 	private static final class PairOfMatches<E> {
 		final E actual, expected;
 
@@ -55,6 +55,21 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 
 	public CollectionAssertion<E> dontExitIfSizeDoesNotMatch() {
 		this.exitIfSizeDoesNotMatch = false;
+		return this;
+	}
+
+	public CollectionAssertion<E> maxMismatchesToReport(long max) {
+		this.maxMismatchesToReport = max;
+		return this;
+	}
+
+	public CollectionAssertion<E> maxNotFoundToReport(long max) {
+		this.maxNotFoundToReport = max;
+		return this;
+	}
+
+	public CollectionAssertion<E> maxUnexpectedToReport(long max) {
+		this.maxUnexpectedToReport = max;
 		return this;
 	}
 
@@ -163,17 +178,22 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 					iactual++;
 				}
 			}
-
+			long singlesCounter = 0;
 			for (E e : singlesInExpected) {
 				Reporter.logToFile("Item not found",
 						new AssertionError(new StringBuilder(e.toString()).append(" was expected but not found")));
-
+				if (++singlesCounter > maxNotFoundToReport) {
+					break;
+				}
 			}
 
+			singlesCounter = 0;
 			for (E e : singlesInActual) {
 				StringBuilder itemFound = new StringBuilder(e.toString()).append(" was found");
-
 				if (!allItems) {
+					if (++singlesCounter > maxUnexpectedToReport) {
+						break;
+					}
 					itemFound.append(" unexpectedly");
 					Reporter.logToFile("Unexpected item found", new AssertionError(itemFound));
 				} else {
@@ -200,7 +220,9 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 					StringBuilder itemMismatch = new StringBuilder("The item:\n[").append(match.actual)
 							.append("]\nwhich was acually found, did not match the expected item\n[")
 							.append(match.expected.toString()).append("]");
-					Reporter.logToFile(itemMismatchTitle, itemMismatch.toString(), Color.RED);
+					if (mismatchCounter > maxMismatchesToReport) {
+						Reporter.logToFile(itemMismatchTitle, itemMismatch.toString(), Color.RED);
+					}
 					mismatchCounter++;
 				}
 			}

@@ -67,7 +67,7 @@
 						</property>
 					</properties>
 					<includes>
-						<include>**/ReporterTests.java</include>
+						<include>**/*Tests.java</include>
 					</includes>
 				</configuration>
 			</plugin>

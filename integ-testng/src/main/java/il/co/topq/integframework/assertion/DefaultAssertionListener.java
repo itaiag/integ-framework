@@ -12,13 +12,13 @@ public class DefaultAssertionListener<T> implements AssertionListener<T>{
 	@Override
 	public void assertionFailed(T actual, AbstractAssertionLogic<T> logic) {
 		Reporter.log("Assertion failed: " + logic.getTitle(), logic.getMessage(), false);
-		org.testng.Assert.fail(logic.message);
+		org.testng.Assert.fail(logic.getTitle());
 		
 	}
 
 	@Override
 	public void assertionFailed(T actual, AbstractAssertionLogic<T> logic, Throwable t) {
 		Reporter.log("Assertion process failed: ", t);
-		org.testng.Assert.fail(logic.message, t);
+		org.testng.Assert.fail(logic.getTitle(), t);
 	}
 };

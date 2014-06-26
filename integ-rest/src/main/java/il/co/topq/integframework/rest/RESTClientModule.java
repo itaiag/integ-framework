@@ -37,6 +37,29 @@ public class RESTClientModule extends AbstractModuleImpl {
 		return clientResponse;
 	}
 
+	public ClientResponse get(String action) throws Exception {
+		Reporter.log("Request", action, Style.PLAINTEXT);
+		StringBuilder builder = new StringBuilder(uri);
+		if (!uri.endsWith("/")) {
+			builder.append("/");
+		}
+		builder.append(action);
+		ClientResponse clientResponse = create().resource(builder.toString()).accept("application/json")
+				.get(ClientResponse.class);
+
+		setActual(clientResponse.getEntity(String.class));
+		try {
+			JSONObject response = new JSONObject(getActual(String.class));
+			Reporter.log("Response", response.toString(3), Style.PLAINTEXT);
+		} catch (JSONException e) {
+			Reporter.log("Response", getActual(String.class), Style.PLAINTEXT);// should
+																				// never
+																				// happen!!
+		}
+
+		return clientResponse;
+	}
+
 	public String getUri() {
 		return uri;
 	}

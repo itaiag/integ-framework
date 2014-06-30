@@ -351,20 +351,21 @@ public class Reporter extends org.testng.Reporter {
 	}
 
 	public static void fileToggle(String title, String body) {
-
-		if (null == title) {
-			title = "file";
+		String fileTitle = "file";
+		if (null != title && !title.contains(",") && !title.contains(" ") && !title.contains("/")) {
+			fileTitle = title;
 		}
 		StringBuilder toggleElement = new StringBuilder();
 		final String id = System.currentTimeMillis() + "_" + RandomUtils.getRandomInt(1000, 9999, random);
 		File file;
 		try {
-			file = File.createTempFile(title, ".partial", null);// work directly
+			file = File.createTempFile(fileTitle, ".partial", parentFolder());// work
+																	// directly
 																// on report
 																// file
-			File newfile = copyFileToReporterFolder(file);
-			file.delete();
-			file = newfile;
+			// File newfile = copyFileToReporterFolder(file);
+			// file.delete();
+			// file = newfile;
 			try (FileWriter writer = new FileWriter(file)) {
 				writer.write(body);
 			}
@@ -378,7 +379,7 @@ public class Reporter extends org.testng.Reporter {
 		toggleElement.append(id);
 		toggleElement.append("', 'block');").append("loadExternal('").append(id).append("','").append(file.getName())
 				.append("');return false;\" title=\"Click to expand/collapse\">");
-		toggleElement.append("<b>").append(title).append("</b></a><br />");
+		toggleElement.append("<b>").append(title).append("</b></a>");
 
 		// Creating body
 		toggleElement.append("<div class='stackTrace' id='");
@@ -491,16 +492,8 @@ public class Reporter extends org.testng.Reporter {
 		}
 
 		// Creating parent folder
-		final File parentFolder = new File(new File(getCurrentTestResult().getTestContext().getOutputDirectory()).getParent()
-				+ File.separator + "html");
-		if (!parentFolder.exists()) {
-			if (!parentFolder.mkdirs()) {
-				log("Failed to create folder for logging file");
-			}
-		}
-
 		// Copying the file to the parent folder
-		final File newFile = new File(parentFolder, file.getName());
+		final File newFile = new File(parentFolder(), file.getName());
 		if (newFile.exists()) {
 			newFile.delete();
 		}
@@ -510,6 +503,17 @@ public class Reporter extends org.testng.Reporter {
 			log("Failed copying file " + file.getAbsolutePath());
 		}
 		return newFile;
+	}
+
+	private static final File parentFolder() {
+		File parentFolder = new File(new File(getCurrentTestResult().getTestContext().getOutputDirectory()).getParent()
+				+ File.separator + "html");
+		if (!parentFolder.exists()) {
+			if (!parentFolder.mkdirs()) {
+				log("Failed to create folder for logging file");
+			}
+		}
+		return parentFolder;
 	}
 
 	private static String toHtml(String str) {

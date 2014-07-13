@@ -54,7 +54,7 @@ public class SSHWithRSA extends SSH {
 		}
 
 		/* Authenticate */
-		if (passAuthentication) {
+		if (passAuthentication && password != null) {
 			super.connect();
 		} else if (privateKeyAuthentication) {
 			try {

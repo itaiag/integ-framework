@@ -326,6 +326,9 @@ implements CliConnection {
 		if (delayedTyping) {
 			terminal.setKeyTypingDelay(keyTypingDelay);
 		}
+		if (terminal instanceof SSH) {
+			((SSH) terminal).setPort(getPort());
+		}
 		cli = new Cli(terminal);
 		if (enterStr != null) {
 			setEnterStr(enterStr);

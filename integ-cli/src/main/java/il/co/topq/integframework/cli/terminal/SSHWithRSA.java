@@ -28,7 +28,7 @@ public class SSHWithRSA extends SSH {
 		boolean isAuthenticated = false;
 		/* Create a connection instance */
 		System.out.println("Connet to Host with SSH and RSA private key");
-		conn = new Connection(hostname);
+		conn = new Connection(hostname, getPort());
 
 		/* Now connect */
 

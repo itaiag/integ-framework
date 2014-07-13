@@ -36,6 +36,8 @@ public class SSH extends Terminal {
 
 	protected int destinationPort = -1;
 	
+	protected int port = 22;
+
 	protected boolean xtermTerminal = true;
 	
 	public SSH(String hostnameP, String usernameP, String passwordP) {
@@ -61,7 +63,7 @@ public class SSH extends Terminal {
 		boolean isAuthenticated = false;
 		/* Create a connection instance */
 
-		conn = new Connection(hostname);
+		conn = new Connection(hostname, getPort());
 
 		/* Now connect */
 
@@ -117,6 +119,14 @@ public class SSH extends Terminal {
 		
 		in =  sess.getStdout();
 		out = sess.getStdin();
+	}
+
+	protected int getPort() {
+		return port;
+	}
+
+	public void setPort(int port) {
+		this.port = port;
 	}
 
 	@Override

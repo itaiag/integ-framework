@@ -1,6 +1,9 @@
 package il.co.topq.integframework.assertion;
 
+import com.google.common.base.Predicate;
+
 public enum CompareMethod {
+
 	BIGGER {
 		@Override
 		public <T extends Comparable<T>> boolean compare(T o1, T o2) {
@@ -46,8 +49,22 @@ public enum CompareMethod {
 		default:
 			return null;
 		}
-
 	};
 
 	public abstract <T extends Comparable<T>> boolean compare(T o1, T o2);
+
+	public final <T extends Comparable<T>> Predicate<T> to(final T that) {
+		return than(that);
+	}
+
+	public final <T extends Comparable<T>> Predicate<T> than(final T that) {
+		final CompareMethod me = this;
+		return new Predicate<T>() {
+
+			@Override
+			public boolean apply(T t) {
+				return me.compare(t, that);
+			}
+		};
+	}
 }

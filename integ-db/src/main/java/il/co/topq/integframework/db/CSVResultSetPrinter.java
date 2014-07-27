@@ -91,6 +91,7 @@ public class CSVResultSetPrinter implements ResultSetPrinter {
 		if (file != null && file.exists()) {
 			if (!headerLine) {
 				Reporter.logFile("SQL Table", file);
+				file.delete();
 			}
 		} else {
 			Reporter.log("failed to print resultset", ITestResult.SUCCESS_PERCENTAGE_FAILURE);

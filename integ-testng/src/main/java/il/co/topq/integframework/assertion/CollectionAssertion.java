@@ -211,7 +211,7 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 			}
 		} else if (matches != null) {
 			status = true;
-			Reporter.step("Validating matches data using " + comparator.toString());
+			Reporter.log("Validating matches data using " + comparator.toString(), XmlSuite.DEFAULT_VERBOSE + 1);
 			long mismatchCounter = 0;
 			String itemMismatchTitle = "Item mismatch when comparing " + comparator.toString();
 			for (PairOfMatches<E> match : matches) {

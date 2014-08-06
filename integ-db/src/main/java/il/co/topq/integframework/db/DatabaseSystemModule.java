@@ -102,6 +102,20 @@ public class DatabaseSystemModule extends AbstractModuleImpl {
 	}
 
 	/**
+	 * Executes the given SQL statement, which may be an DROP, ALTER etc,.
+	 * 
+	 * @param sql
+	 *            the statement to execute
+	 * @throws Exception
+	 */
+	public void executeStatement(final String sql) {
+		if (null == sql || sql.isEmpty()) {
+			throw new IllegalArgumentException("SQL query can't be empty");
+		}
+		template.execute(sql);
+	}
+
+	/**
 	 * Compare between the number of rows returned as a result of executing the
 	 * specified query and the given number.
 	 * 

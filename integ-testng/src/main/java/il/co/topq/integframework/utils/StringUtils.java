@@ -7,6 +7,8 @@ import java.util.Set;
 
 import org.testng.collections.Lists;
 
+import com.google.common.base.Optional;
+
 public abstract class StringUtils {
 	@SuppressWarnings("unused")
 	private final boolean __;
@@ -17,6 +19,10 @@ public abstract class StringUtils {
 
 	public static boolean isEmpty(String str) {
 		return (str == null) ? true : str.isEmpty();
+	}
+
+	public static Optional<String> either(String s) {
+		return Optional.fromNullable(isEmpty(s) ? null : s);
 	}
 
 	public static String getStackTrace(Throwable t) {

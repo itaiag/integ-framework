@@ -1,8 +1,9 @@
 package il.co.topq.integframework.assertion;
 
+import static il.co.topq.integframework.utils.StringUtils.either;
+import static il.co.topq.integframework.utils.StringUtils.isEmpty;
 import il.co.topq.integframework.reporting.Reporter;
 import il.co.topq.integframework.reporting.Reporter.Color;
-import il.co.topq.integframework.utils.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -91,11 +92,11 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 	@Override
 	public String getTitle() {
 		StringBuilder titleBuilder = new StringBuilder("all items");
-		if (!StringUtils.isEmpty(expectedTitle)) {
+		if (!isEmpty(expectedTitle)) {
 			titleBuilder.append(" from ").append(expectedTitle);
 		}
 		titleBuilder.append(" should exists");
-		if (!StringUtils.isEmpty(actualTitle)) {
+		if (!isEmpty(actualTitle)) {
 			titleBuilder.append(" in ").append(actualTitle);
 		}
 		if (allItems) {
@@ -128,7 +129,9 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 			if (!allItems) {
 				if (expected.size() > actual.size()) {
 					status = false;
-					Reporter.logToFile(new AssertionError(new StringBuilder("Size of actual items is ").append(actual.size())
+					
+					Reporter.logToFile(new AssertionError(new StringBuilder("Amount of ")
+							.append(either(actualTitle).or("actual items")).append(" ").append(actual.size())
 							.append(", should be at least ").append(expected.size()).append("\n")));
 					if (exitIfSizeDoesNotMatch) {
 						return;
@@ -137,8 +140,9 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 				singlesInActual.addAll(actual);
 			} else {
 				if (expected.size() != actual.size()) {
-					Reporter.logToFile(new AssertionError(new StringBuilder("Size of actual items is ").append(actual.size())
-							.append("instead of ").append(expected.size()).append("\n")));
+					Reporter.logToFile(new AssertionError(new StringBuilder("Amount of ")
+							.append(either(actualTitle).or("actual items")).append(" ").append(actual.size())
+							.append(" instead of ").append(expected.size()).append("\n")));
 					status = false;
 					if (exitIfSizeDoesNotMatch) {
 						return;

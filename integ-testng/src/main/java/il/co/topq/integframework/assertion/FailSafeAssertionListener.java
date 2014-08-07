@@ -3,6 +3,8 @@
  */
 package il.co.topq.integframework.assertion;
 
+import il.co.topq.integframework.utils.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -29,7 +31,7 @@ public class FailSafeAssertionListener<T> implements AssertionListener<T> {
 	 */
 	@Override
 	public void assertionFailed(T actual, AbstractAssertionLogic<T> logic) {
-		suppressed.add(new AssertionError(logic.message));
+		suppressed.add(new AssertionError(StringUtils.either(logic.message).or(logic.getTitle())));
 	}
 
 	/* (non-Javadoc)
@@ -38,7 +40,7 @@ public class FailSafeAssertionListener<T> implements AssertionListener<T> {
 	@Override
 	public void assertionFailed(T actual, AbstractAssertionLogic<T> logic,
 			Throwable t) {
-		suppressed.add(new AssertionError(logic.message, t));
+		suppressed.add(new AssertionError(StringUtils.either(logic.message).or(logic.getTitle()), t));
 
 	}
 	

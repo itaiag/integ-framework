@@ -29,7 +29,7 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 		}
 	}
 
-	protected boolean keepMatches = true;
+	protected boolean keepMatches = false;
 	private List<PairOfMatches<E>> matches;
 
 	protected void addMatch(E actual, E expected) {

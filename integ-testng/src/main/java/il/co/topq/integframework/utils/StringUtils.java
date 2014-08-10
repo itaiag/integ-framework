@@ -1,5 +1,7 @@
 package il.co.topq.integframework.utils;
 
+import il.co.topq.integframework.assertion.CompareMethod;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
@@ -8,6 +10,7 @@ import java.util.Set;
 import org.testng.collections.Lists;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 
 public abstract class StringUtils {
 	@SuppressWarnings("unused")
@@ -23,6 +26,26 @@ public abstract class StringUtils {
 
 	public static Optional<String> either(String s) {
 		return Optional.fromNullable(isEmpty(s) ? null : s);
+	}
+
+	public final static Predicate<String> isEmpty = new Predicate<String>() {
+		@Override
+		public boolean apply(String input) {
+			return isEmpty(input);
+		}
+	};
+
+	public final static Predicate<String> length(final CompareMethod method, final int length) {
+		return new Predicate<String>() {
+			@Override
+			public boolean apply(String input) {
+				return method.compare(input.length(), length);
+			}
+		};
+	}
+
+	public final static Predicate<String> is(final CompareMethod compare, final String another) {
+		return compare.to(another);
 	}
 
 	public static String getStackTrace(Throwable t) {

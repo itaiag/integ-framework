@@ -1,8 +1,9 @@
+#set( $D = '$' )
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>${artifactId}</artifactId>
-	<name>Perion automation for infra data</name>
+	<name>Automation for ${package}</name>
 	<groupId>${groupId}</groupId>
 	<version>${version}</version>
 	<packaging>jar</packaging>
@@ -31,7 +32,7 @@
 		<dependency>
 			<groupId>il.co.topq.integframework</groupId>
 			<artifactId>integ-testng</artifactId>
-			<version>${symbol_dollar}{integ.version}</version>
+			<version>${integ.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.inject</groupId>
@@ -42,17 +43,17 @@
 		<dependency>
 			<groupId>il.co.topq.integframework</groupId>
 			<artifactId>integ-db</artifactId>
-			<version>${symbol_dollar}{integ.version}</version>
+			<version>${integ.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
-			<version>${symbol_dollar}{spring.version}</version>
+			<version>${spring.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
-			<version>${symbol_dollar}{spring.version}</version>
+			<version>${spring.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
@@ -165,9 +166,9 @@
 									</includes>
 								</fileset>
 								<fileset>
-									<directory>${symbol_dollar}{project.basedir}</directory>
+									<directory>${project.basedir}</directory>
 									<includes>
-										<include>${symbol_dollar}{project.artifactId}-${symbol_dollar}{project.version}-zipTests.zip</include>
+										<include>${project.artifactId}-${project.version}-zipTests.zip</include>
 									</includes>
 								</fileset>
 							</filesets>
@@ -200,14 +201,13 @@
 				<plugins>
 					<plugin>
 						<artifactId>maven-assembly-plugin</artifactId>
-
 						<version>2.3</version>
 						<configuration>
 							<descriptors>
-								<descriptor>${symbol_dollar}{project.testResources[0].directory}/assembly/zipTests.xml</descriptor>
+								<descriptor>${D}{project.testResources[0].directory}/assembly/zipTests.xml</descriptor>
 							</descriptors>
 							<appendAssemblyId>true</appendAssemblyId>
-							<outputDirectory>${symbol_dollar}{project.basedir}</outputDirectory>
+							<outputDirectory>${project.basedir}</outputDirectory>
 						</configuration>
 						<executions>
 							<execution>

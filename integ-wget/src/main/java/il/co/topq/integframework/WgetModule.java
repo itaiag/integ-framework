@@ -90,6 +90,11 @@ public class WgetModule extends LinuxCommandLineModule {
 			return this;
 		}
 
+		public WgetCommand withHeader(String header) {
+			// e.g: --header='Accept-Charset: iso-8859-2'
+			command.append(" --header=\'").append(header).append('\'');
+			return this;
+		}
 		@Override
 		public void execute() throws Exception {
 			alreadyRun = setFlag(alreadyRun, "A client can execute only once!");
@@ -97,6 +102,13 @@ public class WgetModule extends LinuxCommandLineModule {
 				cmd = command.append(' ').append(url).toString();
 			}
 			super.execute();
+		}
+
+		public WgetCommand withHeaders(Iterable<String> headers) {
+			for (String header : headers) {
+				withHeader(header);
+			}
+			return this;
 		}
 
 	}

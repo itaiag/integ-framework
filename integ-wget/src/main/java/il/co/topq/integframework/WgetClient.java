@@ -9,6 +9,8 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -16,7 +18,7 @@ import org.apache.commons.io.IOUtils;
 
 public class WgetClient implements Callable<String> {
 	final String userAgent, ip;
-
+	final List<String> headers = new ArrayList<>();
 	private final WgetModule module;
 	private PostDataGenerator dataGenerator;
 
@@ -44,14 +46,14 @@ public class WgetClient implements Callable<String> {
 
 	public void post(CharSequence data) throws Exception {
 		CliCommandExecution execution = module.new WgetCommand().bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything()
-				.post(data).error("failed");
+				.withHeaders(headers).post(data).error("failed");
 		execution.execute();
 		response = execution.getResult();
 	}
 
 	public void silentlyPost(CharSequence data) throws Exception {
 		CliCommandExecution execution = module.new WgetCommand().bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything()
-				.post(data).withTimeout(30, TimeUnit.SECONDS).error("failed").silently();
+				.withHeaders(headers).post(data).withTimeout(30, TimeUnit.SECONDS).error("failed").silently();
 		execution.execute();
 		response = execution.getResult();
 	}
@@ -75,7 +77,7 @@ public class WgetClient implements Callable<String> {
 
 	public void postFile(String remoteFile) throws Exception {
 		CliCommandExecution execution = module.new WgetCommand().bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything()
-				.postFile(remoteFile).error("failed");
+				.withHeaders(headers).postFile(remoteFile).error("failed");
 		execution.execute();
 		response = execution.getResult();
 	}
@@ -142,7 +144,8 @@ public class WgetClient implements Callable<String> {
 	@Override
 	public String call() throws Exception {
 		WgetCommand wgetCommand = module.new WgetCommand();
-		wgetCommand.bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything().post(this.dataGenerator.generateData(this));
+		wgetCommand.bindAddress(ip).withUserAgent(userAgent).withHeaders(headers).doNotDownloadAnything()
+				.post(this.dataGenerator.generateData(this));
 		wgetCommand.error("failed").silently().execute();
 		String httpRequestSentMessage = "HTTP request sent, awaiting response... ";
 		wgetCommand.mustHaveResponse(httpRequestSentMessage);
@@ -159,6 +162,16 @@ public class WgetClient implements Callable<String> {
 
 	public synchronized String getResponse() {
 		return response;
+	}
+
+	public WgetClient addHeader(String httpHeader) {
+		this.headers.add(httpHeader);
+		return this;
+	}
+
+	public WgetClient noHeaders() {
+		this.headers.clear();
+		return this;
 	}
 
 }

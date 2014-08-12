@@ -24,6 +24,7 @@ public class BaseTestCase extends AbstractTestNGSpringContextTests {
 
 	static {
 		Reporter.filterPackagesOnThrowables(packagesToFilter);
+		
 	}
 
 }

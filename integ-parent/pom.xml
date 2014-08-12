@@ -80,6 +80,7 @@
 		<module>../integ-support</module>
 		<module>../integ-rest</module>
 		<module>../integ-wget</module>
+		<module>../integ-archetype</module>
 	</modules>
 	<scm>
 		<developerConnection>scm:git:https://github.com/aharonha/integ-framework</developerConnection>

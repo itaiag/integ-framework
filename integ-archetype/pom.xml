@@ -15,7 +15,6 @@
         <version>2.2</version>
       </extension>
     </extensions>
-
     <pluginManagement>
       <plugins>
         <plugin>

@@ -30,6 +30,7 @@ import org.apache.hadoop.fs.UnsupportedFileSystemException;
 import org.apache.hadoop.hdfs.protocol.HdfsConstants;
 import org.apache.hadoop.security.AccessControlException;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 
 public class HDFSSystemModule {
@@ -79,16 +80,15 @@ public class HDFSSystemModule {
 				true);
 	}
 
-	public <T> T validateThat(HdfsExpectedCondition<T> expectedCondition) throws Exception{
+	public <T> T validateThat(HdfsExpectedCondition<T> expectedCondition) throws Throwable {
 		Reporter.log("Validating: " + expectedCondition.toString());
 		HdfsWait oldWait = this.wait;
 		this.wait = new HdfsWait(hdfs);
-		wait.withTimeout(0, TimeUnit.MILLISECONDS);
 		try {
-			return wait.until(expectedCondition);
+			return wait.withTimeout(0, TimeUnit.MILLISECONDS).until(expectedCondition);
 		}
 		catch (TimeoutException exception){
-			throw new Exception(exception.getCause()); 
+			throw Optional.fromNullable(exception.getCause()).or(exception);
 		} finally {
 			this.wait=oldWait;
 		}

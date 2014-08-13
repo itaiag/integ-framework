@@ -20,14 +20,14 @@
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-hdfs</artifactId>
-			<version>[2.0.0,)</version>
+			<version>${hadoop.provided.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-common</artifactId>
-			<version>[2.0.0,)</version>
 			<scope>provided</scope>
+			<version>${hadoop.provided.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>il.co.topq.integframework</groupId>
@@ -42,4 +42,7 @@
 		<relativePath>../integ-parent</relativePath>
 	</parent>
 	
+	<properties>
+		<hadoop.provided.version>[2.0.0,2.4.1)</hadoop.provided.version>
+	</properties>
 </project>

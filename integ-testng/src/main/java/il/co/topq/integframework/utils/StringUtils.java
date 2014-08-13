@@ -25,7 +25,7 @@ public abstract class StringUtils {
 	}
 
 	public static Optional<String> either(String s) {
-		return Optional.fromNullable(isEmpty(s) ? null : s);
+		return isEmpty(s) ? Optional.<String> absent() : Optional.of(s);
 	}
 
 	public final static Predicate<String> isEmpty = new Predicate<String>() {

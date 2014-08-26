@@ -5,12 +5,7 @@ import static il.co.topq.integframework.utils.StringUtils.isEmpty;
 import il.co.topq.integframework.reporting.Reporter;
 import il.co.topq.integframework.reporting.Reporter.Color;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 import org.testng.xml.XmlSuite;
 
@@ -130,7 +125,7 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 				if (expected.size() > actual.size()) {
 					status = false;
 					
-					Reporter.logToFile(new AssertionError(new StringBuilder("Amount of ")
+					Reporter.logToFile(new AssertionError(new StringBuilder("size of ")
 							.append(either(actualTitle).or("actual items")).append(" ").append(actual.size())
 							.append(", should be at least ").append(expected.size()).append("\n")));
 					if (exitIfSizeDoesNotMatch) {
@@ -140,7 +135,7 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 				singlesInActual.addAll(actual);
 			} else {
 				if (expected.size() != actual.size()) {
-					Reporter.logToFile(new AssertionError(new StringBuilder("Amount of ")
+					Reporter.logToFile(new AssertionError(new StringBuilder("size of ")
 							.append(either(actualTitle).or("actual items")).append(" ").append(actual.size())
 							.append(" instead of ").append(expected.size()).append("\n")));
 					status = false;

@@ -3,7 +3,8 @@
  */
 package il.co.topq.integframework.cli.conn;
 
-import il.co.topq.integframework.reporting.Reporter;
+import static il.co.topq.integframework.reporting.Reporter.log;
+import static java.lang.System.currentTimeMillis;
 
 /**
  * Monitors the allowed idle time of a machine.
@@ -25,6 +26,7 @@ public class IdleMonitor extends Thread {
 	 */
 	public IdleMonitor(CliConnectionImpl cli, long timeout){
 		super("Idle monitor for " + cli.getName());
+		setDaemon(true);
 		this.cli = cli;
 		this.timeout = timeout;
 	}
@@ -36,29 +38,30 @@ public class IdleMonitor extends Thread {
 			long lastCommandTime = cli.getLastCommandTime();
 			if(lastCommandTime == 0){
 				try {
-					Thread.sleep(timeout/2);
+					sleep(timeout / 2);
 				} catch (InterruptedException e) {
-					return;
+					setStop();
 				}
 				continue;
 			}
-			if(System.currentTimeMillis() - lastCommandTime > (timeout * 0.9)){
+			if (currentTimeMillis() - lastCommandTime > (timeout * 0.9)) {
 				CliCommand cmd = new CliCommand();
 				cmd.setCommands(new String[]{""});
+				cmd.setSilent(true);
 				cli.command(cmd);
 				if(cmd.isFailed()){
-					Reporter.log(" idle monitor failed" , null ,false);
+					log("idle monitor failed", null, false);
 				} else {
-					Reporter.log(" idle monitor keepalive success");
+					log("idle monitor keepalive success");
 				}
 			} else {
 				try {
-					long toSleep = (long)(timeout * 0.9) - (System.currentTimeMillis() - lastCommandTime);
+					long toSleep = (long) (timeout * 0.9) - (currentTimeMillis() - lastCommandTime);
 					if(toSleep > 0){
-						Thread.sleep(toSleep);
+						sleep(toSleep);
 					}
 				} catch (InterruptedException e) {
-					return;
+					setStop();
 				}
 			}
 		}

@@ -623,7 +623,7 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 	 * idleMonitor was allready active
 	 */
 	public synchronized void activateIdleMonitor() {
-		if (maxIdleTime > 0 && idleMonitor == null || !idleMonitor.isAlive()) {
+		if (maxIdleTime > 0 && (idleMonitor == null || !idleMonitor.isAlive())) {
 			idleMonitor = new IdleMonitor(this, maxIdleTime);
 			idleMonitor.start();
 		}

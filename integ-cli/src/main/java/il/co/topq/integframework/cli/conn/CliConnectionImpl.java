@@ -8,29 +8,12 @@ package il.co.topq.integframework.cli.conn;
 import il.co.topq.integframework.AbstractModuleImpl;
 import il.co.topq.integframework.assertion.AbstractAssertionLogic;
 import il.co.topq.integframework.assertion.IAssertionLogic;
-import il.co.topq.integframework.cli.terminal.BufferInputStream;
-import il.co.topq.integframework.cli.terminal.Cli;
-import il.co.topq.integframework.cli.terminal.InOutInputStream;
-import il.co.topq.integframework.cli.terminal.Prompt;
-import il.co.topq.integframework.cli.terminal.RS232;
-import il.co.topq.integframework.cli.terminal.SSH;
-import il.co.topq.integframework.cli.terminal.SSHWithRSA;
-import il.co.topq.integframework.cli.terminal.Telnet;
-import il.co.topq.integframework.cli.terminal.Terminal;
-import il.co.topq.integframework.cli.terminal.VT100FilterInputStream;
+import il.co.topq.integframework.cli.terminal.*;
 import il.co.topq.integframework.reporting.Reporter;
 import il.co.topq.integframework.reporting.Reporter.Color;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Properties;
+import java.io.*;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -40,20 +23,16 @@ import java.util.regex.Pattern;
  * @author guy.arieli
  * 
  */
-public abstract class CliConnectionImpl 
-extends AbstractModuleImpl 
-implements CliConnection {
-	
-	public static enum EnumConnectionType {    
-		COM("com"),
-		RS232("rs232"),
-		TELNET("telnet"),
-		SSH("ssh"),
-		SSH_RSA("ssh-rsa");
+public abstract class CliConnectionImpl extends AbstractModuleImpl implements CliConnection {
+
+	public static enum EnumConnectionType {
+		COM("com"), RS232("rs232"), TELNET("telnet"), SSH("ssh"), SSH_RSA("ssh-rsa");
 		EnumConnectionType(String value) {
 			this.value = value;
 		}
+
 		private String value;
+
 		public String value() {
 			return value;
 		}
@@ -99,10 +78,10 @@ implements CliConnection {
 	protected boolean dummy = false;
 
 	protected boolean forceIgnoreAnyErrors = false;
-	
+
 	// used for win2K server
 	protected boolean vt100Filter = false;
-	
+
 	// will generate enter upon login (like in rs232)
 	protected boolean leadingEnter = false;
 
@@ -126,7 +105,7 @@ implements CliConnection {
 	 * this is the command enter string, can be set from the sut
 	 */
 	protected String enterStr = null;
-	
+
 	/**
 	 * The key delay when sending keys to the terminal. Only relevant when
 	 * delayTyping is set to true
@@ -136,9 +115,9 @@ implements CliConnection {
 	/**
 	 * Whether to ignore backspace characters or not
 	 */
-    private boolean ignoreBackSpace = false;
-    
-    private String charSet = "ASCII";
+	private boolean ignoreBackSpace = false;
+
+	private String charSet = "ASCII";
 
 	/**
 	 * SSH2 private key -RSA (ppk or pem file)
@@ -194,9 +173,9 @@ implements CliConnection {
 		if (currentPosition == null) {
 			throw new Exception("Fail to find position: " + command.getPosition());
 		}
-		
+
 		String[] commands = toPosition ? currentPosition.getEnters() : currentPosition.getExits();
-		
+
 		if (commands != null) {
 			for (int ccommandIndex = 0; ccommandIndex < commands.length; ccommandIndex++) {
 				String cmd = changeCommand(commands[ccommandIndex], command.getProperties());
@@ -292,25 +271,24 @@ implements CliConnection {
 		// Terminal t;
 		boolean isRs232 = false;
 
-
-    	boolean isRsa = false;
-		if (host.toLowerCase().startsWith(EnumConnectionType.COM.value()) || protocol.toLowerCase().equals(EnumConnectionType.RS232.value())) { 
+		boolean isRsa = false;
+		if (host.toLowerCase().startsWith(EnumConnectionType.COM.value())
+				|| protocol.toLowerCase().equals(EnumConnectionType.RS232.value())) {
 			// syntax for serial connection found
 			isRs232 = true;
 			String[] params = host.split("\\;");
 			if (params.length < 5) {
 				throw new Exception("Unable to extract parameters from host: " + host);
 			}
-			terminal = new RS232(params[0], Integer.parseInt(params[1]), Integer.parseInt(params[2]), Integer.parseInt(params[3]), Integer
-					.parseInt(params[4]));
+			terminal = new RS232(params[0], Integer.parseInt(params[1]), Integer.parseInt(params[2]), Integer.parseInt(params[3]),
+					Integer.parseInt(params[4]));
 		} else if (protocol.toLowerCase().equals(EnumConnectionType.SSH.value())) {
 			terminal = new SSH(host, user, password);
-		} else if (protocol.toLowerCase().equals(
-				EnumConnectionType.SSH_RSA.value())) {
+		} else if (protocol.toLowerCase().equals(EnumConnectionType.SSH_RSA.value())) {
 			terminal = new SSHWithRSA(host, user, password, privateKey);
 			prompts.add(new Prompt("$", false, true));
 			prompts.add(new Prompt("]$", false, true));
-			
+
 			isRsa = true;
 		} else {
 			terminal = new Telnet(host, port, useTelnetInputStream);
@@ -318,11 +296,11 @@ implements CliConnection {
 				((Telnet) terminal).setVtType(null);
 			}
 		}
-		
+
 		terminal.setCharSet(getCharSet());
-		
+
 		terminal.setIgnoreBackSpace(isIgnoreBackSpace());
-		
+
 		if (delayedTyping) {
 			terminal.setKeyTypingDelay(keyTypingDelay);
 		}
@@ -339,7 +317,7 @@ implements CliConnection {
 			terminal.addFilter(buffer);
 			buffer.startThread();
 		}
-		
+
 		if (vt100Filter) {
 			terminal.addFilter(new VT100FilterInputStream());
 		}
@@ -349,9 +327,9 @@ implements CliConnection {
 		}
 		if (isRs232 || leadingEnter) {
 			cli.command("");
-		}else if (isRsa){
+		} else if (isRsa) {
 			cli.login();
-		}else {
+		} else {
 			cli.login(60000, delayedTyping);
 		}
 		connected = true;
@@ -410,48 +388,48 @@ implements CliConnection {
 	public static void handleCliCommand(CliConnectionImpl cli, String title, CliCommand command) throws Exception {
 		synchronized (cli) {
 
-		if (!cli.isConnectOnInit() && !cli.isConnected() || cli.useThreads) {
-			cli.connect();
-		}
-		cli.command(command);
-
-		cli.setActual(command.getResult());
-		if (command.isFailed() && (!command.isIgnoreErrors()) && (!cli.isForceIgnoreAnyErrors())) {
-			Reporter.log(title + ", " + command.getFailCause(), command.getResult(), Color.RED);
-			Exception e = command.getThrown();
-			if (e != null) {
-				throw e;
+			if (!cli.isConnectOnInit() && !cli.isConnected() || cli.useThreads) {
+				cli.connect();
 			}
-			throw new Exception("Cli command failed");
-		}
+			cli.command(command);
 
-		if (!command.isSilent()) {
-			Reporter.log(title, command.getResult());
-		}
-		if (command.isIgnoreErrors() || (cli.isForceIgnoreAnyErrors())) {
-			;
-		} else {
-			List<IAssertionLogic<String>> analyzers = command.getAnalyzers();
-			if (analyzers != null) {
-				for (IAssertionLogic<String> analyzer : analyzers) {
-					analyzer.setActual(cli.getActual(String.class));
-					analyzer.doAssertion();
-					if (analyzer instanceof AbstractAssertionLogic<?>){
-						AbstractAssertionLogic<String> stringAssertionLogic = (AbstractAssertionLogic<String>) analyzer;
-						if (!(command.isSilent() && stringAssertionLogic.isStatus())){
-							Reporter.log(stringAssertionLogic.getTitle(), stringAssertionLogic.getMessage(),
-									stringAssertionLogic.isStatus());
+			cli.setActual(command.getResult());
+			if (command.isFailed() && (!command.isIgnoreErrors()) && (!cli.isForceIgnoreAnyErrors())) {
+				Reporter.log(title + ", " + command.getFailCause(), command.getResult(), Color.RED);
+				Exception e = command.getThrown();
+				if (e != null) {
+					throw e;
+				}
+				throw new Exception("Cli command failed");
+			}
+
+			if (!command.isSilent()) {
+				Reporter.log(title, command.getResult());
+			}
+			if (command.isIgnoreErrors() || (cli.isForceIgnoreAnyErrors())) {
+				;
+			} else {
+				List<IAssertionLogic<String>> analyzers = command.getAnalyzers();
+				if (analyzers != null) {
+					for (IAssertionLogic<String> analyzer : analyzers) {
+						analyzer.setActual(cli.getActual(String.class));
+						analyzer.doAssertion();
+						if (analyzer instanceof AbstractAssertionLogic<?>) {
+							AbstractAssertionLogic<String> stringAssertionLogic = (AbstractAssertionLogic<String>) analyzer;
+							if (!(command.isSilent() && stringAssertionLogic.isStatus())) {
+								Reporter.log(stringAssertionLogic.getTitle(), stringAssertionLogic.getMessage(),
+										stringAssertionLogic.isStatus());
+							}
 						}
 					}
 				}
 			}
-		}
-		cli.setForceIgnoreAnyErrors(false);
+			cli.setForceIgnoreAnyErrors(false);
 		}
 	}
 
 	public synchronized void command(CliCommand command) {
-		
+
 		lastCommandTime = System.currentTimeMillis();
 		cli.setDontWaitForPrompts(command.isDontWaitForPrompts());
 		try {
@@ -475,9 +453,11 @@ implements CliConnection {
 
 				try {
 					if (command.getPrompts() != null) {
-						cli.command(cmd, command.getTimeout(), command.isAddEnter(), command.isDelayTyping(), null, command.getPrompts());
+						cli.command(cmd, command.getTimeout(), command.isAddEnter(), command.isDelayTyping(), null,
+								command.getPrompts());
 					} else {
-						cli.command(cmd, command.getTimeout(), command.isAddEnter(), command.isDelayTyping(), command.getPromptString());
+						cli.command(cmd, command.getTimeout(), command.isAddEnter(), command.isDelayTyping(),
+								command.getPromptString());
 					}
 
 				} catch (Exception e) {
@@ -637,19 +617,35 @@ implements CliConnection {
 	public void setMaxIdleTime(long maxIdleTime) {
 		this.maxIdleTime = maxIdleTime;
 	}
-	
-    /**
-     * activates the IdleMonitor (if it wasn't activated allready)
-     * don't use if idleMonitor was allready active
-     */
-    public void activateIdleMonitor() {
-		if (maxIdleTime > 0 ) {
+
+	/**
+	 * activates the IdleMonitor (if it wasn't activated allready) don't use if
+	 * idleMonitor was allready active
+	 */
+	public synchronized void activateIdleMonitor() {
+		if (maxIdleTime > 0) {
 			lastCommandTime = System.currentTimeMillis();
 			idleMonitor = new IdleMonitor(this, maxIdleTime);
 			idleMonitor.start();
 		}
-    }
-	
+	}
+
+	/**
+	 * deactivates the IdleMonitor
+	 */
+	public synchronized void deactivateIdleMonitor() {
+		if (idleMonitor != null) {
+			try {
+				idleMonitor.setStop();
+				idleMonitor.join();
+			} catch (InterruptedException e) {
+				Reporter.log("Deactivating idle monitor failed", e);
+			} finally {
+				idleMonitor = null;
+			}
+		}
+	}
+
 	public String getCliLogFile() {
 		return cliLogFile;
 	}
@@ -693,7 +689,7 @@ implements CliConnection {
 	}
 
 	public void reconnect() {
-		
+
 		try {
 			cli.reconnect();
 		} catch (Exception e) {
@@ -702,7 +698,8 @@ implements CliConnection {
 
 	public Object clone() throws CloneNotSupportedException {
 		try {
-			CliConnectionImpl newImpl = (CliConnectionImpl) getClass().getClassLoader().loadClass(getClass().getName()).newInstance();
+			CliConnectionImpl newImpl = (CliConnectionImpl) getClass().getClassLoader().loadClass(getClass().getName())
+					.newInstance();
 			newImpl.port = port;
 			newImpl.user = user;
 			newImpl.password = password;

@@ -180,6 +180,7 @@ public class WgetClient implements Callable<String> {
 	}
 
 	public void activateIdleMonitor() {
+		module.setName("wget from " + ip + " as " + userAgent);
 		module.getCliConnectionImpl().activateIdleMonitor();
 	}
 

@@ -622,7 +622,7 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 	 * activates the IdleMonitor (if it wasn't activated allready) don't use if
 	 * idleMonitor was allready active
 	 */
-	public synchronized void activateIdleMonitor() {
+	public void activateIdleMonitor() {
 		if (maxIdleTime > 0 && (idleMonitor == null || !idleMonitor.isAlive())) {
 			idleMonitor = new IdleMonitor(this, maxIdleTime);
 			idleMonitor.start();
@@ -632,15 +632,19 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 	/**
 	 * deactivates the IdleMonitor
 	 */
-	public synchronized void deactivateIdleMonitor() {
+	public void deactivateIdleMonitor() {
+
 		if (idleMonitor != null) {
-			try {
-				idleMonitor.setStop();
-				idleMonitor.join();
-			} catch (InterruptedException e) {
-				Reporter.log("Deactivating idle monitor failed", e);
-			} finally {
-				idleMonitor = null;
+			synchronized (idleMonitor) {
+				try {
+					System.out.println("stopping " + idleMonitor.getName());
+					idleMonitor.setStop();
+					idleMonitor.join();
+				} catch (InterruptedException e) {
+					Reporter.log("Deactivating idle monitor failed", e);
+				} finally {
+					idleMonitor = null;
+				}
 			}
 		}
 	}

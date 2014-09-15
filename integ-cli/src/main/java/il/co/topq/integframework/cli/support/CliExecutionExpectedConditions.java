@@ -1,11 +1,6 @@
 package il.co.topq.integframework.cli.support;
 
-import il.co.topq.integframework.assertion.AbstractAssertionLogic;
-import il.co.topq.integframework.assertion.Assert;
-import il.co.topq.integframework.assertion.ComparableAssertion;
-import il.co.topq.integframework.assertion.CompareMethod;
-import il.co.topq.integframework.assertion.FailSafeAssertionListener;
-import il.co.topq.integframework.assertion.FindTextAssertion;
+import il.co.topq.integframework.assertion.*;
 import il.co.topq.integframework.cli.process.CliCommandExecution;
 import il.co.topq.integframework.utils.Parser;
 
@@ -103,13 +98,19 @@ public abstract class CliExecutionExpectedConditions {
 					T actual = parser.parse(execution.getResult());
 					Assert.assertLogic(actual, logic, failSafeListener);
 					if (failSafeListener.getSuppressedThrowables().hasNext()) {
-						Assert.fail("execution failed", failSafeListener.getSuppressedThrowables().next());
+						Throwable cause = failSafeListener.getSuppressedThrowables().next();
+						if (cause instanceof AssertionError) {
+							if (cause.getCause() != null) {
+								throw new RuntimeException(cause.getCause());
+							}
+							return null;
+						}
+						throw new RuntimeException(cause);
 					}
 					return actual;
 				} catch (Exception e) {
-					Assert.fail(toString(), e);
+					throw new RuntimeException(e);
 				}
-				return null;
 			}
 
 			@Override

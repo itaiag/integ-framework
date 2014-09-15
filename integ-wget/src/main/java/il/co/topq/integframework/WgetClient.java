@@ -28,6 +28,7 @@ public class WgetClient implements Callable<String> {
 		this.module = module;
 		this.ip = ip;
 		this.userAgent = userAgent;
+		module.setName("wget from " + ip + " as " + userAgent);
 	}
 
 	public String getUserAgent() {

@@ -624,7 +624,6 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 	 */
 	public synchronized void activateIdleMonitor() {
 		if (maxIdleTime > 0 && idleMonitor == null) {
-			lastCommandTime = System.currentTimeMillis();
 			idleMonitor = new IdleMonitor(this, maxIdleTime);
 			idleMonitor.start();
 		}

@@ -33,7 +33,7 @@ public class IdleMonitor extends Thread {
 	
 	@Override
 	public void run(){
-		System.out.println("Idle monitor was started");
+		System.out.println(this.getName() + " started");
 		while(!stop){
 			long lastCommandTime = cli.getLastCommandTime();
 			if(lastCommandTime == 0){
@@ -50,9 +50,9 @@ public class IdleMonitor extends Thread {
 				cmd.setSilent(true);
 				cli.command(cmd);
 				if(cmd.isFailed()){
-					log("idle monitor failed", null, false);
+					log(getName() + " keepalive failed", null, false);
 				} else {
-					log("idle monitor keepalive success");
+					System.out.println(getName() + " keepalive success");
 				}
 			} else {
 				try {

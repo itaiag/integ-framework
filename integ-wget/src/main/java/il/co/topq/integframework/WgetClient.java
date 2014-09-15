@@ -174,4 +174,16 @@ public class WgetClient implements Callable<String> {
 		return this;
 	}
 
+	public void setMaxIdleTime(int maxIdleTimeMillies) {
+		module.getCliConnectionImpl().setMaxIdleTime(maxIdleTimeMillies);
+	}
+
+	public void activateIdleMonitor() {
+		module.getCliConnectionImpl().activateIdleMonitor();
+	}
+
+	public void deactivateIdleMonitor() {
+		module.getCliConnectionImpl().deactivateIdleMonitor();
+	}
+
 }

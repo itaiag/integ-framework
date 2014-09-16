@@ -4,6 +4,8 @@ import il.co.topq.integframework.assertion.*;
 import il.co.topq.integframework.cli.process.CliCommandExecution;
 import il.co.topq.integframework.utils.Parser;
 
+import java.text.ParseException;
+
 public abstract class CliExecutionExpectedConditions {
 	final Object __;
 
@@ -108,6 +110,8 @@ public abstract class CliExecutionExpectedConditions {
 						throw new RuntimeException(cause);
 					}
 					return actual;
+				} catch (ParseException pe) {
+					return null;
 				} catch (Exception e) {
 					throw new RuntimeException(e);
 				}

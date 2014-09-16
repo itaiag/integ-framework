@@ -1,5 +1,7 @@
 package il.co.topq.integframework.utils;
 
+import static com.google.common.base.Optional.fromNullable;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
@@ -9,7 +11,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 
@@ -23,24 +24,44 @@ public class Parsers {
 			;
 	}
 
+	private static class NumberFormatParseException extends ParseException {
+		private static final long serialVersionUID = -8164703305382254148L;
+		public NumberFormatParseException(String s, int errorOffset, NumberFormatException cause) {
+			super(s, errorOffset);
+			initCause(cause);
+		}
+	}
+
 	public static final Parser<Long> longParser = new Parser<Long>() {
 		@Override
 		public Long parse(String source) throws ParseException {
-			return Long.parseLong(source);
+			try {
+				return Long.parseLong(source);
+			} catch (final NumberFormatException e) {
+				throw new NumberFormatParseException(source, 0, e);
+			}
 		}
 	};
 
 	public static final Parser<Integer> intParser = new Parser<Integer>() {
 		@Override
 		public Integer parse(String source) throws ParseException {
-			return Integer.parseInt(source);
+			try {
+				return Integer.parseInt(source);
+			} catch (final NumberFormatException e) {
+				throw new NumberFormatParseException(source, 0, e);
+			}
 		}
 	};
 
 	public static final Parser<Double> doubleParser = new Parser<Double>() {
 		@Override
 		public Double parse(String source) throws ParseException {
-			return Double.parseDouble(source);
+			try {
+				return Double.parseDouble(source);
+			} catch (final NumberFormatException e) {
+				throw new NumberFormatParseException(source, 0, e);
+			}
 		}
 	};
 	/**
@@ -49,8 +70,9 @@ public class Parsers {
 	public static final Parser<String> stringParser = new Parser<String>() {
 		@Override
 		public String parse(String source) throws ParseException {
-			if (source != null)
+			if (source != null) {
 				return source;
+			}
 			throw new ParseException("source string is null", 0);
 		}
 	};
@@ -73,10 +95,11 @@ public class Parsers {
 		return new Parser<T>() {
 			@Override
 			public T parse(String source) throws ParseException {
-				if (m.reset(source).find())
+				if (m.reset(source).find()) {
 					return parser.parse(m.group(groupToFind));
-				else
+				} else {
 					throw new ParseException(source, 0);
+				}
 			}
 		};
 	}
@@ -97,8 +120,8 @@ public class Parsers {
 	 * */
 	public static final <T> Parser<Iterable<T>> parseLines(final Parser<T> parseInLine, Predicate<T> filterValues,
 			Predicate<String> filterLines) {
-		final Predicate<T> filterValuesLocalPredicate = Optional.fromNullable(filterValues).or(Predicates.<T> alwaysTrue());
-		final Predicate<String> filterLinesLocalPredicate = Optional.fromNullable(filterLines).or(Predicates.<String> alwaysTrue());
+		final Predicate<T> filterValuesLocalPredicate = fromNullable(filterValues).or(Predicates.<T> alwaysTrue());
+		final Predicate<String> filterLinesLocalPredicate = fromNullable(filterLines).or(Predicates.<String> alwaysTrue());
 		return new Parser<Iterable<T>>() {
 
 			@Override

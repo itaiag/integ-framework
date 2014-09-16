@@ -52,7 +52,7 @@ public class IdleMonitor extends Thread {
 				if(cmd.isFailed()){
 					log(getName() + " keepalive failed", null, false);
 				} else {
-					System.out.println(getName() + " keepalive success");
+					// System.out.println(getName() + " keepalive success");
 				}
 			} else {
 				try {

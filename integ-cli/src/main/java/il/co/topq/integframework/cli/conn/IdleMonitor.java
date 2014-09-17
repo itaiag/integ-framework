@@ -5,6 +5,7 @@ package il.co.topq.integframework.cli.conn;
 
 import static il.co.topq.integframework.reporting.Reporter.log;
 import static java.lang.System.currentTimeMillis;
+import static java.lang.System.out;
 
 /**
  * Monitors the allowed idle time of a machine.
@@ -19,7 +20,7 @@ public class IdleMonitor extends Thread {
 	CliConnectionImpl cli;
 	long timeout;
 	boolean stop = false;
-	
+
 	/**	 
 	 * @param cli CliConnection 
 	 * @param timeout (miliSeconds) the maximum idleTime
@@ -33,7 +34,7 @@ public class IdleMonitor extends Thread {
 	
 	@Override
 	public void run(){
-		System.out.println(this.getName() + " started");
+		out.println(this.getName() + " started");
 		while(!stop){
 			long lastCommandTime = cli.getLastCommandTime();
 			if(lastCommandTime == 0){
@@ -45,10 +46,10 @@ public class IdleMonitor extends Thread {
 				continue;
 			}
 			if (currentTimeMillis() - lastCommandTime > (timeout * 0.9)) {
-				CliCommand cmd = new CliCommand();
-				cmd.setCommands(new String[]{""});
-				cmd.setSilent(true);
+				CliCommand cmd = new CliCommand("");
+				cli.setPrintStream(null);
 				cli.command(cmd);
+				cli.setPrintStream(out);
 				if(cmd.isFailed()){
 					log(getName() + " keepalive failed", null, false);
 				} else {

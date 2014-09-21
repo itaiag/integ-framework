@@ -69,27 +69,24 @@ public class HDFSSystemModule {
 		return wait;
 	}
 
-	public void copyFromLocal(File src, Path dst,
-			EnumSet<CreateFlag> createFlag, CreateOpts... opts)
-			throws AccessControlException, FileAlreadyExistsException,
-			FileNotFoundException, ParentNotDirectoryException,
-			UnsupportedFileSystemException, UnresolvedLinkException,
-			IOException {
+	public void copyFromLocal(File src, Path dst, EnumSet<CreateFlag> createFlag, CreateOpts... opts)
+			throws AccessControlException, FileAlreadyExistsException, FileNotFoundException, ParentNotDirectoryException,
+			UnsupportedFileSystemException, UnresolvedLinkException, IOException {
 
-		copyBytes(new BufferedInputStream(new FileInputStream(src)),
-				new BufferedOutputStream(hdfs.create(dst, createFlag, opts)),
+		copyBytes(new BufferedInputStream(new FileInputStream(src)), new BufferedOutputStream(hdfs.create(dst, createFlag, opts)),
 				10240, true);
 	}
 
-	public void copyFromRemote(Path src, File dst)
-			throws AccessControlException,
-			FileNotFoundException,
-			UnresolvedLinkException,
+	public void copyFromRemote(Path src, File dst) throws AccessControlException, FileNotFoundException, UnresolvedLinkException,
 			IOException {
 
-		copyBytes(new BufferedInputStream(hdfs.open(src)),
-				new BufferedOutputStream(new FileOutputStream(dst)), 10240,
-				true);
+		copyBytes(new BufferedInputStream(hdfs.open(src)), new BufferedOutputStream(new FileOutputStream(dst)), 10240, true);
+	}
+
+	public OutputStream create(Path f, EnumSet<CreateFlag> createFlag, CreateOpts... opts) throws AccessControlException,
+			FileAlreadyExistsException, FileNotFoundException, ParentNotDirectoryException, UnsupportedFileSystemException,
+			UnresolvedLinkException, IOException {
+		return hdfs.create(f, createFlag, opts);
 	}
 
 	public <T> T validateThat(HdfsExpectedCondition<T> expectedCondition) throws Throwable {
@@ -111,4 +108,5 @@ public class HDFSSystemModule {
 		Reporter.log("Validating " + predicate.toString());
 		return predicate.apply(hdfs);
 	}
+
 }

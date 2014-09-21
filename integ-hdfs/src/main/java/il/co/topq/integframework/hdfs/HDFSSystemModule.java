@@ -52,8 +52,11 @@ public class HDFSSystemModule {
 				Configuration conf = new Configuration();
 				UserGroupInformation.setConfiguration(conf);
 				return (Hdfs) Hdfs.get(new URI(HdfsConstants.HDFS_URI_SCHEME, userinfo, host, port, "", "", ""), conf);
+
 			}
+
 		});
+
 	}
 
 	public Hdfs getHdfs() {

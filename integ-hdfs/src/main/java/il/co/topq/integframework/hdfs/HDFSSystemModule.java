@@ -90,6 +90,10 @@ public class HDFSSystemModule {
 		return hdfs.create(f, createFlag, opts);
 	}
 
+	public InputStream open(Path f) throws AccessControlException, FileNotFoundException, UnresolvedLinkException, IOException {
+		return hdfs.open(f);
+	}
+
 	public void mkdir(Path dir, FsPermission permission, boolean createParent) throws UnresolvedLinkException, IOException {
 		hdfs.mkdir(dir, permission, createParent);
 	}

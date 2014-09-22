@@ -15,7 +15,7 @@ public class RESTClientModule extends AbstractModuleImpl {
 	String uri;
 
 	public ClientResponse post(JSONObject input, String action) throws Exception {
-		Reporter.log("Request", input.toString(3), Style.PLAINTEXT);
+		Reporter.log("Request", action + "\nBody:" + input.toString(3), Style.PLAINTEXT);
 		StringBuilder builder = new StringBuilder(uri);
 		if (!uri.endsWith("/")) {
 			builder.append("/");

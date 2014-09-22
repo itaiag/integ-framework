@@ -1,14 +1,20 @@
 package il.co.topq.integframework.issue;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static il.co.topq.integframework.assertion.CompareMethod.BEFORE;
+import static il.co.topq.integframework.assertion.CompareMethod.is;
+import static il.co.topq.integframework.issue.IssueType.PASS;
+import static org.testng.ITestResult.FAILURE;
+import static org.testng.ITestResult.SUCCESS;
+import static org.testng.ITestResult.SUCCESS_PERCENTAGE_FAILURE;
 import il.co.topq.integframework.issue.KnownIssue.KnownIssues;
+import il.co.topq.integframework.reporting.Reporter;
 
 import java.util.List;
 
 import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
-
-import com.google.common.collect.Lists;
 
 public class KnownIssueTestListener implements ITestListener {
 
@@ -34,10 +40,10 @@ public class KnownIssueTestListener implements ITestListener {
 		KnownIssue issue = result.getMethod().getConstructorOrMethod().getMethod().getAnnotation(KnownIssue.class);
 		KnownIssues issues = result.getMethod().getConstructorOrMethod().getMethod().getAnnotation(KnownIssues.class);
 
-		List<KnownIssue> allIssues = Lists.newArrayList();
+		List<KnownIssue> allIssues = newArrayList();
 		allIssues.add(issue);
 		if (issues != null) {
-			allIssues.addAll(Lists.newArrayList(issues.value()));
+			allIssues.addAll(newArrayList(issues.value()));
 		}
 
 		boolean isKnownIssue = false;
@@ -46,16 +52,22 @@ public class KnownIssueTestListener implements ITestListener {
 				if (knownIssue.type().equals(whatItShouldHave)) {
 					if (knownIssue.throwableType().isInstance(result.getThrowable())) {
 						if (result.getThrowable().getMessage().matches(knownIssue.messageMustMatch())) {
-							if (knownIssue.dueTo() < System.currentTimeMillis()) {
-								isKnownIssue = true;
+							boolean passedDueDate;
+							if (knownIssue.dueTo() == -1) {
+								passedDueDate = false;
+							} else {
+								passedDueDate = is(knownIssue.dueTo(), BEFORE, System.currentTimeMillis());
 							}
+							Reporter.log(knownIssue.issue(), result.getThrowable(), passedDueDate ? FAILURE
+									: SUCCESS_PERCENTAGE_FAILURE);
+							isKnownIssue = true;
 						}
 					}
 				}
 			}
 		}
 		if (isKnownIssue) {
-			result.setStatus((whatItShouldHave == IssueType.PASS) ? ITestResult.SUCCESS : ITestResult.FAILURE);
+			result.setStatus((whatItShouldHave == PASS) ? SUCCESS : FAILURE);
 		}
 	}
 

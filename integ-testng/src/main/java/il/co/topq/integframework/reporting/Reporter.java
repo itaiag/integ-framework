@@ -44,7 +44,13 @@ public class Reporter extends org.testng.Reporter {
 	}
 
 	public enum Color {
-		RED, BLUE, YELLOW, GREEN
+		RED, BLUE, YELLOW {
+			@Override
+			public String toString() {
+				return "gold";
+			}
+		},
+		GREEN
 	}
 
 	public void logEscapeHtml(String s) {
@@ -479,7 +485,7 @@ public class Reporter extends org.testng.Reporter {
 			return s;
 		}
 		final StringBuilder sb = new StringBuilder();
-		sb.append("<span style='color:").append(color.name()).append("'>");
+		sb.append("<span style='color:").append(color.toString()).append("'>");
 		sb.append(s);
 		sb.append("</span>");
 		return sb.toString();

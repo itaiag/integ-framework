@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>integ-hdfs</artifactId>
 	<dependencies>
@@ -34,6 +35,11 @@
 			<artifactId>integ-support</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>il.co.topq.integframework</groupId>
+			<artifactId>integ-cli</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 	</dependencies>
 	<parent>
 		<groupId>il.co.topq.integframework</groupId>
@@ -41,7 +47,7 @@
 		<version>1.0.3-SNAPSHOT</version>
 		<relativePath>../integ-parent</relativePath>
 	</parent>
-	
+
 	<properties>
 		<hadoop.provided.version>[2.0.0,2.4.1)</hadoop.provided.version>
 	</properties>

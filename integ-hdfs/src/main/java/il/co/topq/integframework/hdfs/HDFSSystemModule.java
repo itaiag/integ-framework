@@ -50,35 +50,26 @@ public class HDFSSystemModule extends AbstractModuleImpl {
 			} else {
 				username = userinfo;
 			}
-			System.setProperty("user.name", username);
-			System.setProperty("HADOOP_USER_NAME", username);
 			ugi = UserGroupInformation.createRemoteUser(username);
 		}
 	}
 
 	@Override
 	public void init() throws Exception {
-
 		super.init();
-		if (this.isClosed) {
-			hdfs = ugi.doAs(new PrivilegedExceptionAction<Hdfs>() {
-				@Override
-				public Hdfs run() throws Exception {
-
-					Configuration conf = new Configuration();
-					if (gateway != null) {
-						for (String resourcePath : resourcesPaths) {
-							conf.addResource(gateway.get(resourcePath));
-						}
-						conf.reloadConfiguration();
+		hdfs = ugi.doAs(new PrivilegedExceptionAction<Hdfs>() {
+			@Override
+			public Hdfs run() throws Exception {
+				Configuration conf = new Configuration();
+				if (gateway != null) {
+					for (String resourcePath : resourcesPaths) {
+						conf.addResource(new BufferedInputStream(gateway.get(resourcePath)));
 					}
-					UserGroupInformation.setConfiguration(conf);
-					return (Hdfs) Hdfs.get(new URI(HdfsConstants.HDFS_URI_SCHEME, userinfo, host, port, "", "", ""), conf);
-
 				}
-
-			});
-		}
+				UserGroupInformation.setConfiguration(conf);
+				return (Hdfs) Hdfs.get(new URI(HdfsConstants.HDFS_URI_SCHEME, userinfo, host, port, "", "", ""), conf);
+			}
+		});
 	}
 
 	public Hdfs getHdfs() {

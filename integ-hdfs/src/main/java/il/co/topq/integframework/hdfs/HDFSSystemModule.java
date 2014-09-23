@@ -1,6 +1,7 @@
 package il.co.topq.integframework.hdfs;
 
 import static org.apache.hadoop.io.IOUtils.copyBytes;
+import il.co.topq.integframework.AbstractModuleImpl;
 import il.co.topq.integframework.cli.conn.LinuxDefaultCliConnection;
 import il.co.topq.integframework.hdfs.support.HdfsExpectedCondition;
 import il.co.topq.integframework.hdfs.support.HdfsWait;
@@ -11,9 +12,7 @@ import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.PrivilegedExceptionAction;
-import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.conf.Configuration;
@@ -27,17 +26,22 @@ import org.apache.hadoop.security.UserGroupInformation;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 
-public class HDFSSystemModule {
+public class HDFSSystemModule extends AbstractModuleImpl {
 
-	protected final Hdfs hdfs;
+	protected Hdfs hdfs;
 	private HdfsWait wait;
 	protected UserGroupInformation ugi;
 	protected LinuxDefaultCliConnection gateway = null;
-	protected List<String> resourcesPaths = new ArrayList<>();
+	protected String[] resourcesPaths = null;
+	protected final int port;
+	protected final String host;
+	protected final String userinfo;
 
 	public HDFSSystemModule(final String host, final int port, final String userinfo) throws URISyntaxException, IOException,
 			InterruptedException {
-
+		this.host = host;
+		this.port = port;
+		this.userinfo = userinfo;
 		ugi = UserGroupInformation.getCurrentUser();
 		if (userinfo != null) {
 			String username;
@@ -46,29 +50,35 @@ public class HDFSSystemModule {
 			} else {
 				username = userinfo;
 			}
-			System.setProperty("user.name", username);
-			System.setProperty("HADOOP_USER_NAME", username);
+			// System.setProperty("user.name", username);
+			// System.setProperty("HADOOP_USER_NAME", username);
 			ugi = UserGroupInformation.createRemoteUser(username);
 		}
+	}
 
-		hdfs = ugi.doAs(new PrivilegedExceptionAction<Hdfs>() {
-			@Override
-			public Hdfs run() throws Exception {
+	@Override
+	public void init() throws Exception {
 
-				Configuration conf = new Configuration();
-				if (gateway != null) {
-					for (String resourcePath : resourcesPaths) {
-						conf.addResource(gateway.get(resourcePath));
+		super.init();
+		if (this.isClosed) {
+			hdfs = ugi.doAs(new PrivilegedExceptionAction<Hdfs>() {
+				@Override
+				public Hdfs run() throws Exception {
+
+					Configuration conf = new Configuration();
+					if (gateway != null) {
+						for (String resourcePath : resourcesPaths) {
+							conf.addResource(gateway.get(resourcePath));
+						}
+						conf.reloadConfiguration();
 					}
-					conf.reloadConfiguration();
+					UserGroupInformation.setConfiguration(conf);
+					return (Hdfs) Hdfs.get(new URI(HdfsConstants.HDFS_URI_SCHEME, userinfo, host, port, "", "", ""), conf);
+
 				}
-				UserGroupInformation.setConfiguration(conf);
-				return (Hdfs) Hdfs.get(new URI(HdfsConstants.HDFS_URI_SCHEME, userinfo, host, port, "", "", ""), conf);
 
-			}
-
-		});
-
+			});
+		}
 	}
 
 	public Hdfs getHdfs() {
@@ -130,4 +140,19 @@ public class HDFSSystemModule {
 		return predicate.apply(hdfs);
 	}
 
+	public LinuxDefaultCliConnection getGateway() {
+		return gateway;
+	}
+
+	public void setGateway(LinuxDefaultCliConnection gateway) {
+		this.gateway = gateway;
+	}
+
+	public String[] getResourcesPaths() {
+		return resourcesPaths;
+	}
+
+	public void setResourcesPaths(String[] resourcesPaths) {
+		this.resourcesPaths = resourcesPaths;
+	}
 }

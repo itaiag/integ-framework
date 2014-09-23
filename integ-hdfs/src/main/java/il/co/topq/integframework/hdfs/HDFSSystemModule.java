@@ -50,8 +50,8 @@ public class HDFSSystemModule extends AbstractModuleImpl {
 			} else {
 				username = userinfo;
 			}
-			// System.setProperty("user.name", username);
-			// System.setProperty("HADOOP_USER_NAME", username);
+			System.setProperty("user.name", username);
+			System.setProperty("HADOOP_USER_NAME", username);
 			ugi = UserGroupInformation.createRemoteUser(username);
 		}
 	}

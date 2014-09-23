@@ -1,6 +1,7 @@
 package il.co.topq.integframework.hdfs;
 
 import static org.apache.hadoop.io.IOUtils.copyBytes;
+import il.co.topq.integframework.cli.conn.LinuxDefaultCliConnection;
 import il.co.topq.integframework.hdfs.support.HdfsExpectedCondition;
 import il.co.topq.integframework.hdfs.support.HdfsWait;
 import il.co.topq.integframework.reporting.Reporter;
@@ -10,7 +11,9 @@ import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.PrivilegedExceptionAction;
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.conf.Configuration;
@@ -29,6 +32,8 @@ public class HDFSSystemModule {
 	protected final Hdfs hdfs;
 	private HdfsWait wait;
 	protected UserGroupInformation ugi;
+	protected LinuxDefaultCliConnection gateway = null;
+	protected List<String> resourcesPaths = new ArrayList<>();
 
 	public HDFSSystemModule(final String host, final int port, final String userinfo) throws URISyntaxException, IOException,
 			InterruptedException {
@@ -49,7 +54,14 @@ public class HDFSSystemModule {
 		hdfs = ugi.doAs(new PrivilegedExceptionAction<Hdfs>() {
 			@Override
 			public Hdfs run() throws Exception {
+
 				Configuration conf = new Configuration();
+				if (gateway != null) {
+					for (String resourcePath : resourcesPaths) {
+						conf.addResource(gateway.get(resourcePath));
+					}
+					conf.reloadConfiguration();
+				}
 				UserGroupInformation.setConfiguration(conf);
 				return (Hdfs) Hdfs.get(new URI(HdfsConstants.HDFS_URI_SCHEME, userinfo, host, port, "", "", ""), conf);
 

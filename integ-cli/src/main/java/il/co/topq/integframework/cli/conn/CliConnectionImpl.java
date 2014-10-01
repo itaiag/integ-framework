@@ -11,6 +11,7 @@ import il.co.topq.integframework.assertion.IAssertionLogic;
 import il.co.topq.integframework.cli.terminal.*;
 import il.co.topq.integframework.reporting.Reporter;
 import il.co.topq.integframework.reporting.Reporter.Color;
+import il.co.topq.integframework.utils.StringUtils;
 
 import java.io.*;
 import java.util.*;
@@ -201,10 +202,8 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 	public void init() throws Exception {
 		final List<Exception> ex = new ArrayList<Exception>();
 		Runnable r = new Runnable() {
-
 			@Override
 			public void run() {
-				// TODO Auto-generated method stub
 				if (isConnectOnInit()) {
 					try {
 						connect();
@@ -214,13 +213,12 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 				}
 			}
 		};
-		name = this.getName() != null ? this.getName() : this.getHost();
-		initializer = new Thread(null, r, getName() + " initializer");
-		initializer.setDaemon(true);
-
 		if (useThreads) {
+			initializer = new Thread(null, r, "Connector for " + getName());
+			initializer.setDaemon(true);
 			initializer.start();
 		} else {
+			initializer = Thread.currentThread();
 			r.run();
 			if (ex.size() == 1) {
 				throw ex.get(0);
@@ -230,7 +228,6 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 	}
 
 	public void connect() throws Exception {
-		activateIdleMonitor();
 		connectRetries = connectRetries <= 0 ? 1 : connectRetries;
 		if (!Thread.currentThread().equals(initializer)) {
 			initializer.join();
@@ -239,9 +236,8 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 
 			for (int retriesCounter = 0; retriesCounter < connectRetries; retriesCounter++) {
 				try {
-					// TODO:
-					// Reporter.getCurrentTestResult().setStatus(ITestResult.SUCCESS);
 					internalConnect();
+					activateIdleMonitor();
 					break;
 				} catch (Exception e) {
 					Reporter.log("Failed connecting  " + getHost() + ". Attempt " + (retriesCounter + 1) + ".  " + e.getMessage());
@@ -884,4 +880,8 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 		this.useThreads = useThreads;
 	}
 
+	@Override
+	public String getName() {
+		return StringUtils.either(super.getName()).or(getHost());
+	}
 }

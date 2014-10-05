@@ -17,10 +17,13 @@ public class DatabaseSystemModule extends AbstractModuleImpl {
 
 	protected final JdbcTemplate template;
 	private List<ResultSetPrinter> resultSetPrinterList;
+	private int queryTimeout = 0;
 
 	public DatabaseSystemModule(final DataSource dataSource) {
 		super();
 		this.template = new JdbcTemplate(dataSource);
+		if (queryTimeout > 0)
+			this.template.setQueryTimeout(queryTimeout);
 	}
 
 	@Override
@@ -29,7 +32,7 @@ public class DatabaseSystemModule extends AbstractModuleImpl {
 			initResultSetPrinters();
 		}
 	}
-	
+
 	public void initResultSetPrinters() {
 		resultSetPrinterList = new ArrayList<ResultSetPrinter>();
 		resultSetPrinterList.addAll(tablePrinters());
@@ -158,6 +161,14 @@ public class DatabaseSystemModule extends AbstractModuleImpl {
 		} else {
 			this.resultSetPrinterList = resultSetPrinterList;
 		}
+	}
+
+	public int getQueryTimeout() {
+		return queryTimeout;
+	}
+
+	public void setQueryTimeout(int queryTimeout) {
+		this.queryTimeout = queryTimeout;
 	}
 
 }

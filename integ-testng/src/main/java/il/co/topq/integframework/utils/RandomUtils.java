@@ -139,6 +139,26 @@ public class RandomUtils {
 		return randomInt + min;
 	}
 
+	/**
+	 * Get a random long value in given range
+	 * 
+	 * @param min
+	 *            range start (inclusive)
+	 * @param max
+	 *            range end (exclusive)
+	 * @param random
+	 *            the Random object to random with
+	 * @return an int value in the given range
+	 */
+	public static long getRandomLong(long min, long max, Random random) {
+		long randomLong;
+		do {
+			randomLong = random.nextLong(); // generate a random value
+		} while (!(min <= randomLong && randomLong < max)); // until it is in
+															// the range
+		return randomLong + min;
+	}
+
 	public static float getRandomFloat(float min, float max, Random random) {
 		float diff = max - min;
 		float randomFloat = random.nextFloat();

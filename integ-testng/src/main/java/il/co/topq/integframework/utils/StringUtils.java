@@ -4,6 +4,8 @@ import il.co.topq.integframework.assertion.CompareMethod;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -11,6 +13,7 @@ import org.testng.collections.Lists;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 
 public abstract class StringUtils {
 	@SuppressWarnings("unused")
@@ -46,6 +49,23 @@ public abstract class StringUtils {
 
 	public final static Predicate<String> is(final CompareMethod compare, final String another) {
 		return compare.to(another);
+	}
+
+	public final static Predicate<String> startsWith(final String another) {
+		return new Predicate<String>() {
+			@Override
+			public boolean apply(String input) {
+				return input.startsWith(another);
+			}
+		};
+	}
+
+	public final static Predicate<String> startsWith(final Collection<String> oneOfTheStrings) {
+		List<Predicate<String>> startWithEitherString = new ArrayList<>();
+		for (String string : oneOfTheStrings) {
+			startWithEitherString.add(startsWith(string));
+		}
+		return Predicates.or(startWithEitherString);
 	}
 
 	public static String getStackTrace(Throwable t) {

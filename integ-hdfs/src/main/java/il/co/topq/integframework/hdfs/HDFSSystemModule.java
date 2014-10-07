@@ -111,6 +111,10 @@ public class HDFSSystemModule extends AbstractModuleImpl {
 		hdfs.mkdir(dir, permission, createParent);
 	}
 
+	public void rmdir(Path dir) throws UnresolvedLinkException, IOException {
+		hdfs.delete(dir, true);
+	}
+
 	public <T> T validateThat(HdfsExpectedCondition<T> expectedCondition) throws Throwable {
 		Reporter.log("Validating: " + expectedCondition.toString());
 		HdfsWait oldWait = this.wait;
@@ -146,4 +150,5 @@ public class HDFSSystemModule extends AbstractModuleImpl {
 	public void setResourcesPaths(String[] resourcesPaths) {
 		this.resourcesPaths = resourcesPaths;
 	}
+
 }

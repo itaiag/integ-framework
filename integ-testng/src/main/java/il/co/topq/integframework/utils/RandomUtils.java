@@ -291,7 +291,7 @@ public class RandomUtils {
 	}
 
 	public static <E> E getRandomItemFrom(Collection<E> collection, int limit) {
-		return new ArrayList<E>(collection).get(getRandomInt(0, limit - 1, new Random()));
+		return new ArrayList<E>(collection).get(getRandomInt(0, limit, new Random()));
 	}
 
 }

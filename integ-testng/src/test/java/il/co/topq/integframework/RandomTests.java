@@ -33,7 +33,7 @@ public class RandomTests {
 		int r = RandomUtils.getRandomInt(min, max, random);
 		Assert.assertLogic(r, new ComparableAssertion<>(SMALLER, max));
 		Assert.assertLogic(r, new ComparableAssertion<>(BIGGER_OR_EQUALS, min));
-
+		Reporter.log("==" + r);
 	}
 
 	@DataProvider(name = "longranges", parallel = true)
@@ -50,7 +50,7 @@ public class RandomTests {
 		long r = RandomUtils.getRandomLong(min, max, random);
 		Assert.assertLogic(r, new ComparableAssertion<>(SMALLER, max));
 		Assert.assertLogic(r, new ComparableAssertion<>(BIGGER_OR_EQUALS, min));
-		Reporter.log("" + r);
+		Reporter.log("==" + r);
 	}
 
 	@Test(invocationCount = 50, threadPoolSize = 5)

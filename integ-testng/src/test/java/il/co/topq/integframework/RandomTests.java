@@ -5,6 +5,7 @@ import static il.co.topq.integframework.assertion.CompareMethod.SMALLER;
 import il.co.topq.integframework.assertion.Assert;
 import il.co.topq.integframework.assertion.ComparableAssertion;
 import il.co.topq.integframework.assertion.PredicateAssertionLogic;
+import il.co.topq.integframework.reporting.Reporter;
 import il.co.topq.integframework.utils.RandomUtils;
 
 import java.util.List;
@@ -49,7 +50,7 @@ public class RandomTests {
 		long r = RandomUtils.getRandomLong(min, max, random);
 		Assert.assertLogic(r, new ComparableAssertion<>(SMALLER, max));
 		Assert.assertLogic(r, new ComparableAssertion<>(BIGGER_OR_EQUALS, min));
-
+		Reporter.log("" + r);
 	}
 
 	@Test(invocationCount = 50, threadPoolSize = 5)
@@ -57,6 +58,7 @@ public class RandomTests {
 		List<String> letters = Lists.newArrayList("a", "b", "C", "D", "1", "2", "3", "4");
 		String r = RandomUtils.getRandomItemFrom(letters);
 		Assert.assertLogic(r, new PredicateAssertionLogic<>(Predicates.in(letters)));
+		Reporter.log("" + r);
 	}
 
 	@Test(expectedExceptions = { IllegalArgumentException.class }, expectedExceptionsMessageRegExp = "-?\\d+ is smaller then -?\\d+")

@@ -480,10 +480,8 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 				// be save also to this file
 				// Add to the sut file under <conn><cli> the tag <cliLogFile>
 				if (cliLogFile != null) {
-					try {
-						BufferedWriter out = new BufferedWriter(new FileWriter(cliLogFile, true));
+					try (BufferedWriter out = new BufferedWriter(new FileWriter(cliLogFile, true))) {
 						out.write(lastResult);
-						out.close();
 					} catch (IOException e) {
 						command.setFailCause("Writing CLI buffer to file " + cliLogFile + " failed");
 						command.setThrown(e);
@@ -503,7 +501,7 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 				try {
 					Thread.sleep(command.getDelayInRetries());
 				} catch (InterruptedException e2) {
-					command.setFailCause("Sleep failed");
+					command.setFailCause("Sleep interrupted");
 					command.setThrown(e2);
 					command.setFailed(true);
 					return;
@@ -883,5 +881,10 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 	@Override
 	public String getName() {
 		return StringUtils.either(super.getName()).or(getHost());
+	}
+
+	@Override
+	public String toString() {
+		return getName();
 	}
 }

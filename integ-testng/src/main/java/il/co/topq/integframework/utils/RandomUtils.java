@@ -134,7 +134,22 @@ public class RandomUtils {
 	 * @return an int value in the given range
 	 */
 	public static int getRandomInt(int min, int max, Random random) {
-		int diff = max - min + 1;
+		if (max <= min)
+			throw new IllegalArgumentException(max + " is smaller then " + min);
+		int diff = max - min;
+
+		if (diff < 0) {
+			int a = getRandomInt(0, (max == 0) ? 1 : max, random);
+			if (max == 0 && a == 0)
+				a--;
+			int b;
+			if (min == Integer.MIN_VALUE) {
+				b = -getRandomInt(0, Integer.MAX_VALUE - 2, random);
+			} else {
+				b = getRandomInt(min, 0, random);
+			}
+			return random.nextBoolean() ? a : b;
+		}
 		int randomInt = random.nextInt(diff);
 		return randomInt + min;
 	}
@@ -151,12 +166,27 @@ public class RandomUtils {
 	 * @return an int value in the given range
 	 */
 	public static long getRandomLong(long min, long max, Random random) {
-		long randomLong;
+		if (max <= min)
+			throw new IllegalArgumentException(max + " is smaller then " + min);
+		long val, bits, diff = max - min;
+		if (diff < 0) {
+			long a = getRandomLong(0, (max == 0) ? 1 : max, random);
+			if (max == 0 && a == 0)
+				a--;
+			long b;
+			if (min == Long.MIN_VALUE) {
+				b = -getRandomLong(0, Long.MAX_VALUE - 2, random);
+			} else {
+				b = getRandomLong(min, 0, random);
+			}
+			return random.nextBoolean() ? a : b;
+		}
 		do {
-			randomLong = random.nextLong(); // generate a random value
-		} while (!(min <= randomLong && randomLong < max)); // until it is in
-															// the range
-		return randomLong + min;
+			bits = (random.nextLong() << 1) >>> 1;
+			val = bits % diff + min;
+		} while (val < min || max <= val);
+		return val;
+
 	}
 
 	public static float getRandomFloat(float min, float max, Random random) {
@@ -263,6 +293,5 @@ public class RandomUtils {
 	public static <E> E getRandomItemFrom(Collection<E> collection, int limit) {
 		return new ArrayList<E>(collection).get(getRandomInt(0, limit - 1, new Random()));
 	}
-
 
 }

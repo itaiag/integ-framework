@@ -258,7 +258,7 @@ public class Cli {
 				}
 				if (timeout > 0) {
 					if (System.currentTimeMillis() - startTime > (timeout)) {
-						throw new IOException("timeout: " + timeout);
+						throw new IOException("Timeout waiting for scroll");
 					}
 				}
 				/*

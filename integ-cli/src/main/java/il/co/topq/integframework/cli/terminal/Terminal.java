@@ -278,7 +278,7 @@ public abstract class Terminal {
                     if (timeout > 0) {
                         if (System.currentTimeMillis() - startTime > timeout) {
                             result.append(sb);
-                            throw new IOException("timeout: " + timeout);
+							throw new IOException("Timeout waiting for response");
                         }
                     }
                 }

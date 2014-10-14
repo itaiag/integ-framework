@@ -1,16 +1,12 @@
 package il.co.topq.integframework.cli.process;
 
 import il.co.topq.integframework.AbstractModule;
-import il.co.topq.integframework.assertion.AbstractAssertionLogic;
-import il.co.topq.integframework.assertion.Assert;
-import il.co.topq.integframework.assertion.DefaultAssertionListener;
-import il.co.topq.integframework.assertion.FindTextAssertion;
-import il.co.topq.integframework.assertion.IAssertionLogic;
-import il.co.topq.integframework.assertion.TextNotFoundAssertion;
+import il.co.topq.integframework.assertion.*;
 import il.co.topq.integframework.cli.conn.CliCommand;
 import il.co.topq.integframework.cli.conn.CliConnection;
 import il.co.topq.integframework.utils.StringUtils;
 
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -102,7 +98,11 @@ public class CliCommandExecution {
 		if (silently) {
 			cliConnection.setPrintStream(silentPrintStream);
 		}
-		this.cliConnection.handleCliCommand(title, cliCommand);
+		try {
+			this.cliConnection.handleCliCommand(title, cliCommand);
+		} catch (IOException exception) {
+			throw new IOException("Execution of " + title + " failed on " + cliConnection.toString(), exception);
+		}
 
 		if (cliConnection instanceof AbstractModule) {
 			AbstractModule cliModule = (AbstractModule) cliConnection;

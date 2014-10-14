@@ -276,7 +276,7 @@ public class Reporter extends org.testng.Reporter {
 	 * @param color
 	 *            The color of the link element
 	 */
-	public static void log(String title, String body, Color color) {
+	public synchronized static void log(String title, String body, Color color) {
 		if (null == title) {
 			title = "title";
 		}
@@ -352,7 +352,7 @@ public class Reporter extends org.testng.Reporter {
 		log(title, body, statusColor);
 	}
 
-	public static void startLogToggle(String title) {
+	public synchronized static void startLogToggle(String title) {
 		startLogToggle(title, null);
 	}
 
@@ -394,7 +394,7 @@ public class Reporter extends org.testng.Reporter {
 		log(toggleElement.toString(), false, null, null);
 	}
 
-	public static void startLogToggle(String title, Color color) {
+	public synchronized static void startLogToggle(String title, Color color) {
 		if (inToggle) {
 			return;
 		}

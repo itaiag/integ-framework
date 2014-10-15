@@ -117,13 +117,8 @@ public class HDFSSystemModule extends AbstractModuleImpl {
 	}
 
 	public void rmdir(Path dir, boolean throwFileNotFoundException) throws UnresolvedLinkException, IOException {
-		try {
-			if (!hdfs.delete(dir, true)) {
-				throw new DirectoryNotEmptyException("delete of " + dir.toString() + " failed");
-			}
-		} catch (FileNotFoundException exception) {
-			if (throwFileNotFoundException)
-				throw exception;
+		if (!FileUtil.fullyDelete(new File(hdfs.getUriPath(dir)))) {
+			throw new DirectoryNotEmptyException("delete of " + dir.toString() + " failed");
 		}
 	}
 

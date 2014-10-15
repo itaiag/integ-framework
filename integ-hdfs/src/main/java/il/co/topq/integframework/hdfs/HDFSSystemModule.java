@@ -11,6 +11,7 @@ import il.co.topq.integframework.support.TimeoutException;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.DirectoryNotEmptyException;
 import java.security.PrivilegedExceptionAction;
 import java.util.EnumSet;
 import java.util.concurrent.TimeUnit;
@@ -112,7 +113,18 @@ public class HDFSSystemModule extends AbstractModuleImpl {
 	}
 
 	public void rmdir(Path dir) throws UnresolvedLinkException, IOException {
-		hdfs.delete(dir, true);
+		rmdir(dir, false);
+	}
+
+	public void rmdir(Path dir, boolean throwFileNotFoundException) throws UnresolvedLinkException, IOException {
+		try {
+			if (!hdfs.delete(dir, true)) {
+				throw new DirectoryNotEmptyException("delete of " + dir.toString() + " failed");
+			}
+		} catch (FileNotFoundException exception) {
+			if (throwFileNotFoundException)
+				throw exception;
+		}
 	}
 
 	public <T> T validateThat(HdfsExpectedCondition<T> expectedCondition) throws Throwable {

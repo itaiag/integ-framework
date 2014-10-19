@@ -1,12 +1,6 @@
 package il.co.topq.integframework;
 
-import static il.co.topq.integframework.reporting.Reporter.log;
-import static il.co.topq.integframework.reporting.Reporter.logFile;
-import static il.co.topq.integframework.reporting.Reporter.logImage;
-import static il.co.topq.integframework.reporting.Reporter.logToFile;
-import static il.co.topq.integframework.reporting.Reporter.startLogToggle;
-import static il.co.topq.integframework.reporting.Reporter.step;
-import static il.co.topq.integframework.reporting.Reporter.stopLogToggle;
+import static il.co.topq.integframework.reporting.Reporter.*;
 import static il.co.topq.integframework.reporting.Reporter.Color.BLUE;
 import static il.co.topq.integframework.reporting.Reporter.Color.GREEN;
 import static il.co.topq.integframework.reporting.Reporter.Color.RED;
@@ -89,6 +83,11 @@ public class ReporterTests {
 	@Test
 	public void warning() {
 		log(new RuntimeException("warning"), ITestResult.SUCCESS_PERCENTAGE_FAILURE);
+	}
+
+	@Test
+	public void skip() {
+		log(new RuntimeException("skip"), ITestResult.SKIP);
 	}
 
 	@Test

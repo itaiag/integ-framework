@@ -159,6 +159,11 @@ public abstract class HdfsExpectedConditions {
 	public static Predicate<Hdfs> isDirectory(final Path path) {
 		return new Predicate<Hdfs>() {
 			@Override
+			public String toString() {
+				return "the path " + path.toString() + " is a directory";
+			}
+
+			@Override
 			public boolean apply(Hdfs hdfs) {
 				try {
 					return hdfs.getFileStatus(path).isDirectory();

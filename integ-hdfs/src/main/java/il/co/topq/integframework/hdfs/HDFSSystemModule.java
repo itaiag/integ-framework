@@ -4,6 +4,7 @@ import static org.apache.hadoop.io.IOUtils.copyBytes;
 import il.co.topq.integframework.AbstractModuleImpl;
 import il.co.topq.integframework.cli.conn.LinuxDefaultCliConnection;
 import il.co.topq.integframework.hdfs.support.HdfsExpectedCondition;
+import il.co.topq.integframework.hdfs.support.HdfsExpectedConditions;
 import il.co.topq.integframework.hdfs.support.HdfsWait;
 import il.co.topq.integframework.reporting.Reporter;
 import il.co.topq.integframework.support.TimeoutException;
@@ -117,8 +118,12 @@ public class HDFSSystemModule extends AbstractModuleImpl {
 	}
 
 	public void rmdir(Path dir, boolean throwFileNotFoundException) throws UnresolvedLinkException, IOException {
-		if (!FileUtil.fullyDelete(new File(hdfs.getUriPath(dir)))) {
-			throw new DirectoryNotEmptyException("delete of " + dir.toString() + " failed");
+		if (validateThat(HdfsExpectedConditions.isDirectory(dir))) {
+			if (!hdfs.delete(dir, true)) {
+				throw new DirectoryNotEmptyException("delete of " + dir.toString() + " failed");
+			}
+		} else if (throwFileNotFoundException) {
+			throw new FileNotFoundException(dir.toString());
 		}
 	}
 

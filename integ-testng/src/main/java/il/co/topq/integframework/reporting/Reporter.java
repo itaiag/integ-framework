@@ -341,6 +341,7 @@ public class Reporter extends org.testng.Reporter {
 			statusColor = Color.RED;
 			break;
 		case ITestResult.SUCCESS_PERCENTAGE_FAILURE:
+		case ITestResult.SKIP:
 			statusColor = Color.YELLOW;
 			break;
 		case ITestResult.SUCCESS:

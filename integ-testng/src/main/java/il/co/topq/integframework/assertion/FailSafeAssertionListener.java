@@ -57,7 +57,8 @@ public class FailSafeAssertionListener<T> implements AssertionListener<T> {
 
 	public Throwable getRootSuppressedThrowable() {
 		Throwable t;
-		for (t = getLastSuppressedThrowable(); t.getCause() != null && (t.getCause() != t || !(t instanceof AssertionError)); t = t
+		for (t = getLastSuppressedThrowable(); t != null && t.getCause() != null
+				&& (t.getCause() != t || !(t instanceof AssertionError)); t = t
 				.getCause())
 			;/* DoNothing */
 		return t;

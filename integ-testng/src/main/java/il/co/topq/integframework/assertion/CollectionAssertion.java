@@ -148,8 +148,8 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 
 			List<E> sortedActual = actual.subList(0, actual.size());
 			List<E> sortedExpected = expected.subList(0, expected.size());
-			Collections.sort(sortedActual, comparator);
-			Collections.sort(sortedExpected, comparator);
+			Collections.sort(sortedActual, sortingComparator(comparator, either(actualTitle).or("actual")));
+			Collections.sort(sortedExpected, sortingComparator(comparator, either(actualTitle).or("expected")));
 			for (int iactual = 0, iexpected = 0; (iactual < sortedActual.size() || !allItems)
 					&& (iexpected < sortedExpected.size());) {
 				if (iactual >= sortedActual.size()) {
@@ -203,9 +203,9 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 
 			status = singlesInExpected.isEmpty() && (singlesInActual.isEmpty() || !allItems);
 			if (!status) {
-				message = "Total items not found: " + singlesInExpected.size() + "\n";
+				message = "Total items not found: " + singlesInExpected.size();
 				if (allItems) {
-					message = message + "Total unexpected items found: " + singlesInActual.size() + "\n";
+					message = message + "\nTotal unexpected items found: " + singlesInActual.size() + "\n";
 				}
 			}
 		} else if (matches != null) {
@@ -281,6 +281,10 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 
 	protected final Comparator<E> simpleComparator = new Comparator<E>() {
 
+		public String toString() {
+			return "Simple comparator";
+		};
+
 		@Override
 		public int compare(E o1, E o2) {
 			if (o1 instanceof Comparable<?>) {
@@ -299,4 +303,14 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 		}
 	};
 
+	protected final Comparator<E> sortingComparator(final Comparator<E> delegate, final String title) {
+		return new Comparator<E>() {
+			@Override
+			public int compare(E o1, E o2) {
+				int res = delegate.compare(o1, o2);
+				Assert.assertNotEquals(res, 0, "Duplicates found in " + title);
+				return res;
+			}
+		};
+	}
 }

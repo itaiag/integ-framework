@@ -3,16 +3,12 @@ package il.co.topq.integframework;
 import il.co.topq.integframework.assertion.Assert;
 import il.co.topq.integframework.assertion.CollectionAssertion;
 import il.co.topq.integframework.assertion.FailSafeAssertionListener;
-import il.co.topq.integframework.issue.KnownIssue;
-import il.co.topq.integframework.issue.KnownIssueTestListener;
 
 import java.util.List;
 
-import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
 
-@Listeners(KnownIssueTestListener.class)
 public class AssertionsTests {
 
 	@Test
@@ -21,8 +17,7 @@ public class AssertionsTests {
 				new CollectionAssertion<>(Lists.newArrayList("F", "D", "A", "S")));
 	}
 
-	@Test
-	@KnownIssue(messageMustMatch = "Total items not found: \\d+")
+	@Test(expectedExceptions = AssertionError.class, expectedExceptionsMessageRegExp = "Total items not found: \\d+")
 	public void testAssertCollectionFails() throws Throwable {
 		FailSafeAssertionListener<List<String>> assertionListener = new FailSafeAssertionListener<>();
 		List<String> actual = Lists.newArrayList("A", "S", "D", "F"), expected = Lists.newArrayList("Q", "W", "E", "A");
@@ -31,8 +26,7 @@ public class AssertionsTests {
 		throw assertionListener.getRootSuppressedThrowable();
 	}
 
-	@Test
-	@KnownIssue(messageMustMatch = "Duplicates found in actual")
+	@Test(expectedExceptions = AssertionError.class, expectedExceptionsMessageRegExp = "Duplicates found in actual")
 	public void testAssertCollectionActualDuplications() throws Throwable {
 		FailSafeAssertionListener<List<String>> assertionListener = new FailSafeAssertionListener<>();
 		List<String> actual = Lists.newArrayList("A", "A", "D", "F"), expected = Lists.newArrayList("Q", "W", "E", "R");
@@ -41,8 +35,7 @@ public class AssertionsTests {
 		throw assertionListener.getRootSuppressedThrowable();
 	}
 
-	@Test
-	@KnownIssue(messageMustMatch = "Duplicates found in expected")
+	@Test(expectedExceptions = AssertionError.class, expectedExceptionsMessageRegExp = "Duplicates found in expected")
 	public void testAssertCollectionExpectedDuplications() throws Throwable {
 		FailSafeAssertionListener<List<String>> assertionListener = new FailSafeAssertionListener<>();
 		List<String> actual = Lists.newArrayList("A", "S", "D", "F"), expected = Lists.newArrayList("Q", "W", "R", "R");

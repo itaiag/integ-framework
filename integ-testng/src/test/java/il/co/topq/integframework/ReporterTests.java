@@ -35,6 +35,7 @@ public class ReporterTests {
 		File myFile = new File("myFile.txt");
 		myFile.createNewFile();
 		logFile("Link to my file", myFile);
+		myFile.delete();
 	}
 
 	@Test

@@ -47,14 +47,14 @@ public class WgetClient implements Callable<String> {
 	}
 
 	public void post(CharSequence data) throws Exception {
-		CliCommandExecution execution = module.new WgetCommand().bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything()
+		CliCommandExecution execution = getModule().new WgetCommand().bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything()
 				.withHeaders(headers).post(data).error("failed");
 		execution.execute();
 		response = execution.getResult();
 	}
 
 	public void silentlyPost(CharSequence data) throws Exception {
-		CliCommandExecution execution = module.new WgetCommand().bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything()
+		CliCommandExecution execution = getModule().new WgetCommand().bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything()
 				.withHeaders(headers).post(data).withTimeout(30, TimeUnit.SECONDS).error("failed").silently();
 		execution.execute();
 		response = execution.getResult();
@@ -78,14 +78,14 @@ public class WgetClient implements Callable<String> {
 	}
 
 	public void postFile(String remoteFile) throws Exception {
-		CliCommandExecution execution = module.new WgetCommand().bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything()
+		CliCommandExecution execution = getModule().new WgetCommand().bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything()
 				.withHeaders(headers).postFile(remoteFile).error("failed");
 		execution.execute();
 		response = execution.getResult();
 	}
 
 	public void post(byte[] data, String remoteDir, String remoteFile) throws Exception {
-		OutputStream put = ((LinuxDefaultCliConnection) module.getCliConnectionImpl())
+		OutputStream put = ((LinuxDefaultCliConnection) getModule().getCliConnectionImpl())
 				.put(remoteDir, remoteFile, null, data.length);
 		IOUtils.copy(new ByteArrayInputStream(data), put);
 		IOUtils.closeQuietly(put);
@@ -95,12 +95,12 @@ public class WgetClient implements Callable<String> {
 
 	public void bindAddress() throws Exception {
 		if (!isEmpty(ip))
-			module.new AddIpCommand(ip).execute();
+			getModule().new AddIpCommand(ip).execute();
 	}
 
 	public void unbindAddress() throws Exception {
 		if (!isEmpty(ip))
-			module.new DeleteIpCommand(ip).execute();
+			getModule().new DeleteIpCommand(ip).execute();
 	}
 
 	@Override
@@ -147,7 +147,7 @@ public class WgetClient implements Callable<String> {
 
 	@Override
 	public String call() throws Exception {
-		WgetCommand wgetCommand = module.new WgetCommand();
+		WgetCommand wgetCommand = getModule().new WgetCommand();
 		wgetCommand.bindAddress(ip).withUserAgent(userAgent).withHeaders(headers).doNotDownloadAnything()
 				.post(this.dataGenerator.generateData(this));
 		wgetCommand.error("failed").silently().execute();
@@ -179,16 +179,20 @@ public class WgetClient implements Callable<String> {
 	}
 
 	public void setMaxIdleTime(long maxIdleTimeMillies) {
-		module.getCliConnectionImpl().setMaxIdleTime(maxIdleTimeMillies);
+		getModule().getCliConnectionImpl().setMaxIdleTime(maxIdleTimeMillies);
 	}
 
 	public void activateIdleMonitor() {
-		module.setName("wget" + (isEmpty(ip) ? " from " + ip : "") + " as " + userAgent);
-		module.getCliConnectionImpl().activateIdleMonitor();
+		getModule().setName("wget" + (isEmpty(ip) ? " from " + ip : "") + " as " + userAgent);
+		getModule().getCliConnectionImpl().activateIdleMonitor();
 	}
 
 	public void deactivateIdleMonitor() {
-		module.getCliConnectionImpl().deactivateIdleMonitor();
+		getModule().getCliConnectionImpl().deactivateIdleMonitor();
+	}
+
+	public WgetModule getModule() {
+		return module;
 	}
 
 }

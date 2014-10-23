@@ -256,7 +256,7 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 		}
 	}
 
-	private void internalConnect() throws Exception {
+	private synchronized void internalConnect() throws Exception {
 		if (host == null) {
 			throw new Exception("Default connection ip/comm is not configured");
 		}

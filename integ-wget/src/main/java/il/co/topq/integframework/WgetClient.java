@@ -1,5 +1,6 @@
 package il.co.topq.integframework;
 
+import static il.co.topq.integframework.utils.StringUtils.isEmpty;
 import il.co.topq.integframework.WgetModule.WgetCommand;
 import il.co.topq.integframework.cli.conn.LinuxDefaultCliConnection;
 import il.co.topq.integframework.cli.process.CliCommandExecution;
@@ -28,7 +29,7 @@ public class WgetClient implements Callable<String> {
 		this.module = module;
 		this.ip = ip;
 		this.userAgent = userAgent;
-		module.setName("wget from " + ip + " as " + userAgent);
+		module.setName("Wget client");
 	}
 
 	public String getUserAgent() {
@@ -93,11 +94,13 @@ public class WgetClient implements Callable<String> {
 	}
 
 	public void bindAddress() throws Exception {
-		module.new AddIpCommand(ip).execute();
+		if (!isEmpty(ip))
+			module.new AddIpCommand(ip).execute();
 	}
 
 	public void unbindAddress() throws Exception {
-		module.new DeleteIpCommand(ip).execute();
+		if (!isEmpty(ip))
+			module.new DeleteIpCommand(ip).execute();
 	}
 
 	@Override
@@ -180,7 +183,7 @@ public class WgetClient implements Callable<String> {
 	}
 
 	public void activateIdleMonitor() {
-		module.setName("wget from " + ip + " as " + userAgent);
+		module.setName("wget" + (isEmpty(ip) ? "from " + ip : "") + " as " + userAgent);
 		module.getCliConnectionImpl().activateIdleMonitor();
 	}
 

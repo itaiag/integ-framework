@@ -67,6 +67,8 @@ public class WgetModule extends LinuxCommandLineModule {
 		}
 
 		public WgetCommand bindAddress(String address) {
+			if (StringUtils.isEmpty(address))
+				return this;
 			bindAddressSet = setFlag(bindAddressSet, "Bind address" + " already set!");
 			command.append(" --bind-address=").append(address);
 			return this;

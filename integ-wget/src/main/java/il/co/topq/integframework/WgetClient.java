@@ -183,7 +183,7 @@ public class WgetClient implements Callable<String> {
 	}
 
 	public void activateIdleMonitor() {
-		module.setName("wget" + (isEmpty(ip) ? "from " + ip : "") + " as " + userAgent);
+		module.setName("wget" + (isEmpty(ip) ? " from " + ip : "") + " as " + userAgent);
 		module.getCliConnectionImpl().activateIdleMonitor();
 	}
 

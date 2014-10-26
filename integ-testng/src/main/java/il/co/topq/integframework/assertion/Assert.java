@@ -211,7 +211,7 @@ public class Assert extends org.testng.Assert {
 		do {
 			actual = actualValueGenerator.apply(resource);
 			if (actual == null) {
-				listener.assertionFailed(actual, logic);
+				listener.assertionFailed(actual, logic, new NullPointerException(logic.getMessage()));
 			}
 			Assert.assertLogic(actual, logic, listener);
 			try {

@@ -230,7 +230,11 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 	public void connect() throws Exception {
 		connectRetries = connectRetries <= 0 ? 1 : connectRetries;
 		if (!Thread.currentThread().equals(initializer)) {
-			initializer.join();
+			synchronized (initializer) {
+				while (initializer.isAlive()) {
+					initializer.join(100);
+				}
+			}
 		}
 		synchronized (this) {
 
@@ -620,6 +624,7 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 		if (maxIdleTime > 0 && (idleMonitor == null || !idleMonitor.isAlive())) {
 			idleMonitor = new IdleMonitor(this, maxIdleTime);
 			idleMonitor.start();
+			initializer = idleMonitor;
 		}
 	}
 

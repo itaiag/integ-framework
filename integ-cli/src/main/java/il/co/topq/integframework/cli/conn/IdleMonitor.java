@@ -62,7 +62,9 @@ public class IdleMonitor extends Thread {
 					log(getName() + " keepalive failed", null, false);
 					try {
 						synchronized (cli) {
-							cli.connect();
+							if (!cli.terminal.isConnected()) {
+								cli.connect();
+							}
 						}
 					} catch (Exception e) {
 						continue;
@@ -85,5 +87,6 @@ public class IdleMonitor extends Thread {
 
 	public void setStop() {
 		stop = true;
+		this.interrupt();
 	}
 }

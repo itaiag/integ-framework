@@ -8,11 +8,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 
-import ch.ethz.ssh2.Connection;
-import ch.ethz.ssh2.InteractiveCallback;
-import ch.ethz.ssh2.LocalPortForwarder;
-import ch.ethz.ssh2.SCPClient;
-import ch.ethz.ssh2.Session;
+import ch.ethz.ssh2.*;
+import ch.ethz.ssh2.channel.Channel;
 
 /**
  * A terminal used for SSH Connection
@@ -147,7 +144,7 @@ public class SSH extends Terminal {
 
 	@Override
 	public boolean isConnected() {
-		return true;
+		return sess.getState() == Channel.STATE_OPEN;
 	}
 
 	@Override
@@ -255,8 +252,4 @@ public class SSH extends Terminal {
 	protected void setDestinationPort(int destinationPort) {
 		this.destinationPort = destinationPort;
 	}
-
-
-
-	
 }

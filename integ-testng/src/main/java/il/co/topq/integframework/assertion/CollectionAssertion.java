@@ -15,6 +15,7 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 	final protected List<E> expected;
 	private List<E> singlesInActual, singlesInExpected;
 	private long maxMismatchesToReport = -1, maxNotFoundToReport = -1, maxUnexpectedToReport = -1;
+
 	private static final class PairOfMatches<E> {
 		final E actual, expected;
 
@@ -124,7 +125,7 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 			if (!allItems) {
 				if (expected.size() > actual.size()) {
 					status = false;
-					
+
 					Reporter.logToFile(new AssertionError(new StringBuilder("size of ")
 							.append(either(actualTitle).or("actual items")).append(" ").append(actual.size())
 							.append(", should be at least ").append(expected.size()).append("\n")));
@@ -308,7 +309,9 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 			@Override
 			public int compare(E o1, E o2) {
 				int res = delegate.compare(o1, o2);
-				Assert.assertNotEquals(res, 0, "Duplicates found in " + title);
+				if (res == 0) {
+					Assert.fail("Duplicates found in " + title);
+				}
 				return res;
 			}
 		};

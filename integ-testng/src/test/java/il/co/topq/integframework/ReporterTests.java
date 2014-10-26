@@ -8,7 +8,7 @@ import static il.co.topq.integframework.reporting.Reporter.Color.YELLOW;
 import static il.co.topq.integframework.reporting.Reporter.Style.BOLD;
 import static il.co.topq.integframework.reporting.Reporter.Style.ITALIC;
 import static il.co.topq.integframework.reporting.Reporter.Style.REGULAR;
-import static org.testng.Reporter.getCurrentTestResult;
+import il.co.topq.integframework.reporting.Reporter;
 import il.co.topq.integframework.reporting.Reporter.Color;
 import il.co.topq.integframework.reporting.Reporter.Style;
 
@@ -78,7 +78,7 @@ public class ReporterTests {
 
 		log(new RuntimeException("fail"), ITestResult.FAILURE);
 		log(new RuntimeException("success"), ITestResult.SUCCESS);
-		getCurrentTestResult().setStatus(0);
+		Reporter.getCurrentTestResult().setStatus(0);
 	}
 
 	@Test

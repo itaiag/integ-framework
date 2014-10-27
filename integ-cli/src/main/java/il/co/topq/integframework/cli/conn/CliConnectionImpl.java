@@ -392,44 +392,54 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 	 */
 	public static void handleCliCommand(CliConnectionImpl cli, String title, CliCommand command) throws Exception {
 		synchronized (cli) {
-
-			if (!cli.isConnectOnInit() && !cli.isConnected() || cli.useThreads) {
-				cli.connect();
-			}
-			cli.command(command);
-
-			cli.setActual(command.getResult());
-			if (command.isFailed() && (!command.isIgnoreErrors()) && (!cli.isForceIgnoreAnyErrors())) {
-				Reporter.log(title + ", " + command.getFailCause(), command.getResult(), Color.RED);
-				Exception e = command.getThrown();
-				if (e != null) {
-					throw e;
+			if (!cli.isConnectOnInit() || cli.useThreads) {
+				if (!cli.isConnected()) {
+					cli.connect();
 				}
-				throw new Exception("Cli command failed");
 			}
+			try {
+				if (!command.isSilent()) {
+					Reporter.startLogToggle(title);
+				}
+				cli.command(command);
 
-			if (!command.isSilent()) {
-				Reporter.log(title, command.getResult());
-			}
-			if (command.isIgnoreErrors() || (cli.isForceIgnoreAnyErrors())) {
-				;
-			} else {
-				List<IAssertionLogic<String>> analyzers = command.getAnalyzers();
-				if (analyzers != null) {
-					for (IAssertionLogic<String> analyzer : analyzers) {
-						analyzer.setActual(cli.getActual(String.class));
-						analyzer.doAssertion();
-						if (analyzer instanceof AbstractAssertionLogic<?>) {
-							AbstractAssertionLogic<String> stringAssertionLogic = (AbstractAssertionLogic<String>) analyzer;
-							if (!(command.isSilent() && stringAssertionLogic.isStatus())) {
-								Reporter.log(stringAssertionLogic.getTitle(), stringAssertionLogic.getMessage(),
-										stringAssertionLogic.isStatus());
+				cli.setActual(command.getResult());
+				if (command.isFailed() && (!command.isIgnoreErrors()) && (!cli.isForceIgnoreAnyErrors())) {
+					Reporter.log(command.getFailCause(), command.getResult(), Color.RED);
+					Exception e = command.getThrown();
+					if (e != null) {
+						throw e;
+					}
+					throw new Exception("Cli command failed");
+				}
+
+				if (!command.isSilent()) {
+					Reporter.log(command.getResult());
+				}
+				if (command.isIgnoreErrors() || (cli.isForceIgnoreAnyErrors())) {
+					;
+				} else {
+					List<IAssertionLogic<String>> analyzers = command.getAnalyzers();
+					if (analyzers != null) {
+						for (IAssertionLogic<String> analyzer : analyzers) {
+							analyzer.setActual(cli.getActual(String.class));
+							analyzer.doAssertion();
+							if (analyzer instanceof AbstractAssertionLogic<?>) {
+								AbstractAssertionLogic<String> stringAssertionLogic = (AbstractAssertionLogic<String>) analyzer;
+								if (!(command.isSilent() && stringAssertionLogic.isStatus())) {
+									Reporter.log(stringAssertionLogic.getTitle(), stringAssertionLogic.getMessage(),
+											stringAssertionLogic.isStatus());
+								}
 							}
 						}
 					}
 				}
+				cli.setForceIgnoreAnyErrors(false);
+			} finally {
+				if (!command.isSilent()) {
+					Reporter.stopLogToggle();
+				}
 			}
-			cli.setForceIgnoreAnyErrors(false);
 		}
 	}
 

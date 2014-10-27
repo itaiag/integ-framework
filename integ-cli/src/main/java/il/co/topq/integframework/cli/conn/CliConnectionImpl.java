@@ -15,6 +15,7 @@ import il.co.topq.integframework.utils.StringUtils;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 /**
@@ -231,8 +232,8 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 		connectRetries = connectRetries <= 0 ? 1 : connectRetries;
 		if (!Thread.currentThread().equals(initializer)) {
 			synchronized (initializer) {
-				while (initializer.isAlive()) {
-					initializer.join(100);
+				while (initializer.isAlive() && (!connected || !terminal.isConnected())) {
+					initializer.join(TimeUnit.SECONDS.toMillis(1));
 				}
 			}
 		}
@@ -339,7 +340,11 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 	public void close() {
 		if (idleMonitor != null) {
 			idleMonitor.setStop();
-			idleMonitor.interrupt();
+			try {
+				idleMonitor.join();
+			} catch (InterruptedException e) {
+				Reporter.log("Waiting for idle monitor failed", e);
+			}
 		}
 		disconnect();
 		isClosed = true;
@@ -617,8 +622,8 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 	}
 
 	/**
-	 * activates the IdleMonitor (if it wasn't activated allready) don't use if
-	 * idleMonitor was allready active
+	 * activates the IdleMonitor (if it wasn't activated already) don't use if
+	 * idleMonitor was already active
 	 */
 	public void activateIdleMonitor() {
 		if (maxIdleTime > 0 && (idleMonitor == null || !idleMonitor.isAlive())) {

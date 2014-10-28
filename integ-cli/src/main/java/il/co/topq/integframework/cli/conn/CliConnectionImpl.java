@@ -231,31 +231,37 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 	public void connect() throws Exception {
 		connectRetries = connectRetries <= 0 ? 1 : connectRetries;
 		if (!Thread.currentThread().equals(initializer)) {
+			int countdownLatch = 10;
 			synchronized (initializer) {
-				while (initializer.isAlive() && (!connected || !terminal.isConnected())) {
+				while (initializer.isAlive() && (!isConnected())) {
 					initializer.join(TimeUnit.SECONDS.toMillis(1));
+					if (0 < --countdownLatch) {
+						initializer.interrupt();
+					}
 				}
 			}
 		}
 		synchronized (this) {
-
-			for (int retriesCounter = 0; retriesCounter < connectRetries; retriesCounter++) {
-				try {
-					internalConnect();
-					activateIdleMonitor();
-					break;
-				} catch (Exception e) {
-					Reporter.log("Failed connecting  " + getHost() + ". Attempt " + (retriesCounter + 1) + ".  " + e.getMessage());
+			if (!isConnected()) {
+				for (int retriesCounter = 0; retriesCounter < connectRetries; retriesCounter++) {
 					try {
-						disconnect();
-					} catch (Throwable t) {
+						internalConnect();
+						activateIdleMonitor();
+						break;
+					} catch (Exception e) {
+						Reporter.log("Failed connecting  " + getHost() + ". Attempt " + (retriesCounter + 1) + ".  "
+								+ e.getMessage());
+						try {
+							disconnect();
+						} catch (Throwable t) {
+						}
+						if (retriesCounter == connectRetries - 1) {
+							throw e;
+						}
+					} finally {
+						// TODO:
+						// Reporter.getCurrentTestResult().setStatus(ITestResult.FAILURE);
 					}
-					if (retriesCounter == connectRetries - 1) {
-						throw e;
-					}
-				} finally {
-					// TODO:
-					// Reporter.getCurrentTestResult().setStatus(ITestResult.FAILURE);
 				}
 			}
 		}

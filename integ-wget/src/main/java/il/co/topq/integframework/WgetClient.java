@@ -195,4 +195,8 @@ public class WgetClient implements Callable<String> {
 		return module;
 	}
 
+	public boolean idleMonitorIsActive() {
+		return module.getCliConnectionImpl().idleMonitorIsActive();
+	}
+
 }

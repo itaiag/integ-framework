@@ -20,7 +20,8 @@ import static java.lang.System.out;
 public class IdleMonitor extends Thread {
 	CliConnectionImpl cli;
 	long timeout;
-	boolean stop = false;
+
+	// boolean stop = false;
 
 	/**
 	 * @param cli
@@ -39,9 +40,25 @@ public class IdleMonitor extends Thread {
 	public void run() {
 		out.println(this.getName() + " started");
 		String position = null;
-		while (!stop) {
+		while (!isInterrupted()) {
+			try {
+				synchronized (cli) {
+					if (!cli.terminal.isConnected()) {
+						cli.connect();
+					}
+				}
+			} catch (Exception e) {
+				continue;
+			}
 			long lastCommandTime = cli.getLastCommandTime();
 			if (lastCommandTime == 0) {
+				// if (!cli.isConnected()) {
+				// try {
+				// cli.connect();
+				// } catch (Exception e) {
+				// continue;
+				// }
+				// }
 				try {
 					sleep(timeout / 2);
 				} catch (InterruptedException e) {
@@ -60,15 +77,6 @@ public class IdleMonitor extends Thread {
 				position = cmd.getPosition();
 				if (cmd.isFailed()) {
 					log(getName() + " keepalive failed", null, false);
-					try {
-						synchronized (cli) {
-							if (!cli.terminal.isConnected()) {
-								cli.connect();
-							}
-						}
-					} catch (Exception e) {
-						continue;
-					}
 				} else {
 					// System.out.println(getName() + " keepalive success");
 				}
@@ -86,7 +94,7 @@ public class IdleMonitor extends Thread {
 	}
 
 	public void setStop() {
-		stop = true;
+		// stop = true;
 		this.interrupt();
 	}
 }

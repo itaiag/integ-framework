@@ -59,11 +59,9 @@ public class FindTextAssertion extends AbstractAssertionLogic<String> {
 		} else {
 			status = actual.contains(expectedText);
 		}
-		if (status) {
-			title = "Expected text was found in actual text";
-		} else {
-			title = "Expected text was not found in actual text";
-		}
+
+		title = "Expected text [" + expectedText + "] was " + (status ? "" : "not ") + "found in actual text [" + actual + "]";
+
 		StringBuilder messageBuilder = new StringBuilder();
 		messageBuilder.append("Text to find: \n");
 		messageBuilder.append(expectedText).append("\n\n");

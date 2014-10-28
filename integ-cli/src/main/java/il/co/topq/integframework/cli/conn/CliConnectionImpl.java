@@ -635,7 +635,7 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 	 * activates the IdleMonitor (if it wasn't activated already) don't use if
 	 * idleMonitor was already active
 	 */
-	public void activateIdleMonitor() {
+	public synchronized void activateIdleMonitor() {
 		if (maxIdleTime > 0 && (idleMonitor == null || !idleMonitor.isAlive())) {
 			idleMonitor = new IdleMonitor(this, maxIdleTime);
 			idleMonitor.start();
@@ -646,7 +646,7 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 	/**
 	 * deactivates the IdleMonitor
 	 */
-	public void deactivateIdleMonitor() {
+	public synchronized void deactivateIdleMonitor() {
 
 		if (idleMonitor != null) {
 			synchronized (idleMonitor) {
@@ -661,6 +661,17 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 				}
 			}
 		}
+	}
+
+	public synchronized boolean idleMonitorIsActive() {
+		if (idleMonitor == null) {
+			return false;
+		}
+		if (!idleMonitor.isAlive()) {
+			deactivateIdleMonitor();
+			return false;
+		}
+		return true;
 	}
 
 	public String getCliLogFile() {
@@ -907,4 +918,5 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 	public String toString() {
 		return getName();
 	}
+
 }

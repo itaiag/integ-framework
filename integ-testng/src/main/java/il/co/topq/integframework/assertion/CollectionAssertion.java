@@ -4,6 +4,8 @@ import static il.co.topq.integframework.utils.StringUtils.either;
 import static il.co.topq.integframework.utils.StringUtils.isEmpty;
 import il.co.topq.integframework.reporting.Reporter;
 import il.co.topq.integframework.reporting.Reporter.Color;
+import il.co.topq.integframework.utils.FormattingComparator;
+import il.co.topq.integframework.utils.FormattingComparatorDecorator;
 
 import java.util.*;
 
@@ -39,7 +41,7 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 
 	protected boolean allItems = false, exitIfSizeDoesNotMatch = true;
 
-	private List<Comparator<E>> comparators;
+	private List<FormattingComparator<E>> comparators;
 
 	public CollectionAssertion(Collection<E> expected) {
 		this.expected = new ArrayList<E>(expected);
@@ -107,14 +109,14 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 
 	@Override
 	public void doAssertion() {
-		Comparator<E> comparator;
+		FormattingComparator<E> comparator;
 		if (this.comparators == null) {
 			comparator = simpleComparator;
 		} else {
 			if (comparators.size() == 1) {
 				comparator = comparators.get(0);
 			} else {
-				comparator = new CombinedComparator<E>(comparators);
+				comparator = new FormattingComparatorDecorator<>(new CombinedComparator<>(comparators));
 			}
 		}
 		if (keepMatches && matches == null || !keepMatches) {
@@ -217,9 +219,9 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 			for (PairOfMatches<E> match : matches) {
 				if (comparator.compare(match.actual, match.expected) != 0) {
 					status = false;
-					StringBuilder itemMismatch = new StringBuilder("The item:\n[").append(match.actual)
+					StringBuilder itemMismatch = new StringBuilder("The item:\n[").append(comparator.toString(match.actual))
 							.append("]\nwhich was acually found, did not match the expected item\n[")
-							.append(match.expected.toString()).append("]");
+							.append(comparator.toString(match.expected)).append("]");
 					if (++mismatchCounter <= maxMismatchesToReport) {
 						Reporter.logToFile(itemMismatchTitle, itemMismatch.toString(), Color.RED);
 					}
@@ -236,9 +238,15 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 
 	public CollectionAssertion<E> withComparator(Comparator<E> comparator) {
 		if (this.comparators == null) {
-			comparators = new ArrayList<Comparator<E>>();
+			comparators = new ArrayList<>();
 		}
-		comparators.add(comparator);
+		FormattingComparator<E> formattingComparator;
+		if (comparator instanceof FormattingComparator<?>) {
+			formattingComparator = (FormattingComparator<E>) comparator;
+		} else {
+			formattingComparator = new FormattingComparatorDecorator<>(comparator);
+		}
+		comparators.add(formattingComparator);
 		return this;
 	}
 
@@ -280,12 +288,7 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 		return this;
 	}
 
-	protected final Comparator<E> simpleComparator = new Comparator<E>() {
-
-		public String toString() {
-			return "Simple comparator";
-		};
-
+	protected final FormattingComparator<E> simpleComparator = new FormattingComparatorDecorator<E>(new Comparator<E>() {
 		@Override
 		public int compare(E o1, E o2) {
 			if (o1 instanceof Comparable<?>) {
@@ -302,6 +305,11 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 				return Integer.compare(o1.hashCode(), o2.hashCode());
 			}
 		}
+
+	}) {
+		public String toString() {
+			return "Simple comparator";
+		};
 	};
 
 	protected final Comparator<E> sortingComparator(final Comparator<E> delegate, final String title) {

@@ -4,7 +4,7 @@ public class FormatterImpl<T> implements Formatter<T> {
 
 	@Override
 	public String toString(T t) {
-		return t.toString();
+		return String.valueOf(t);
 	}
 
 }

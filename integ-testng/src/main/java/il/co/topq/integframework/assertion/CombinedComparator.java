@@ -6,17 +6,17 @@ import java.util.List;
 
 public class CombinedComparator<T> implements Comparator<T> {
 
-	private final List<Comparator<T>> comparators;
+	private final List<? extends Comparator<T>> comparators;
 	private String lastFailedComparatorName;
 
-	public CombinedComparator(List<Comparator<T>> comparators) {
+	public CombinedComparator(List<? extends Comparator<T>> comparators) {
 		this.comparators = comparators.subList(0, comparators.size());
 	}
 
 	@Override
 	public int compare(T o1, T o2) {
 		int comparisonResult = 0;
-		Iterator<Comparator<T>> comparatorsIterator = this.comparators.iterator();
+		Iterator<? extends Comparator<T>> comparatorsIterator = this.comparators.iterator();
 		while (comparisonResult == 0 && comparatorsIterator.hasNext()) {
 			Comparator<T> currComparator = comparatorsIterator.next();
 			comparisonResult = currComparator.compare(o1, o2);

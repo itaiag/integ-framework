@@ -71,7 +71,23 @@ public class WgetClient implements Callable<String> {
 				} catch (Exception e) {
 
 				}
+			}
+		};
 
+	}
+
+	public Callable<Void> postLater(final CharSequence data) {
+		return new Callable<Void>() {
+			@Override
+			public Void call() {
+				try {
+					synchronized (this) {
+						post(data);
+					}
+				} catch (Exception e) {
+
+				}
+				return null;
 			}
 		};
 

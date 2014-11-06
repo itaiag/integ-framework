@@ -183,7 +183,7 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 			long singlesCounter = 0;
 			for (E e : singlesInExpected) {
 				Reporter.logToFile("Item not found",
-						new AssertionError(new StringBuilder(e.toString()).append(" was expected but not found")));
+						new AssertionError(new StringBuilder(comparator.toString(e)).append(" was expected but not found")));
 				if (++singlesCounter > maxNotFoundToReport) {
 					break;
 				}
@@ -191,7 +191,7 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 
 			singlesCounter = 0;
 			for (E e : singlesInActual) {
-				StringBuilder itemFound = new StringBuilder(e.toString()).append(" was found");
+				StringBuilder itemFound = new StringBuilder(comparator.toString(e)).append(" was found");
 				if (!allItems) {
 					if (++singlesCounter > maxUnexpectedToReport) {
 						break;

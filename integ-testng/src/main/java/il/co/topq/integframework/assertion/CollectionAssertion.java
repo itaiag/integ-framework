@@ -4,12 +4,15 @@ import static il.co.topq.integframework.utils.StringUtils.either;
 import static il.co.topq.integframework.utils.StringUtils.isEmpty;
 import il.co.topq.integframework.reporting.Reporter;
 import il.co.topq.integframework.reporting.Reporter.Color;
+import il.co.topq.integframework.utils.Formatter;
 import il.co.topq.integframework.utils.FormattingComparator;
 import il.co.topq.integframework.utils.FormattingComparatorDecorator;
 
 import java.util.*;
 
 import org.testng.xml.XmlSuite;
+
+import com.google.common.base.Optional;
 
 public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 
@@ -42,6 +45,7 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 	protected boolean allItems = false, exitIfSizeDoesNotMatch = true;
 
 	private List<FormattingComparator<E>> comparators;
+	private Formatter<E> formatter;
 
 	public CollectionAssertion(Collection<E> expected) {
 		this.expected = new ArrayList<E>(expected);
@@ -119,6 +123,8 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 				comparator = new FormattingComparatorDecorator<>(new CombinedComparator<>(comparators));
 			}
 		}
+		Formatter<E> formatter = Optional.fromNullable(this.formatter).or(comparator);
+
 		if (keepMatches && matches == null || !keepMatches) {
 			message = "";
 			singlesInExpected = new ArrayList<E>(expected.size());
@@ -183,7 +189,7 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 			long singlesCounter = 0;
 			for (E e : singlesInExpected) {
 				Reporter.logToFile("Item not found",
-						new AssertionError(new StringBuilder(comparator.toString(e)).append(" was expected but not found")));
+						new AssertionError(new StringBuilder(formatter.toString(e)).append(" was expected but not found")));
 				if (++singlesCounter > maxNotFoundToReport) {
 					break;
 				}
@@ -191,7 +197,7 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 
 			singlesCounter = 0;
 			for (E e : singlesInActual) {
-				StringBuilder itemFound = new StringBuilder(comparator.toString(e)).append(" was found");
+				StringBuilder itemFound = new StringBuilder(formatter.toString(e)).append(" was found");
 				if (!allItems) {
 					if (++singlesCounter > maxUnexpectedToReport) {
 						break;
@@ -219,9 +225,9 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 			for (PairOfMatches<E> match : matches) {
 				if (comparator.compare(match.actual, match.expected) != 0) {
 					status = false;
-					StringBuilder itemMismatch = new StringBuilder("The item:\n[").append(comparator.toString(match.actual))
+					StringBuilder itemMismatch = new StringBuilder("The item:\n[").append(formatter.toString(match.actual))
 							.append("]\nwhich was acually found, did not match the expected item\n[")
-							.append(comparator.toString(match.expected)).append("]");
+							.append(formatter.toString(match.expected)).append("]");
 					if (++mismatchCounter <= maxMismatchesToReport) {
 						Reporter.logToFile(itemMismatchTitle, itemMismatch.toString(), Color.RED);
 					}
@@ -247,6 +253,11 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 			formattingComparator = new FormattingComparatorDecorator<>(comparator);
 		}
 		comparators.add(formattingComparator);
+		return this;
+	}
+
+	public CollectionAssertion<E> withFormatter(Formatter<E> formatter) {
+		this.formatter = formatter;
 		return this;
 	}
 

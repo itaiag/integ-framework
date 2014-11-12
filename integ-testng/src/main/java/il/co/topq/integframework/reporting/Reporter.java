@@ -81,6 +81,7 @@ public class Reporter extends org.testng.Reporter {
 	}
 
 	public static void step(String step) {
+		System.err.println(step);
 		log(step, Style.EMPHASIZED, Color.BLUE);
 
 	}
@@ -367,9 +368,9 @@ public class Reporter extends org.testng.Reporter {
 		File file;
 		try {
 			file = File.createTempFile(fileTitle, ".partial", parentFolder());// work
-																	// directly
-																// on report
-																// file
+			// directly
+			// on report
+			// file
 			// File newfile = copyFileToReporterFolder(file);
 			// file.delete();
 			// file = newfile;

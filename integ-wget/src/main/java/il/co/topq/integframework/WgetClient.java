@@ -47,21 +47,42 @@ public class WgetClient implements Callable<String> {
 	}
 
 	public void post(CharSequence data) throws Exception {
-		CliCommandExecution execution = getModule().new WgetCommand().bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything()
-				.withHeaders(headers).post(data).error("failed");
+		CliCommandExecution execution = getModule().new WgetCommand().bindAddress(ip).withUserAgent(userAgent)
+				.doNotDownloadAnything().withHeaders(headers).post(data).error("failed");
 		execution.execute();
 		response = execution.getResult();
 	}
 
 	public void silentlyPost(CharSequence data) throws Exception {
-		CliCommandExecution execution = getModule().new WgetCommand().bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything()
-				.withHeaders(headers).post(data).withTimeout(30, TimeUnit.SECONDS).error("failed").silently();
+		CliCommandExecution execution = getModule().new WgetCommand().bindAddress(ip).withUserAgent(userAgent)
+				.doNotDownloadAnything().withHeaders(headers).post(data).withTimeout(30, TimeUnit.SECONDS).error("failed")
+				.silently();
 		execution.execute();
 		response = execution.getResult();
 	}
 
 	public Runnable silentlyPostLater(final CharSequence data) {
+		final WgetClient parent = this;
 		return new Runnable() {
+			@Override
+			public boolean equals(Object obj) {
+				return getParent().equals(parent);
+			};
+
+			private WgetClient getParent() {
+				return parent;
+			}
+
+			@Override
+			public int hashCode() {
+				return parent.hashCode();
+			};
+
+			@Override
+			public String toString() {
+				return "Posting " + data + " on " + parent.toString();
+			};
+
 			@Override
 			public void run() {
 				try {
@@ -77,7 +98,27 @@ public class WgetClient implements Callable<String> {
 	}
 
 	public Callable<Void> postLater(final CharSequence data) {
+		final WgetClient parent = this;
 		return new Callable<Void>() {
+			@Override
+			public boolean equals(Object obj) {
+				return getParent().equals(parent);
+			};
+
+			private WgetClient getParent() {
+				return parent;
+			}
+
+			@Override
+			public int hashCode() {
+				return parent.hashCode();
+			};
+
+			@Override
+			public String toString() {
+				return "Posting " + data + " on " + parent.toString();
+			};
+
 			@Override
 			public Void call() {
 				try {
@@ -94,15 +135,15 @@ public class WgetClient implements Callable<String> {
 	}
 
 	public void postFile(String remoteFile) throws Exception {
-		CliCommandExecution execution = getModule().new WgetCommand().bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything()
-				.withHeaders(headers).postFile(remoteFile).error("failed");
+		CliCommandExecution execution = getModule().new WgetCommand().bindAddress(ip).withUserAgent(userAgent)
+				.doNotDownloadAnything().withHeaders(headers).postFile(remoteFile).error("failed");
 		execution.execute();
 		response = execution.getResult();
 	}
 
 	public void post(byte[] data, String remoteDir, String remoteFile) throws Exception {
-		OutputStream put = ((LinuxDefaultCliConnection) getModule().getCliConnectionImpl())
-				.put(remoteDir, remoteFile, null, data.length);
+		OutputStream put = ((LinuxDefaultCliConnection) getModule().getCliConnectionImpl()).put(remoteDir, remoteFile, null,
+				data.length);
 		IOUtils.copy(new ByteArrayInputStream(data), put);
 		IOUtils.closeQuietly(put);
 

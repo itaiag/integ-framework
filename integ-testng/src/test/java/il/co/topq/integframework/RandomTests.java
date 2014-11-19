@@ -17,6 +17,7 @@ import org.testng.collections.Lists;
 
 import com.google.common.base.Predicates;
 
+@Test(enabled = false)
 public class RandomTests {
 	private Random random = new Random(System.currentTimeMillis());
 

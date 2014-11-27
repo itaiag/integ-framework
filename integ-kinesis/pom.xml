@@ -28,8 +28,8 @@
                          <configuration>
                              <relocations>
                                  <relocation>
-<!--                                      <pattern>xxxxxxxxxxxxxxxxxxxxx</pattern> -->
-<!--                                      <shadedPattern>yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy</shadedPattern> -->
+                                     <pattern>org.apache.http</pattern>
+                                     <shadedPattern>org.xapachex.http</shadedPattern>
                                  </relocation>
                              </relocations>
                          </configuration>

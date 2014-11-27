@@ -3,7 +3,7 @@
   <parent>
     <groupId>il.co.topq.integframework</groupId>
     <artifactId>integ-parent</artifactId>
-    <version>1.0.3-SNAPSHOT</version>
+    <version>1.0.3</version>
     <relativePath>../integ-parent</relativePath>
   </parent>
   <artifactId>integ-support</artifactId>

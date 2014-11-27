@@ -90,6 +90,7 @@
 		<module>../integ-rest</module>
 		<module>../integ-wget</module>
 		<module>../integ-archetype</module>
+		<module>../integ-kinesis</module>
 	</modules>
 	<scm>
 		<developerConnection>scm:git:https://github.com/aharonha/integ-framework</developerConnection>

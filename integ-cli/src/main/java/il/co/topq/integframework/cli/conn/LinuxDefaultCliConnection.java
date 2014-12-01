@@ -13,13 +13,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Iterator;
-import java.util.TimeZone;
+import java.util.*;
 
 /**
  * Default CliConnection for a Cli connection to a linux machine. Protocol is
@@ -54,12 +48,14 @@ public class LinuxDefaultCliConnection extends CliConnectionImpl {
 		terminal.addFilter(new VT100FilterInputStream());
 	}
 
+	@Override
 	public Position[] getPositions() {
 		return null;
 	}
 
+	@Override
 	public Prompt[] getPrompts() {
-		ArrayList<Prompt> prompts = new ArrayList<Prompt>();
+		List<Prompt> prompts = new ArrayList<>();
 		Prompt p = new Prompt();
 		p.setCommandEnd(true);
 		p.setPrompt("$ ");

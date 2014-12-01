@@ -25,7 +25,7 @@ public class FailSafeAssertionListener<T> implements AssertionListener<T> {
 	}
 
 	
-	protected final List<Throwable> suppressed = new ArrayList<Throwable>();
+	protected final List<Throwable> suppressed = new ArrayList<>();
 	/* (non-Javadoc)
 	 * @see il.co.topq.integframework.assertion.AssertionListener#assertionFailed(java.lang.Object, il.co.topq.integframework.assertion.AbstractAssertionLogic)
 	 */
@@ -45,7 +45,7 @@ public class FailSafeAssertionListener<T> implements AssertionListener<T> {
 	}
 	
 	public Iterator<Throwable> getSuppressedThrowables(){
-		return new ArrayList<Throwable>(suppressed).iterator();
+		return new ArrayList<>(suppressed).iterator();
 	}
 
 	public Throwable getLastSuppressedThrowable() {

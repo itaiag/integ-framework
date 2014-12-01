@@ -215,7 +215,7 @@ public class WebDriverSystemModule implements HasWebDriver {
 		try {
 			registeredWebDriverEventListeners = driver.getAllRegisteredWebDriverEventListeners();
 		} catch (Exception e) {
-			registeredWebDriverEventListeners = new ArrayList<WebDriverEventListener>();
+			registeredWebDriverEventListeners = new ArrayList<>();
 		}
 
 		return registeredWebDriverEventListeners;
@@ -414,7 +414,7 @@ public class WebDriverSystemModule implements HasWebDriver {
 			Reporter.log("the Chrome Driver path is =" + chromeDriverPath);
 			System.setProperty("webdriver.chrome.driver", chromeDriverPath);
 
-			ArrayList<String> switches = new ArrayList<String>();
+			List<String> switches = new ArrayList<>();
 			if (chromeProfile != null) {
 				Reporter.log("open webDriver chrome with the profile(" + chromeProfile + ").");
 				switches.add("--user-data-dir=" + chromeProfile);
@@ -646,6 +646,7 @@ public class WebDriverSystemModule implements HasWebDriver {
 	 * 
 	 * @return WebDriver
 	 */
+	@Override
 	public WebDriver getDriver() {
 		return this.driver;
 	}

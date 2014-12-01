@@ -40,6 +40,7 @@ public class Cmd extends Terminal {
 	/* (non-Javadoc)
 	 * @see il.co.topq.integframework.cli.terminal.Terminal#connect()
 	 */
+	@Override
 	public void connect() throws IOException {
 		File root = null;
 		if (!StringUtils.isEmpty(processDir)){
@@ -53,7 +54,8 @@ public class Cmd extends Terminal {
 		out = new BufferedOutputStream(process.getOutputStream());
 	}
 
-    public synchronized void sendString(String command, boolean delayedTyping) throws IOException, InterruptedException{
+    @Override
+	public synchronized void sendString(String command, boolean delayedTyping) throws IOException, InterruptedException{
     	super.sendString(command, delayedTyping);
     	if (isCloseOutputOnSend()){
     		out.close();
@@ -62,6 +64,7 @@ public class Cmd extends Terminal {
     /* (non-Javadoc)
 	 * @see il.co.topq.integframework.cli.terminal.Terminal#disconnect()
 	 */
+	@Override
 	public void disconnect() throws IOException {
 		process.destroy();
 	}
@@ -69,6 +72,7 @@ public class Cmd extends Terminal {
 	/* (non-Javadoc)
 	 * @see il.co.topq.integframework.cli.terminal.Terminal#isConnected()
 	 */
+	@Override
 	public boolean isConnected() {
 		if (process == null){
 			return false;
@@ -84,6 +88,7 @@ public class Cmd extends Terminal {
 	/* (non-Javadoc)
 	 * @see il.co.topq.integframework.cli.terminal.Terminal#getConnectionName()
 	 */
+	@Override
 	public String getConnectionName() {
 		return "cmd";
 	}

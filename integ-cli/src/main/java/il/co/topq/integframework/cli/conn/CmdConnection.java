@@ -35,10 +35,12 @@ public class CmdConnection extends CliConnectionImpl {
 		this();
 	}
 	
+	@Override
 	public void init() throws Exception {
 		super.init();
 	}
 	
+	@Override
 	public void connect() throws Exception {
 		terminal = new Cmd(dir);
 		terminal.setPrompts(internalGetPrompts());
@@ -47,6 +49,7 @@ public class CmdConnection extends CliConnectionImpl {
 		((Cmd)terminal).setCloseOutputOnSend(isCloneOnEveryOperation());
 		
 	}
+	@Override
 	public void handleCliCommand(String title,CliCommand command) throws Exception{
 		boolean commandClone = command.isClone();
 		boolean isCloneOneveryOp = 	isCloneOnEveryOperation();
@@ -64,16 +67,18 @@ public class CmdConnection extends CliConnectionImpl {
 			setCloneOnEveryOperation(isCloneOneveryOp);
 		}
 	}
+	@Override
 	public Position[] getPositions() {
 		return null;
 	}
 
+	@Override
 	public Prompt[] getPrompts() {
 		return internalGetPrompts().toArray(new Prompt[0]);
 	}
 
 	private ArrayList<Prompt> internalGetPrompts() {
-		ArrayList<Prompt> prompts = new ArrayList<Prompt>();
+		ArrayList<Prompt> prompts = new ArrayList<>();
 		Prompt p = new Prompt();
 		p = new Prompt();
 		p.setPrompt(">");
@@ -98,6 +103,7 @@ public class CmdConnection extends CliConnectionImpl {
 		this.cloneOnEveryOperation = resetOnEveryOperation;
 	}	
 	
+	@Override
 	public Object clone() throws CloneNotSupportedException{
 		CmdConnection connection = (CmdConnection)super.clone();
 		connection.connectOnInit = false;

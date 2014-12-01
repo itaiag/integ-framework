@@ -59,7 +59,7 @@ public class LinuxFileInfoExecutionBuilder {
 		examinedObjectName.append(name).append(" ");
 		examinedObjectName.append(resultType.name());
 		return executionLogicHappens(
-				new ComparableAssertion<Long>(compareMethod, expected).examinedObjectTitled(examinedObjectName.toString())
+				new ComparableAssertion<>(compareMethod, expected).examinedObjectTitled(examinedObjectName.toString())
 						.formatObjectWith(resultType)
 
 				, resultType.parser);

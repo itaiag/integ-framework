@@ -18,9 +18,11 @@ public class ThreadedBufferedInputStream extends InputStream {
 	/* (non-Javadoc)
 	 * @see java.io.InputStream#read()
 	 */
+	@Override
 	public int read() throws IOException {
 		return reader.read();
 	}
+	@Override
 	public int available() throws IOException{
 		return reader.getSize();
 	}
@@ -37,6 +39,7 @@ class ReaderThread extends Thread{
 		this.in = in;
 		bufferSize = 0;
 	}
+	@Override
 	public void run(){
 		while (true){
 			int avail;

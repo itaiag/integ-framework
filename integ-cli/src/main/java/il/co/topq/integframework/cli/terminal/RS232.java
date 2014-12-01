@@ -7,8 +7,10 @@ import javax.comm.CommPortIdentifier;
 import javax.comm.SerialPort;
 import javax.comm.PortInUseException;
 import javax.comm.UnsupportedCommOperationException;
+
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.io.IOException;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -31,7 +33,7 @@ public class RS232 extends Terminal {
 
 	private SerialPort serialPort = null;
 
-	private static ArrayList<SerialPort> comBank = new ArrayList<SerialPort>();
+	private static List<SerialPort> comBank = new ArrayList<>();
 
 	public RS232(String portName, int boudRate, int dataBit, int stopBit,
 			int parity) {
@@ -42,6 +44,7 @@ public class RS232 extends Terminal {
 		this.parity = parity;
 	}
 
+	@Override
 	public void connect() throws IOException {
 		portId = findComm(portName);
 		try {
@@ -61,6 +64,7 @@ public class RS232 extends Terminal {
 		out = new BufferedOutputStream(serialPort.getOutputStream());
 	}
 
+	@Override
 	public void disconnect() throws IOException {
 		if (serialPort != null) {
 			serialPort.close();
@@ -69,10 +73,12 @@ public class RS232 extends Terminal {
 		closeStreams();
 	}
 
+	@Override
 	public boolean isConnected() {
 		return true;
 	}
 
+	@Override
 	public String getConnectionName() {
 		return portName;
 	}
@@ -88,7 +94,7 @@ public class RS232 extends Terminal {
 				}
 			}
 		}
-		comBank = new ArrayList<SerialPort>();
+		comBank = new ArrayList<>();
 	}
 
 	private static CommPortIdentifier findComm(String portName)

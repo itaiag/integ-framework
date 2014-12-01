@@ -39,6 +39,7 @@ public abstract class AbstractAjaxPageObjectImpl extends AbstractAjaxPageObject 
 
 		public static Predicate<WebDriver> asPredicate(final ExpectedCondition<Boolean> expectedCondition) {
 			return new Predicate<WebDriver>() {
+				@Override
 				public boolean apply(WebDriver driver) {
 					return expectedCondition.apply(driver);
 				}
@@ -162,6 +163,7 @@ public abstract class AbstractAjaxPageObjectImpl extends AbstractAjaxPageObject 
 		wait = new WebDriverWait(driver, timeout);
 		wait.pollingEvery(pollingMillis, TimeUnit.MILLISECONDS);
 		Boolean result = wait.until(new ExpectedCondition<Boolean>() {
+			@Override
 			public Boolean apply( WebDriver input) {
 				return !whileExpectedCondition.apply(input);
 			}

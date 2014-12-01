@@ -2,7 +2,6 @@ package il.co.topq.integframework.webdriver.utils;
 
 import il.co.topq.integframework.reporting.Reporter;
 import il.co.topq.integframework.webdriver.WebDriverType;
-import il.co.topq.integframework.webdriver.WebDriverWrapper;
 
 import java.io.File;
 
@@ -13,14 +12,8 @@ import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.android.AndroidDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.htmlunit.HtmlUnitDriver;
-import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.interactions.Action;
 import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.iphone.IPhoneDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 

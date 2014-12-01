@@ -30,10 +30,12 @@ public class CurrentPageKeeper implements WebDriverContainer {
 
 	WebDriver driver;
 
+	@Override
 	public WebDriver getDriver() {
 		return driver;
 	}
 
+	@Override
 	public void setDriver(WebDriver driver) {
 		this.driver = driver;
 	}

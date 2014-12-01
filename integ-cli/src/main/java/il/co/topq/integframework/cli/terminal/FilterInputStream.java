@@ -21,6 +21,7 @@ public class FilterInputStream extends InOutInputStream implements Runnable {
 		thread.setName(Thread.currentThread().getName());
 		thread.start();
 	}
+	@Override
 	public int read() throws IOException {
     	if(ioExp != null){
     		throw ioExp;
@@ -40,11 +41,13 @@ public class FilterInputStream extends InOutInputStream implements Runnable {
     	inconclusive = false;
 		return c;
 	}
+	@Override
 	public void close() throws IOException{
 		thread.interrupt();
 		super.close();
 	}
-    public int available() throws IOException {
+    @Override
+	public int available() throws IOException {
     	if(ioExp != null){
     		throw ioExp;
     	}
@@ -59,6 +62,7 @@ public class FilterInputStream extends InOutInputStream implements Runnable {
     	return buf.length();
     }
 
+	@Override
 	public void run() {
 		
 		while(true){

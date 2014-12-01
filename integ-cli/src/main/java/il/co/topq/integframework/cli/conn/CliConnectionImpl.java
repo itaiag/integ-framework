@@ -44,7 +44,7 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 
 	protected Terminal terminal;
 
-	protected HashMap<String, Position> positions = new HashMap<String, Position>();
+	protected HashMap<String, Position> positions = new HashMap<>();
 
 	protected int port = 23;
 
@@ -87,7 +87,7 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 	// will generate enter upon login (like in rs232)
 	protected boolean leadingEnter = false;
 
-	private ArrayList<Prompt> prompts = new ArrayList<Prompt>();
+	private List<Prompt> prompts = new ArrayList<>();
 
 	// number of times the client will try to connect to the remote cli
 	// agent.
@@ -126,6 +126,7 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 	 */
 	private File privateKey;
 
+	@Override
 	public boolean isConnectOnInit() {
 		return connectOnInit;
 	}
@@ -134,18 +135,22 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 		this.connectOnInit = connectOnInit;
 	}
 
+	@Override
 	public String getPassword() {
 		return password;
 	}
 
+	@Override
 	public void setPassword(String password) {
 		this.password = password;
 	}
 
+	@Override
 	public String getUser() {
 		return user;
 	}
 
+	@Override
 	public void setUser(String user) {
 		this.user = user;
 	}
@@ -159,10 +164,12 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 		}
 	}
 
+	@Override
 	public String getHost() {
 		return host;
 	}
 
+	@Override
 	public void setHost(String host) {
 		this.host = host;
 	}
@@ -189,10 +196,12 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 		}
 	}
 
+	@Override
 	public void navigateToPosition(CliCommand command) throws Exception {
 		navigate(command, true);
 	}
 
+	@Override
 	public void returnFromPosition(CliCommand command) throws Exception {
 		navigate(command, false);
 	}
@@ -200,8 +209,9 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 	private boolean useThreads = false;
 	private Thread initializer = null;
 
+	@Override
 	public void init() throws Exception {
-		final List<Exception> ex = new ArrayList<Exception>();
+		final List<Exception> ex = new ArrayList<>();
 		Runnable r = new Runnable() {
 			@Override
 			public void run() {
@@ -228,6 +238,7 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 
 	}
 
+	@Override
 	public void connect() throws Exception {
 		connectRetries = connectRetries <= 0 ? 1 : connectRetries;
 		if (!Thread.currentThread().equals(initializer)) {
@@ -356,6 +367,7 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 		isClosed = true;
 	}
 
+	@Override
 	public void disconnect() {
 		connected = false;
 		if (cli != null) {
@@ -370,6 +382,7 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 		positions.put(position.getName(), position);
 	}
 
+	@Override
 	public void handleCliCommand(String title, CliCommand command) throws Exception {
 		if (command.isClone()) {
 			CliConnectionImpl cloned = (CliConnectionImpl) this.clone();
@@ -449,6 +462,7 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 		}
 	}
 
+	@Override
 	public synchronized void command(CliCommand command) {
 
 		lastCommandTime = System.currentTimeMillis();
@@ -580,11 +594,13 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 		return command;
 	}
 
+	@Override
 	public void waitForNotifications(String[] notifications, long timeout) throws Exception {
 		cli.command("", timeout, false, false, notifications);
 		cli.command("", timeout, false, false, (String) null);
 	}
 
+	@Override
 	public String getCliBuffer() {
 		if (useBuffer) {
 			return buffer.getBuffer();
@@ -592,6 +608,7 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 		return null;
 	}
 
+	@Override
 	public void cleanCliBuffer() {
 		if (useBuffer) {
 			buffer.clean();
@@ -606,6 +623,7 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 		this.useBuffer = useBuffer;
 	}
 
+	@Override
 	public boolean isConnected() {
 		if (cli == null) {
 			return false;
@@ -617,22 +635,27 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 		this.connected = connected;
 	}
 
+	@Override
 	public String getProtocol() {
 		return protocol;
 	}
 
+	@Override
 	public void setProtocol(String protocol) {
 		this.protocol = protocol;
 	}
 
+	@Override
 	public long getLastCommandTime() {
 		return lastCommandTime;
 	}
 
+	@Override
 	public long getMaxIdleTime() {
 		return maxIdleTime;
 	}
 
+	@Override
 	public void setMaxIdleTime(long maxIdleTime) {
 		this.maxIdleTime = maxIdleTime;
 	}
@@ -696,6 +719,7 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 		this.dump = dump;
 	}
 
+	@Override
 	public void setGraceful(boolean graceful) {
 		this.graceful = graceful;
 		if (cli != null) {
@@ -703,14 +727,17 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 		}
 	}
 
+	@Override
 	public boolean isGraceful() {
 		return graceful;
 	}
 
+	@Override
 	public void setPrintStream(PrintStream printStream) {
 		cli.setPrintStream(printStream);
 	}
 
+	@Override
 	public Prompt getResultPrompt() {
 		if (cli == null) {
 			return null;
@@ -718,10 +745,12 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 		return cli.getResultPrompt();
 	}
 
+	@Override
 	public String read() throws Exception {
 		return cli.read();
 	}
 
+	@Override
 	public void reconnect() {
 
 		try {
@@ -730,6 +759,7 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 		}
 	}
 
+	@Override
 	public Object clone() throws CloneNotSupportedException {
 		try {
 			CliConnectionImpl newImpl = (CliConnectionImpl) getClass().getClassLoader().loadClass(getClass().getName())
@@ -768,7 +798,7 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 	}
 
 	private Prompt[] getAllPrompts() {
-		ArrayList<Prompt> allPrompts = new ArrayList<Prompt>();
+		ArrayList<Prompt> allPrompts = new ArrayList<>();
 		allPrompts.addAll(prompts);
 		Prompt[] pr = getPrompts();
 		for (Prompt p : pr) {
@@ -777,6 +807,7 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 		return allPrompts.toArray(new Prompt[0]);
 	}
 
+	@Override
 	public void addPrompts(Prompt[] promptsToAdd) {
 		if (promptsToAdd == null) {
 			return;
@@ -789,8 +820,9 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 		}
 	}
 
+	@Override
 	public void setPrompts(Prompt[] promptsToAdd) {
-		prompts = new ArrayList<Prompt>();
+		prompts = new ArrayList<>();
 		if (terminal != null) {
 			terminal.removePrompts();
 		}
@@ -805,6 +837,7 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 		}
 	}
 
+	@Override
 	public void setEnterStr(String enterStr) {
 		// replace \r string with the '\r' char (the same for \n)
 		enterStr = enterStr.replaceAll(Pattern.quote("\\r"), "\r");
@@ -816,18 +849,22 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 		}
 	}
 
+	@Override
 	public void setScrollEndTimeout(long timeout) {
 		terminal.setScrollEndTimeout(timeout);
 	}
 
+	@Override
 	public void addFilter(InOutInputStream stream) {
 		terminal.addFilter(stream);
 	}
 
+	@Override
 	public void sendString(String toSend, boolean delayedTyping) throws Exception {
 		terminal.sendString(toSend, delayedTyping);
 	}
 
+	@Override
 	public String getEnterStr() {
 		if (cli == null) {
 			return enterStr;
@@ -835,10 +872,12 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 		return cli.getEnterStr();
 	}
 
+	@Override
 	public int getConnectRetries() {
 		return connectRetries;
 	}
 
+	@Override
 	public void setConnectRetries(int connectRetries) {
 		this.connectRetries = connectRetries;
 	}
@@ -851,14 +890,17 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 		this.vt100Filter = vt100Filter;
 	}
 
+	@Override
 	public boolean isLeadingEnter() {
 		return leadingEnter;
 	}
 
+	@Override
 	public void setLeadingEnter(boolean leadingEnter) {
 		this.leadingEnter = leadingEnter;
 	}
 
+	@Override
 	public long getKeyTypingDelay() {
 		if (terminal != null) {
 			return terminal.getKeyTypingDelay();
@@ -866,6 +908,7 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 		return keyTypingDelay;
 	}
 
+	@Override
 	public void setKeyTypingDelay(long keyTypingDelay) {
 		this.keyTypingDelay = keyTypingDelay;
 		if (terminal != null) {

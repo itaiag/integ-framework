@@ -40,7 +40,8 @@ public class FluentWait<T> extends org.openqa.selenium.support.ui.FluentWait<T> 
 	   *        on a function.
 	   * @return Nothing will ever be returned; this return type is only specified as a convenience.
 	   */
-	  protected RuntimeException timeoutException(String message, Throwable lastException) {
+	  @Override
+	protected RuntimeException timeoutException(String message, Throwable lastException) {
 	    throw new TimeoutException(message, lastException);
 	  }
 }

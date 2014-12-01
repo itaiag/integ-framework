@@ -17,6 +17,7 @@ public abstract class InOutInputStream extends InputStream {
 	public void setInputStream(InputStream in){
 		this.in = in;
 	}
+	@Override
 	public void close() throws IOException{
 		if(in != null){
 			in.close();

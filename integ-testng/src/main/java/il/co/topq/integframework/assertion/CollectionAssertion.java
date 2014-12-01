@@ -36,9 +36,9 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 	protected void addMatch(E actual, E expected) {
 		if (keepMatches) {
 			if (matches == null) {
-				matches = new ArrayList<CollectionAssertion.PairOfMatches<E>>();
+				matches = new ArrayList<>();
 			}
-			matches.add(new PairOfMatches<E>(actual, expected));
+			matches.add(new PairOfMatches<>(actual, expected));
 		}
 	}
 
@@ -48,7 +48,7 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 	private Formatter<E> formatter;
 
 	public CollectionAssertion(Collection<E> expected) {
-		this.expected = new ArrayList<E>(expected);
+		this.expected = new ArrayList<>(expected);
 	}
 
 	public CollectionAssertion<E> containsAllItems() {
@@ -107,6 +107,7 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 		return titleBuilder.toString();
 	}
 
+	@Override
 	public String getMessage() {
 		return status ? "passed" : "failed";
 	}
@@ -127,8 +128,8 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 
 		if (keepMatches && matches == null || !keepMatches) {
 			message = "";
-			singlesInExpected = new ArrayList<E>(expected.size());
-			singlesInActual = new ArrayList<E>(actual.size());
+			singlesInExpected = new ArrayList<>(expected.size());
+			singlesInActual = new ArrayList<>(actual.size());
 
 			if (!allItems) {
 				if (expected.size() > actual.size()) {
@@ -318,6 +319,7 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 		}
 
 	}) {
+		@Override
 		public String toString() {
 			return "Simple comparator";
 		};

@@ -12,10 +12,12 @@ public class ExecutionStatusCollector extends RunListener {
 	private int numberOfIgnored;
 	private long executionTime;
 
+	@Override
 	public void testStarted(Description description) throws Exception {
 		numberOfTests++;
 	}
 
+	@Override
 	public void testFailure(Failure failure) throws Exception {
 		numberOfFailures++;
 	}
@@ -27,10 +29,12 @@ public class ExecutionStatusCollector extends RunListener {
 	 * @param description
 	 *            describes the test that will not be run
 	 */
+	@Override
 	public void testIgnored(Description description) throws Exception {
 		numberOfIgnored++;
 	}
 
+	@Override
 	public void testRunFinished(Result result) throws Exception {
 		executionTime += result.getRunTime();
 	}

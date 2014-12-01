@@ -49,6 +49,7 @@ public class Telnet extends Terminal {
 		setSocketReceiveBufferSize(socketReceiveBufferSize);
 	}
 
+	@Override
 	public void connect() throws IOException {
 		socket = new Socket(getAddress(), getPort());
 		socket.setReceiveBufferSize(getSocketReceiveBufferSize());
@@ -63,6 +64,7 @@ public class Telnet extends Terminal {
 
 	}
 
+	@Override
 	public void disconnect() throws IOException {
 		if (socket != null) {
 			socket.shutdownInput();
@@ -73,6 +75,7 @@ public class Telnet extends Terminal {
 
 	}
 
+	@Override
 	public boolean isConnected() {
 		if (socket.isConnected() && !socket.isInputShutdown() && !socket.isOutputShutdown()) {
 			return true;
@@ -81,6 +84,7 @@ public class Telnet extends Terminal {
 		}
 	}
 
+	@Override
 	public String getConnectionName() {
 		try {
 			return socket.getLocalAddress().getHostAddress();

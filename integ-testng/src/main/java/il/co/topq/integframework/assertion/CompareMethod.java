@@ -66,6 +66,7 @@ public enum CompareMethod {
 		}
 
 	};
+	@Override
 	public String toString() {
 		switch (this) {
 		case BIGGER:

@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class NamedThreadFactory implements ThreadFactory {
 	private final String name;
-	private static Map<String, AtomicInteger> names = new ConcurrentHashMap<String, AtomicInteger>();
+	private static Map<String, AtomicInteger> names = new ConcurrentHashMap<>();
 
 	public NamedThreadFactory(String name) {
 		synchronized (names) {

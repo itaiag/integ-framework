@@ -33,7 +33,7 @@ public abstract class CliExecutionExpectedConditions {
 			@Override
 			public String apply(CliCommandExecution execution) {
 				try {
-					FailSafeAssertionListener<String> failSafeListener = new FailSafeAssertionListener<String>();
+					FailSafeAssertionListener<String> failSafeListener = new FailSafeAssertionListener<>();
 					execution.execute();
 					Assert.assertLogic(execution.getResult(), logic, failSafeListener);
 					if (failSafeListener.getSuppressedThrowables().hasNext()) {
@@ -95,7 +95,7 @@ public abstract class CliExecutionExpectedConditions {
 			@Override
 			public T apply(CliCommandExecution execution) {
 				try {
-					FailSafeAssertionListener<T> failSafeListener = new FailSafeAssertionListener<T>();
+					FailSafeAssertionListener<T> failSafeListener = new FailSafeAssertionListener<>();
 					execution.execute();
 					T actual = parser.parse(execution.getResult());
 					Assert.assertLogic(actual, logic, failSafeListener);

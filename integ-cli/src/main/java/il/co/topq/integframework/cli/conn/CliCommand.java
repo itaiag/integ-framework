@@ -168,7 +168,7 @@ public class CliCommand {
 	
 	boolean suppressEcho = false;
 
-	List<IAssertionLogic<String>> analyzers = new ArrayList<IAssertionLogic<String>> ();
+	List<IAssertionLogic<String>> analyzers = new ArrayList<> ();
 	
 	Prompt[] prompts = null;
 	
@@ -397,7 +397,7 @@ public class CliCommand {
 	 */
 	public void addMusts(List<String> musts) {
 		if (this.musts == null) {
-			this.musts = new ArrayList<String>();
+			this.musts = new ArrayList<>();
 		}
 		this.musts.addAll(musts);
 		for (String must: musts){

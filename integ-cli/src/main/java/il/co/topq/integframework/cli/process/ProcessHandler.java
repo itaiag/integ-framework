@@ -129,7 +129,7 @@ public class ProcessHandler {
 
 	class CollectingLogOutputStream extends LogOutputStream {
 		private static final int QUEUE_SIZE = 1000;
-		private final Queue<String> lines = new LinkedList<String>();
+		private final Queue<String> lines = new LinkedList<>();
 
 		@Override
 		protected void processLine(String line, int level) {

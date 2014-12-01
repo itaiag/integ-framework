@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,7 +22,7 @@ public abstract class Terminal {
     protected InputStream in = null;
     protected int bufChar = 10;
     protected long scrollEndTimeout = 200;
-    ArrayList<Prompt> prompts = new ArrayList<Prompt>();
+    List<Prompt> prompts = new ArrayList<>();
 
     public abstract void connect() throws IOException;
     public abstract void disconnect() throws IOException;
@@ -364,16 +365,15 @@ public abstract class Terminal {
      * clear all Terminal Prompts
      */
     public void removePrompts() {
-    	prompts = new ArrayList<Prompt>();
+    	prompts = new ArrayList<>();
     }
     
     /**
      * get a clone of the Terminal Prompts list
      * @return
      */
-    @SuppressWarnings("unchecked")
 	public ArrayList<Prompt> getPrompts() {
-    	return (ArrayList<Prompt>)prompts.clone();
+    	return new ArrayList<>(prompts);
     }
     
     /**

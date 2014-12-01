@@ -83,7 +83,8 @@ public class TelnetInputStream extends InOutInputStream
         if ( terminal == null ) terminal = "dumb";
     }
 
-    public int read() throws IOException
+    @Override
+	public int read() throws IOException
     {
         byte b;
 
@@ -207,7 +208,8 @@ public class TelnetInputStream extends InOutInputStream
         }
     }
 
-    public void close() throws IOException
+    @Override
+	public void close() throws IOException
     {
         in.close();
     }
@@ -223,7 +225,8 @@ public class TelnetInputStream extends InOutInputStream
         output.write( inBytes );
         output.flush();
     }
-    public int available() throws IOException {
+    @Override
+	public int available() throws IOException {
         return in.available();
     }
 

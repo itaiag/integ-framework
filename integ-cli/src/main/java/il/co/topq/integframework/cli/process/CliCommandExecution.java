@@ -34,7 +34,7 @@ public class CliCommandExecution {
 	public CliCommandExecution(CliConnection cliConnection, String command) {
 		this.cliConnection = cliConnection;
 		this.cmd = command;
-		assrtions = new ArrayList<IAssertionLogic<String>>();
+		assrtions = new ArrayList<>();
 	}
 
 	public CliCommandExecution withTimeout(long timeout) {
@@ -54,7 +54,7 @@ public class CliCommandExecution {
 
 	public CliCommandExecution mustHaveResponse(String... strings) {
 		if (musts == null) {
-			musts = new ArrayList<String>(strings.length);
+			musts = new ArrayList<>(strings.length);
 		}
 		musts.addAll(Arrays.asList(strings));
 		return this;
@@ -173,7 +173,7 @@ public class CliCommandExecution {
 
 	public CliCommandExecution error(String... errors) {
 		if (this.errors == null) {
-			this.errors = new ArrayList<String>(errors.length);
+			this.errors = new ArrayList<>(errors.length);
 		}
 		this.errors.addAll(Arrays.asList(errors));
 		return this;

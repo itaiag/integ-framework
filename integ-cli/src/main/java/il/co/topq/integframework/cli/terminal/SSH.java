@@ -185,6 +185,7 @@ public class SSH extends Terminal {
 	 */
 	class InteractiveLogic implements InteractiveCallback {
 		/* the callback may be invoked several times, depending on how many questions-sets the server sends */
+		@Override
 		public String[] replyToChallenge(String name, String instruction, int numPrompts, String[] prompt, boolean[] echo) throws IOException {
 			/* Often, servers just send empty strings for "name" and "instruction" */
 

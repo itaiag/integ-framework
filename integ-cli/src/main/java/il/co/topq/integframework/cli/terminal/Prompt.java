@@ -180,6 +180,7 @@ public class Prompt {
 		this.regularExpression = regularExpression;
 	}
 
+	@Override
 	public boolean equals(Object o) {
 		return (o instanceof Prompt && ((Prompt) o).getPrompt().equals(getPrompt()));
 	}

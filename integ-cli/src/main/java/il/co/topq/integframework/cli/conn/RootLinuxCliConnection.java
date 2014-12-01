@@ -2,6 +2,7 @@ package il.co.topq.integframework.cli.conn;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import il.co.topq.integframework.cli.terminal.Prompt;
 import il.co.topq.integframework.utils.StringUtils;
@@ -12,7 +13,7 @@ public class RootLinuxCliConnection extends LinuxDefaultCliConnection {
 	
 	@Override
 	public Prompt[] getPrompts() {
-		ArrayList<Prompt> prompts = new ArrayList<Prompt>();
+		List<Prompt> prompts = new ArrayList<>();
 		prompts.addAll(Arrays.asList(super.getPrompts()));
 		
 		Prompt rootPrompt = new Prompt();

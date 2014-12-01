@@ -20,6 +20,7 @@ public class IntegrationJUnit4ClassRunner extends SpringJUnit4ClassRunner {
 		super(clazz);
 	}
 
+	@Override
 	public void run(RunNotifier notifier) {
 		//Make sure that the system is configured
 		Configurator.getInstance();

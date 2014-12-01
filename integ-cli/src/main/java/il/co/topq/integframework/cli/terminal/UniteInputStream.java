@@ -24,6 +24,7 @@ public class UniteInputStream extends InputStream {
 	/**
 	 * @see java.io.InputStream#read()
 	 */
+	@Override
 	public int read() throws IOException {
 		if(err.available() > 0){
 			return err.read();
@@ -32,11 +33,13 @@ public class UniteInputStream extends InputStream {
 		}
 	}
 	
-    public int available() throws IOException {
+    @Override
+	public int available() throws IOException {
 		return in.available() + err.available();
 	}
     
-    public void close() throws IOException{
+    @Override
+	public void close() throws IOException{
     	err.close();
     	in.close();
     }

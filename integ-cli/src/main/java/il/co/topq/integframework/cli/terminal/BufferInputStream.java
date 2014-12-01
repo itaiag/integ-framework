@@ -29,6 +29,7 @@ public class BufferInputStream extends InOutInputStream implements Runnable {
 		thread.start();
 	}
 
+	@Override
 	public int read() throws IOException {
 		if (ioExp != null) {
 			throw ioExp;
@@ -49,6 +50,7 @@ public class BufferInputStream extends InOutInputStream implements Runnable {
 		return c;
 	}
 
+	@Override
 	public int available() throws IOException {
 		if (ioExp != null) {
 			throw ioExp;
@@ -92,6 +94,7 @@ public class BufferInputStream extends InOutInputStream implements Runnable {
 		this.bufferMaxSize = bufferMaxSize;
 	}
 
+	@Override
 	public void close() throws IOException {
 		thread.interrupt();
 		super.close();
@@ -102,6 +105,7 @@ public class BufferInputStream extends InOutInputStream implements Runnable {
 	 * 
 	 * @see java.lang.Runnable#run()
 	 */
+	@Override
 	public void run() {
 		while (true) {
 

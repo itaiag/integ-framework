@@ -86,6 +86,7 @@ public abstract class AbstractPageObject implements HasWebDriver {
 	 * 
 	 * @return the driver that initialized this object
 	 */
+	@Override
 	public WebDriver getDriver() {
 		return this.driver;
 	}

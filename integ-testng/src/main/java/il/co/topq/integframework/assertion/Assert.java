@@ -103,7 +103,7 @@ public class Assert extends org.testng.Assert {
 			throw new IllegalArgumentException("logic can't be null");
 		}
 		if (null == listener) {
-			listener = new DefaultAssertionListener<T>();
+			listener = new DefaultAssertionListener<>();
 		}
 		logic.setActual(actual);
 

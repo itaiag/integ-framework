@@ -54,7 +54,7 @@ public class Accumulator<T> {
 
 	private void lazyInit() {
 		if (acc == null) {
-			acc = new HashMap<T, Long>();
+			acc = new HashMap<>();
 		}
 	}
 

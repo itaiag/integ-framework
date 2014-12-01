@@ -282,7 +282,7 @@ public abstract class LinuxCliExpectedConditions {
 		StringBuilder commandBuilder = new StringBuilder().append("find ").append(directory).append(" -maxdepth 1 -type ")
 				.append(itemType.typeCmd).append(" -name ").append(filenamePattern).append(" | wc -l");
 		final String findCommand = commandBuilder.toString();
-		final ComparableAssertion<Integer> amountOfItemsAssertion = new ComparableAssertion<Integer>(compareMethod, expectedAmount);
+		final ComparableAssertion<Integer> amountOfItemsAssertion = new ComparableAssertion<>(compareMethod, expectedAmount);
 		return new CliExpectedCondition<Integer>() {
 
 			@Override

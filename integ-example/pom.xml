@@ -4,33 +4,33 @@
     <artifactId>integration-test</artifactId>
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.activemq.tooling</groupId>
-                <artifactId>maven-activemq-plugin</artifactId>
-                <version>5.7.0</version>
-                <executions>
-                    <execution>
-                        <id>configure-activemq</id>
-                        <phase>pre-integration-test</phase>
-                        <configuration>
-                            <configUri>xbean:file:../src/main/resources/activemq.xml</configUri>
-                            <fork>false</fork>
-                            <systemProperties>
-                                <property>
-                                    <name>javax.net.ssl.keyStorePassword</name>
-                                    <value>password</value>
-                                </property>
-                                <property>
-                                    <name>org.apache.activemq.default.directory.prefix</name>
-                                    <value>./target/</value>
-                                </property>
-                            </systemProperties>
-                        </configuration>
+<!--             <plugin> -->
+<!--                 <groupId>org.apache.activemq.tooling</groupId> -->
+<!--                 <artifactId>maven-activemq-plugin</artifactId> -->
+<!--                 <version>5.7.0</version> -->
+<!--                 <executions> -->
+<!--                     <execution> -->
+<!--                         <id>configure-activemq</id> -->
+<!--                         <phase>pre-integration-test</phase> -->
+<!--                         <configuration> -->
+<!--                             <configUri>xbean:file:../src/main/resources/activemq.xml</configUri> -->
+<!--                             <fork>false</fork> -->
+<!--                             <systemProperties> -->
+<!--                                 <property> -->
+<!--                                     <name>javax.net.ssl.keyStorePassword</name> -->
+<!--                                     <value>password</value> -->
+<!--                                 </property> -->
+<!--                                 <property> -->
+<!--                                     <name>org.apache.activemq.default.directory.prefix</name> -->
+<!--                                     <value>./target/</value> -->
+<!--                                 </property> -->
+<!--                             </systemProperties> -->
+<!--                         </configuration> -->
 
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
+<!--                     </execution> -->
+<!--                 </executions> -->
+<!--             </plugin> -->
+             <plugin> 
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.3.2</version>
@@ -231,10 +231,4 @@
             <version>${project.version}</version>
         </dependency>
     </dependencies>
-    <parent>
-        <groupId>il.co.topq.integframework</groupId>
-        <artifactId>integ-parent</artifactId>
-        <version>1.0.4-SNAPSHOT</version>
-        <relativePath>../integ-parent</relativePath>
-    </parent>
 </project>

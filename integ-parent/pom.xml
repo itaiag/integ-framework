@@ -91,7 +91,6 @@
 		<module>../integ-wget</module>
 		<module>../integ-archetype</module>
 		<module>../integ-kinesis</module>
-		<module>../integ-example</module>
 	</modules>
 	<scm>
 		<developerConnection>scm:git:https://github.com/aharonha/integ-framework</developerConnection>

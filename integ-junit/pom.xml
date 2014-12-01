@@ -18,6 +18,6 @@
 		<groupId>il.co.topq.integframework</groupId>
 		<artifactId>integ-parent</artifactId>
 		<version>1.0.4-SNAPSHOT</version>
-		<relativePath>../integ-parent</relativePath>
+		<relativePath>../integ-parent/pom.xml</relativePath>
 	</parent>
 </project>

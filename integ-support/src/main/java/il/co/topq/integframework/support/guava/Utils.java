@@ -8,7 +8,8 @@ import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.base.*;
+import com.google.common.base.Function;
+import com.google.common.base.Supplier;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -94,4 +95,13 @@ public abstract class Utils {
 			}
 		};
 	};
+
+	public static <T> Function<T, String> getSimpleClassName() {
+		return new Function<T, String>() {
+			@Override
+			public String apply(T t) {
+				return t.getClass().getSimpleName();
+			}
+		};
+	}
 }

@@ -66,10 +66,10 @@ public class CSVResultSetPrinter implements ResultSetPrinter {
 				for (Map<String, Object> map : resultList) {
 					Set<String> fields = map.keySet();
 					if (headerLine) {
-						writeNext(new ArrayList<String>(fields), writer);
+						writeNext(new ArrayList<>(fields), writer);
 						headerLine = false;
 					}
-					List<String> nextLine = new ArrayList<String>(fields.size());
+					List<String> nextLine = new ArrayList<>(fields.size());
 
 					for (String field : fields) {
 						Object value = map.get(field);

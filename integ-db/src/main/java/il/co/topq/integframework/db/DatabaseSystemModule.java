@@ -34,7 +34,7 @@ public class DatabaseSystemModule extends AbstractModuleImpl {
 	}
 
 	public void initResultSetPrinters() {
-		resultSetPrinterList = new ArrayList<ResultSetPrinter>();
+		resultSetPrinterList = new ArrayList<>();
 		resultSetPrinterList.addAll(tablePrinters());
 	}
 
@@ -45,7 +45,7 @@ public class DatabaseSystemModule extends AbstractModuleImpl {
 	 * @return The table printers to add for each query
 	 */
 	protected List<ResultSetPrinter> tablePrinters() {
-		List<ResultSetPrinter> printers = new ArrayList<ResultSetPrinter>();
+		List<ResultSetPrinter> printers = new ArrayList<>();
 		printers.add(new ResultSetHTMLPrinter());
 		return printers;
 	}
@@ -157,7 +157,7 @@ public class DatabaseSystemModule extends AbstractModuleImpl {
 
 	public void setResultSetPrinterList(List<ResultSetPrinter> resultSetPrinterList) {
 		if (resultSetPrinterList == null) {
-			this.resultSetPrinterList = new ArrayList<ResultSetPrinter>();
+			this.resultSetPrinterList = new ArrayList<>();
 		} else {
 			this.resultSetPrinterList = resultSetPrinterList;
 		}

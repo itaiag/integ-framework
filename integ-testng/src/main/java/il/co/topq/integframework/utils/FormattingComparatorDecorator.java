@@ -2,6 +2,7 @@ package il.co.topq.integframework.utils;
 
 import java.util.Comparator;
 
+@Deprecated
 public class FormattingComparatorDecorator<T> extends FormatterImpl<T> implements FormattingComparator<T> {
 	private final Comparator<T> comparator;
 

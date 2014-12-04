@@ -48,6 +48,7 @@ public class Accumulator<T> {
 		lazyInit();
 		acc.remove(t);
 	}
+
 	public void clear() {
 		acc = null;
 	}
@@ -60,5 +61,9 @@ public class Accumulator<T> {
 
 	public Set<T> keySet() {
 		return acc.keySet();
+	}
+
+	public void reset() {
+		acc.clear();
 	}
 }

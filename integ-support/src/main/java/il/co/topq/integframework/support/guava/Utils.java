@@ -104,4 +104,23 @@ public abstract class Utils {
 			}
 		};
 	}
+	
+
+	public static <T> Function<T, String> getClassName() {
+		return new Function<T, String>() {
+			@Override
+			public String apply(T t) {
+				return t.getClass().getName();
+			}
+		};
+	}
+	
+	public static <T> Function<T, String> getCanonicalClassName() {
+		return new Function<T, String>() {
+			@Override
+			public String apply(T t) {
+				return t.getClass().getCanonicalName();
+			}
+		};
+	}
 }

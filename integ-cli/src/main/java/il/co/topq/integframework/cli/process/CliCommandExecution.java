@@ -24,7 +24,7 @@ public class CliCommandExecution {
 	protected String result;
 	private boolean silently = false;
 	protected final List<IAssertionLogic<String>> assrtions;
-	protected static final PrintStream silentPrintStream = new PrintStream(NULL_OUTPUT_STREAM);
+	public static final PrintStream silentPrintStream = new PrintStream(NULL_OUTPUT_STREAM);
 
 	public CliCommandExecution(CliConnection cliConnection) {
 		this(cliConnection, "");

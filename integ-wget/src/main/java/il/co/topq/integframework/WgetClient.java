@@ -47,16 +47,13 @@ public class WgetClient implements Callable<String> {
 	}
 
 	public void post(CharSequence data) throws Exception {
-		CliCommandExecution execution = getModule().new WgetCommand().bindAddress(ip).withUserAgent(userAgent)
-				.doNotDownloadAnything().withHeaders(headers).post(data).error("failed");
+		CliCommandExecution execution = getModule().new WgetCommand().bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything().withHeaders(headers).post(data).error("failed");
 		execution.execute();
 		response = execution.getResult();
 	}
 
 	public void silentlyPost(CharSequence data) throws Exception {
-		CliCommandExecution execution = getModule().new WgetCommand().bindAddress(ip).withUserAgent(userAgent)
-				.doNotDownloadAnything().withHeaders(headers).post(data).withTimeout(30, TimeUnit.SECONDS).error("failed")
-				.silently();
+		CliCommandExecution execution = getModule().new WgetCommand().bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything().withHeaders(headers).post(data).withTimeout(30, TimeUnit.SECONDS).error("failed").silently();
 		execution.execute();
 		response = execution.getResult();
 	}
@@ -85,12 +82,12 @@ public class WgetClient implements Callable<String> {
 
 			@Override
 			public void run() {
-				try {
-					synchronized (this) {
+				synchronized (parent.module.getCliConnectionImpl()) {
+					try {
 						silentlyPost(data);
+					} catch (Exception e) {
+						throw new RuntimeException("Silently post on " + this.toString() + " Failed!", e);
 					}
-				} catch (Exception e) {
-
 				}
 			}
 		};
@@ -135,15 +132,13 @@ public class WgetClient implements Callable<String> {
 	}
 
 	public void postFile(String remoteFile) throws Exception {
-		CliCommandExecution execution = getModule().new WgetCommand().bindAddress(ip).withUserAgent(userAgent)
-				.doNotDownloadAnything().withHeaders(headers).postFile(remoteFile).error("failed");
+		CliCommandExecution execution = getModule().new WgetCommand().bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything().withHeaders(headers).postFile(remoteFile).error("failed");
 		execution.execute();
 		response = execution.getResult();
 	}
 
 	public void post(byte[] data, String remoteDir, String remoteFile) throws Exception {
-		OutputStream put = ((LinuxDefaultCliConnection) getModule().getCliConnectionImpl()).put(remoteDir, remoteFile, null,
-				data.length);
+		OutputStream put = ((LinuxDefaultCliConnection) getModule().getCliConnectionImpl()).put(remoteDir, remoteFile, null, data.length);
 		IOUtils.copy(new ByteArrayInputStream(data), put);
 		IOUtils.closeQuietly(put);
 
@@ -205,8 +200,7 @@ public class WgetClient implements Callable<String> {
 	@Override
 	public String call() throws Exception {
 		WgetCommand wgetCommand = getModule().new WgetCommand();
-		wgetCommand.bindAddress(ip).withUserAgent(userAgent).withHeaders(headers).doNotDownloadAnything()
-				.post(this.dataGenerator.generateData(this));
+		wgetCommand.bindAddress(ip).withUserAgent(userAgent).withHeaders(headers).doNotDownloadAnything().post(this.dataGenerator.generateData(this));
 		wgetCommand.error("failed").silently().execute();
 		String httpRequestSentMessage = "HTTP request sent, awaiting response... ";
 		wgetCommand.mustHaveResponse(httpRequestSentMessage);

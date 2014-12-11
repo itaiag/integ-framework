@@ -64,7 +64,7 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 
 	protected String protocol = EnumConnectionType.TELNET.value();
 
-	protected long lastCommandTime = 0;
+	protected volatile long lastCommandTime = 0;
 
 	// set to true in windows XP telnet server
 	protected boolean dump = false;

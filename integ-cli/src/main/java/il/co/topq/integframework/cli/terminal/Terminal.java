@@ -31,7 +31,7 @@ public abstract class Terminal {
     
     private boolean delayedTyping = false;
     private boolean asciiFilter = true;
-    private PrintStream printStream = System.out;
+    PrintStream printStream = System.out;
     private long keyTypingDelay = 20;
     private boolean ignoreBackSpace = false;
     private String charSet = "ASCII";
@@ -498,6 +498,9 @@ public abstract class Terminal {
 	
 	public String getCharSet() {
 		return charSet;
+	}
+	public PrintStream getPrintStream() {
+		return printStream;
 	}
 	
 }

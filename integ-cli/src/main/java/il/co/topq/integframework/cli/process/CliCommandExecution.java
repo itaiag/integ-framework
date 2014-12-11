@@ -1,5 +1,6 @@
 package il.co.topq.integframework.cli.process;
 
+import static org.apache.commons.io.output.NullOutputStream.NULL_OUTPUT_STREAM;
 import il.co.topq.integframework.AbstractModule;
 import il.co.topq.integframework.assertion.*;
 import il.co.topq.integframework.cli.conn.CliCommand;
@@ -13,8 +14,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.io.output.NullOutputStream;
-
 public class CliCommandExecution {
 	private final CliConnection cliConnection;
 	// setting default timeout to 1 minute.
@@ -25,7 +24,7 @@ public class CliCommandExecution {
 	protected String result;
 	private boolean silently = false;
 	protected final List<IAssertionLogic<String>> assrtions;
-	protected final PrintStream silentPrintStream = new PrintStream(new NullOutputStream());
+	protected static final PrintStream silentPrintStream = new PrintStream(NULL_OUTPUT_STREAM);
 
 	public CliCommandExecution(CliConnection cliConnection) {
 		this(cliConnection, "");
@@ -121,8 +120,7 @@ public class CliCommandExecution {
 			}
 			if (errors != null && !errors.isEmpty()) {
 				for (final String error : errors) {
-					Assert.assertLogic(cliModule.getActual(String.class), new TextNotFoundAssertion(error), new setResultOnError(
-							error));
+					Assert.assertLogic(cliModule.getActual(String.class), new TextNotFoundAssertion(error), new setResultOnError(error));
 				}
 			}
 		}

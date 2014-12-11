@@ -7,6 +7,9 @@ import static il.co.topq.integframework.reporting.Reporter.log;
 import static il.co.topq.integframework.utils.StringUtils.isEmpty;
 import static java.lang.System.currentTimeMillis;
 import static java.lang.System.out;
+import il.co.topq.integframework.cli.process.CliCommandExecution;
+
+import java.io.PrintStream;
 
 /**
  * Monitors the allowed idle time of a machine. (Many devices forces log out in
@@ -20,8 +23,6 @@ import static java.lang.System.out;
 public class IdleMonitor extends Thread {
 	CliConnectionImpl cli;
 	long timeout;
-
-	// boolean stop = false;
 
 	/**
 	 * @param cli
@@ -52,13 +53,6 @@ public class IdleMonitor extends Thread {
 			}
 			long lastCommandTime = cli.getLastCommandTime();
 			if (lastCommandTime == 0) {
-				// if (!cli.isConnected()) {
-				// try {
-				// cli.connect();
-				// } catch (Exception e) {
-				// continue;
-				// }
-				// }
 				try {
 					sleep(timeout / 2);
 				} catch (InterruptedException e) {
@@ -67,18 +61,21 @@ public class IdleMonitor extends Thread {
 				continue;
 			}
 			if (currentTimeMillis() - lastCommandTime > (timeout * 0.9)) {
-				CliCommand cmd = new CliCommand("");
-				if (!isEmpty(position)) {
-					cmd.setPosition(position);
-				}
-				cli.setPrintStream(null);
-				cli.command(cmd);
-				cli.setPrintStream(out);
-				position = cmd.getPosition();
-				if (cmd.isFailed()) {
-					log(getName() + " keepalive failed", null, false);
-				} else {
-					// System.out.println(getName() + " keepalive success");
+				synchronized (cli) {
+					CliCommand cmd = new CliCommand("");
+					if (!isEmpty(position)) {
+						cmd.setPosition(position);
+					}
+					PrintStream stream =  cli.terminal.getPrintStream();
+					cli.setPrintStream(CliCommandExecution.silentPrintStream);
+					cli.command(cmd);
+					cli.setPrintStream(stream);
+					position = cmd.getPosition();
+					if (cmd.isFailed()) {
+						log(getName() + " keepalive failed", null, false);
+					} else {
+						// System.out.println(getName() + " keepalive success");
+					}
 				}
 			} else {
 				try {
@@ -94,7 +91,6 @@ public class IdleMonitor extends Thread {
 	}
 
 	public void setStop() {
-		// stop = true;
 		this.interrupt();
 	}
 }

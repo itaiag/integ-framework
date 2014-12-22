@@ -1,6 +1,7 @@
 package il.co.topq.integframework;
 
-import java.util.Queue;
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 import java.util.concurrent.*;
 
 public class PostDataGeneratorImpl implements PostDataGenerator {
@@ -36,12 +37,8 @@ public class PostDataGeneratorImpl implements PostDataGenerator {
 	@Override
 	public String getPostData() throws InterruptedException {
 		String res = null;
-		while (res == null) {
-			res = queue.poll(1, TimeUnit.SECONDS);
-			
-			if (res ==null && this.isDone()) {
-				throw new InterruptedException("done");
-			}
+		while (!this.isDone() && res == null) {
+			res = queue.poll(1, SECONDS);
 		}
 		return res;
 

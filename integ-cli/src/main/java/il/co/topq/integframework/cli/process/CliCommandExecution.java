@@ -24,7 +24,7 @@ public class CliCommandExecution {
 	protected String result;
 	private boolean silently = false;
 	protected final List<IAssertionLogic<String>> assrtions;
-	public static final PrintStream silentPrintStream = new PrintStream(NULL_OUTPUT_STREAM);
+	public final PrintStream silentPrintStream = new PrintStream(NULL_OUTPUT_STREAM);
 
 	public CliCommandExecution(CliConnection cliConnection) {
 		this(cliConnection, "");
@@ -94,33 +94,38 @@ public class CliCommandExecution {
 		}
 		cliCommand.setTimeout(timeout);
 		cliCommand.setSilent(silently);
-		if (silently) {
-			cliConnection.setPrintStream(silentPrintStream);
-		}
-		try {
-			this.cliConnection.handleCliCommand(title, cliCommand);
-		} catch (IOException exception) {
-			throw new IOException("Execution of " + title + " failed on " + cliConnection.toString(), exception);
-		}
+		synchronized (cliConnection) {
+			if (!cliConnection.isConnected() /*&& !cliConnection.isConnectOnInit()*/){
+				cliConnection.connect();
+			}
+			if (silently) {
+				cliConnection.setPrintStream(silentPrintStream);
+			}
+			try {
+				this.cliConnection.handleCliCommand(title, cliCommand);
+			} catch (IOException exception) {
+				throw new IOException("Execution of " + title + " failed on " + cliConnection.toString(), exception);
+			}
 
-		if (cliConnection instanceof AbstractModule) {
-			AbstractModule cliModule = (AbstractModule) cliConnection;
-			String result = cliModule.getActual(String.class);
-			String commandLine = cmd + this.cliConnection.getEnterStr();
-			result = StringUtils.getFirstSubStringSuffix(result, commandLine, true);
-			if (result.contains(this.cliConnection.getEnterStr())) {
-				result = StringUtils.getPrefix(result, this.cliConnection.getEnterStr());
-			}
-			setResult(result.trim());
-			cliModule.setActual(this.result);
-			if (musts != null && !musts.isEmpty()) {
-				for (String must : musts) {
-					Assert.assertLogic(cliModule.getActual(String.class), new FindTextAssertion(must));
+			if (cliConnection instanceof AbstractModule) {
+				AbstractModule cliModule = (AbstractModule) cliConnection;
+				String result = cliModule.getActual(String.class);
+				String commandLine = cmd + this.cliConnection.getEnterStr();
+				result = StringUtils.getFirstSubStringSuffix(result, commandLine, true);
+				if (result.contains(this.cliConnection.getEnterStr())) {
+					result = StringUtils.getPrefix(result, this.cliConnection.getEnterStr());
 				}
-			}
-			if (errors != null && !errors.isEmpty()) {
-				for (final String error : errors) {
-					Assert.assertLogic(cliModule.getActual(String.class), new TextNotFoundAssertion(error), new setResultOnError(error));
+				setResult(result.trim());
+				cliModule.setActual(this.result);
+				if (musts != null && !musts.isEmpty()) {
+					for (String must : musts) {
+						Assert.assertLogic(cliModule.getActual(String.class), new FindTextAssertion(must));
+					}
+				}
+				if (errors != null && !errors.isEmpty()) {
+					for (final String error : errors) {
+						Assert.assertLogic(cliModule.getActual(String.class), new TextNotFoundAssertion(error), new setResultOnError(error));
+					}
 				}
 			}
 		}

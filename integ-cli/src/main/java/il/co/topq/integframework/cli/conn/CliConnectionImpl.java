@@ -5,6 +5,7 @@
  */
 package il.co.topq.integframework.cli.conn;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
 import il.co.topq.integframework.AbstractModuleImpl;
 import il.co.topq.integframework.assertion.AbstractAssertionLogic;
 import il.co.topq.integframework.assertion.IAssertionLogic;
@@ -245,7 +246,7 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 			int countdownLatch = 10;
 			synchronized (initializer) {
 				while (initializer.isAlive() && (!isConnected())) {
-					initializer.join(TimeUnit.SECONDS.toMillis(1));
+					SECONDS.timedJoin(initializer, 5);
 					if (0 < --countdownLatch) {
 						initializer.interrupt();
 					}

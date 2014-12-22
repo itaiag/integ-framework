@@ -11,6 +11,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class DatabaseSystemModule extends AbstractModuleImpl {
@@ -77,7 +78,7 @@ public class DatabaseSystemModule extends AbstractModuleImpl {
 	 *            expectedNumOfAffectedRows
 	 * @throws Exception
 	 */
-	public void executeUpdateStatement(final String sql) throws Exception {
+	public void executeUpdateStatement(final String sql) throws DataAccessException {
 		executeUpdateStatement(sql, -1);
 	}
 
@@ -94,7 +95,7 @@ public class DatabaseSystemModule extends AbstractModuleImpl {
 	 *            assertion.
 	 * @throws Exception
 	 */
-	public void executeUpdateStatement(final String sql, int expectedNumOfAffectedRows) throws Exception {
+	public void executeUpdateStatement(final String sql, int expectedNumOfAffectedRows) throws DataAccessException {
 		if (null == sql || sql.isEmpty()) {
 			throw new IllegalArgumentException("SQL query can't be empty");
 		}

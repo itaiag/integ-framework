@@ -7,6 +7,7 @@ import static il.co.topq.integframework.reporting.Reporter.log;
 import static il.co.topq.integframework.utils.StringUtils.isEmpty;
 import static java.lang.System.currentTimeMillis;
 import static java.lang.System.out;
+import static org.apache.commons.io.output.NullOutputStream.NULL_OUTPUT_STREAM;
 import il.co.topq.integframework.cli.process.CliCommandExecution;
 
 import java.io.PrintStream;
@@ -22,6 +23,7 @@ import java.io.PrintStream;
  */
 public class IdleMonitor extends Thread {
 	CliConnectionImpl cli;
+	final PrintStream silentPrintStream = new PrintStream(NULL_OUTPUT_STREAM);
 	long timeout;
 
 	/**
@@ -67,7 +69,7 @@ public class IdleMonitor extends Thread {
 						cmd.setPosition(position);
 					}
 					PrintStream stream =  cli.terminal.getPrintStream();
-					cli.setPrintStream(CliCommandExecution.silentPrintStream);
+					cli.setPrintStream(silentPrintStream);
 					cli.command(cmd);
 					cli.setPrintStream(stream);
 					position = cmd.getPosition();

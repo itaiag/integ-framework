@@ -1,35 +1,48 @@
 package il.co.topq.integframework;
 
 import static il.co.topq.integframework.utils.StringUtils.isEmpty;
-import il.co.topq.integframework.WgetModule.WgetCommand;
 import il.co.topq.integframework.cli.conn.LinuxDefaultCliConnection;
 import il.co.topq.integframework.cli.process.CliCommandExecution;
 import il.co.topq.integframework.utils.StringUtils;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
-import java.io.StringReader;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
+import java.util.Set;
+import java.util.concurrent.*;
 
 import org.apache.commons.io.IOUtils;
 
-public class WgetClient implements Callable<String> {
-	final String userAgent, ip;
-	final List<String> headers = new ArrayList<>();
+//import com.google.common.base.Stopwatch;
+import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+
+public class WgetClient {
+	private volatile ExecutorService dispatcher;
+	private volatile ExecutorService sender = null;
+	final String userAgent, ip, connectionIP;
+	final Set<String> headers = Sets.newConcurrentHashSet();
 	private final WgetModule module;
 	private PostDataGenerator dataGenerator;
 
-	private String response;
+	private volatile String response;
 
 	public WgetClient(WgetModule module, String ip, String userAgent) {
 		this.module = module;
 		this.ip = ip;
-		this.userAgent = userAgent;
+		this.userAgent = StringUtils.either(userAgent).or("Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.56 Safari/537.17");
+		String connectionIP;
+		try {
+			connectionIP = InetAddress.getByName(module.getCliConnectionImpl().getHost()).getHostAddress();
+		} catch (UnknownHostException e) {
+			connectionIP = "0.0.0.0";
+		}
+		this.connectionIP = connectionIP;
 		module.setName("Wget client");
+
 	}
 
 	public String getUserAgent() {
@@ -40,22 +53,26 @@ public class WgetClient implements Callable<String> {
 		return ip;
 	}
 
+	public String getConnectionIp() {
+		return connectionIP;
+	}
+
 	public synchronized void setDataGenerator(PostDataGenerator postDataGenerator) {
 		if (null == this.dataGenerator) {
 			this.dataGenerator = postDataGenerator;
 		}
 	}
 
-	public void post(CharSequence data) throws Exception {
+	public String post(CharSequence data) throws Exception {
 		CliCommandExecution execution = getModule().new WgetCommand().bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything().withHeaders(headers).post(data).error("failed");
 		execution.execute();
-		response = execution.getResult();
+		return response = execution.getResult();
 	}
 
-	public void silentlyPost(CharSequence data) throws Exception {
+	public String silentlyPost(CharSequence data) throws Exception {
 		CliCommandExecution execution = getModule().new WgetCommand().bindAddress(ip).withUserAgent(userAgent).doNotDownloadAnything().withHeaders(headers).post(data).withTimeout(30, TimeUnit.SECONDS).error("failed").silently();
 		execution.execute();
-		response = execution.getResult();
+		return response = execution.getResult();
 	}
 
 	public Runnable silentlyPostLater(final CharSequence data) {
@@ -94,9 +111,9 @@ public class WgetClient implements Callable<String> {
 
 	}
 
-	public Callable<Void> postLater(final CharSequence data) {
+	public Callable<String> postLater(final CharSequence data) {
 		final WgetClient parent = this;
-		return new Callable<Void>() {
+		return new Callable<String>() {
 			@Override
 			public boolean equals(Object obj) {
 				return getParent().equals(parent);
@@ -117,15 +134,44 @@ public class WgetClient implements Callable<String> {
 			};
 
 			@Override
-			public Void call() {
-				try {
-					synchronized (this) {
-						post(data);
-					}
-				} catch (Exception e) {
-
+			public String call() throws Exception {
+				synchronized (parent) {
+					post(data);
+					return parent.getModule().getActual(String.class);
 				}
-				return null;
+			}
+		};
+
+	}
+
+	public Callable<String> postLaterSilently(final CharSequence data) {
+		final WgetClient parent = this;
+		return new Callable<String>() {
+			@Override
+			public boolean equals(Object obj) {
+				return getParent().equals(parent);
+			};
+
+			private WgetClient getParent() {
+				return parent;
+			}
+
+			@Override
+			public int hashCode() {
+				return parent.hashCode();
+			};
+
+			@Override
+			public String toString() {
+				return "Posting " + data + " on " + parent.toString();
+			};
+
+			@Override
+			public String call() throws Exception {
+				synchronized (parent) {
+					silentlyPost(data);
+					return response;
+				}
 			}
 		};
 
@@ -197,22 +243,58 @@ public class WgetClient implements Callable<String> {
 		return builder.toString();
 	}
 
-	@Override
-	public String call() throws Exception {
-		WgetCommand wgetCommand = getModule().new WgetCommand();
-		wgetCommand.bindAddress(ip).withUserAgent(userAgent).withHeaders(headers).doNotDownloadAnything().post(this.dataGenerator.generateData(this));
-		wgetCommand.error("failed").silently().execute();
-		String httpRequestSentMessage = "HTTP request sent, awaiting response... ";
-		wgetCommand.mustHaveResponse(httpRequestSentMessage);
-		BufferedReader responseReader = new BufferedReader(new StringReader(wgetCommand.getResult()));
-		String resultLine;
-
-		while (null != (resultLine = responseReader.readLine())) {
-			if (resultLine.startsWith(httpRequestSentMessage)) {
-				return StringUtils.getFirstSubStringSuffix(resultLine, httpRequestSentMessage);
-			}
+	public void resetDispatcher() throws InterruptedException {
+		if (dispatcher != null) {
+			dispatcher.shutdownNow();
+			dispatcher.awaitTermination(1, TimeUnit.MINUTES);
 		}
-		return null;
+		dispatcher = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("Wget dispatcher @" + StringUtils.either(ip).or(this.module.getCliConnectionImpl().getName())).build());
+	}
+
+	public Future<List<Future<String>>> start() {
+		final WgetClient client = this;
+		try {
+			return dispatcher.submit(new Callable<List<Future<String>>>() {
+				@Override
+				public List<Future<String>> call() throws InterruptedException {
+					final List<Future<String>> result = new ArrayList<>(dataGenerator.getCapacity());
+					synchronized (client) {
+						if (sender == null) {
+							sender = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("Sender for " + client.getModule().getName()).build());
+						}
+					}
+					while (!dataGenerator.isDone()) {
+						String postData = dataGenerator.getPostData();
+						if (postData != null) {
+							result.add(sender.submit(postLaterSilently(postData)));
+						} else {
+							continue;
+						}
+					}
+					sender.shutdown();
+					return result;
+				}
+			});
+		} finally {
+			dispatcher.shutdown();
+		}
+		// WgetCommand wgetCommand = getModule().new WgetCommand();
+		// wgetCommand.bindAddress(ip).withUserAgent(userAgent).withHeaders(headers).doNotDownloadAnything().post(this.dataGenerator.generateData(this));
+		// wgetCommand.error("failed").silently().execute();
+		// String httpRequestSentMessage =
+		// "HTTP request sent, awaiting response... ";
+		// wgetCommand.mustHaveResponse(httpRequestSentMessage);
+		// BufferedReader responseReader = new BufferedReader(new
+		// StringReader(wgetCommand.getResult()));
+		// String resultLine;
+		//
+		// while (null != (resultLine = responseReader.readLine())) {
+		// if (resultLine.startsWith(httpRequestSentMessage)) {
+		// return StringUtils.getFirstSubStringSuffix(resultLine,
+		// httpRequestSentMessage);
+		// }
+		// }
+		// return null;
 	}
 
 	public synchronized String getResponse() {
@@ -248,6 +330,10 @@ public class WgetClient implements Callable<String> {
 
 	public boolean idleMonitorIsActive() {
 		return module.getCliConnectionImpl().idleMonitorIsActive();
+	}
+
+	public PostDataGenerator getPostDataGenerator() {
+		return dataGenerator;
 	}
 
 }

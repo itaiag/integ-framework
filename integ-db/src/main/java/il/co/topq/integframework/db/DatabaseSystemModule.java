@@ -62,10 +62,10 @@ public class DatabaseSystemModule extends AbstractModuleImpl {
 		}
 
 		List<Map<String, Object>> resultList = template.queryForList(sql);
+		setActual(resultList);
 		for (ResultSetPrinter printer : resultSetPrinterList) {
 			printer.print(resultList);
 		}
-		setActual(resultList);
 		return resultList;
 	}
 

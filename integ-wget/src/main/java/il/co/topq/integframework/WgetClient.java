@@ -16,6 +16,8 @@ import java.util.concurrent.*;
 
 import org.apache.commons.io.IOUtils;
 
+
+
 //import com.google.common.base.Stopwatch;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -57,9 +59,15 @@ public class WgetClient {
 		return connectionIP;
 	}
 
-	public synchronized void setDataGenerator(PostDataGenerator postDataGenerator) {
+	public void setDataGenerator(PostDataGenerator postDataGenerator) {
 		if (null == this.dataGenerator) {
 			this.dataGenerator = postDataGenerator;
+		}
+		else {
+			synchronized (this) {
+				
+				this.dataGenerator = postDataGenerator;				
+			}
 		}
 	}
 
@@ -251,8 +259,25 @@ public class WgetClient {
 		dispatcher = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("Wget dispatcher @" + StringUtils.either(ip).or(this.module.getCliConnectionImpl().getName())).build());
 	}
 
-	public Future<List<Future<String>>> start() {
+	public synchronized Future<List<Future<String>>> start() {
 		final WgetClient client = this;
+		if (sender != null){
+			if (sender.isShutdown()){
+				if (sender.isTerminated()){
+					sender = null;
+				}
+				else {
+					try {
+						if (!sender.awaitTermination(1, TimeUnit.MINUTES)){
+							throw new IllegalStateException("Wget client sender did not finish yet!");
+						}
+					} catch (InterruptedException e) {
+						throw new IllegalStateException("Wget client sender did not finish yet!",e);
+					}
+					sender = null;
+				}
+			}
+		}
 		try {
 			return dispatcher.submit(new Callable<List<Future<String>>>() {
 				@Override

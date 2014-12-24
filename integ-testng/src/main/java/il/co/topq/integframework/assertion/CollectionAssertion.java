@@ -2,6 +2,7 @@ package il.co.topq.integframework.assertion;
 
 import static il.co.topq.integframework.utils.StringUtils.either;
 import static il.co.topq.integframework.utils.StringUtils.isEmpty;
+import il.co.topq.integframework.Named;
 import il.co.topq.integframework.reporting.Reporter;
 import il.co.topq.integframework.reporting.Reporter.Color;
 import il.co.topq.integframework.utils.Formatter;
@@ -220,9 +221,23 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 			}
 		} else if (matches != null) {
 			status = true;
-			Reporter.log("Validating matches data using " + comparator.toString(), XmlSuite.DEFAULT_VERBOSE + 1);
+			Named matchName;
+			if (formatter instanceof Named){
+				matchName = (Named) formatter;
+			} else if (comparator instanceof Named) {
+				matchName  = (Named) comparator;
+			} else {
+				matchName = new Named() {
+					@Override
+					public String getName() {
+						return "";
+					}
+				};
+			}
+			
+			Reporter.log("Validating matches data using " + matchName.getName(), XmlSuite.DEFAULT_VERBOSE + 1);
 			long mismatchCounter = 0;
-			String itemMismatchTitle = "Item mismatch when comparing " + comparator.toString();
+			String itemMismatchTitle = "Item mismatch when comparing " + matchName.getName();
 			for (PairOfMatches<E> match : matches) {
 				if (comparator.compare(match.actual, match.expected) != 0) {
 					status = false;
@@ -237,7 +252,7 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 			message = "Total reproccessed items:" + matches.size() + "\n";
 			if (mismatchCounter > 0) {
 				message = message + "Total mismatch data items found:" + mismatchCounter + "\n when comparing "
-						+ comparator.toString();
+						+ matchName.getName();
 			}
 
 		}

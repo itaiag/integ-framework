@@ -243,7 +243,7 @@ public class WgetClient {
 		return builder.toString();
 	}
 
-	public void resetDispatcher() throws InterruptedException {
+	public synchronized void resetDispatcher() throws InterruptedException {
 		if (dispatcher != null) {
 			dispatcher.shutdownNow();
 			dispatcher.awaitTermination(1, TimeUnit.MINUTES);
@@ -260,7 +260,7 @@ public class WgetClient {
 					final List<Future<String>> result = new ArrayList<>(dataGenerator.getCapacity());
 					synchronized (client) {
 						if (sender == null) {
-							sender = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("Sender for " + client.getModule().getName()).build());
+							sender = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("Sender for " + StringUtils.either(ip).or(client.getModule().getName())).build());
 						}
 					}
 					while (!dataGenerator.isDone()) {

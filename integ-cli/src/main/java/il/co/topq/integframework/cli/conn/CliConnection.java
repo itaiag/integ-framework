@@ -8,6 +8,7 @@ package il.co.topq.integframework.cli.conn;
 import il.co.topq.integframework.cli.terminal.InOutInputStream;
 import il.co.topq.integframework.cli.terminal.Prompt;
 
+import java.io.IOException;
 import java.io.PrintStream;
 
 /**
@@ -34,8 +35,9 @@ public interface CliConnection {
      * run a given command object
      * 
      * @param command	CliCommand object
+     * @throws InterruptedException 
      */
-    public void command(CliCommand command);
+    public void command(CliCommand command) throws InterruptedException;
     
     /**
      * 
@@ -59,7 +61,7 @@ public interface CliConnection {
      * establish a connection with the CLI
      * @throws Exception
      */
-    public void connect() throws Exception;
+    public void connect() throws IOException;
     
     
     public Position[] getPositions();
@@ -209,8 +211,9 @@ public interface CliConnection {
 	 * 3. Performs report operation & throws an exception<br> 
 	 *    in case of an error. (and ignore error flags were not raised)<br>
 	 * 4. Performs Analysis if one or more analyzers are defined (and ignore error flags were not raised)   
+	 * @throws InterruptedException 
 	 */
-	public void handleCliCommand( String title,CliCommand command) throws Exception;
+	public void handleCliCommand( String title,CliCommand command) throws IOException, InterruptedException;
 
 	/**
 	 * add possible Prompts to the CLI

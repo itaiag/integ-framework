@@ -4,6 +4,7 @@ import il.co.topq.integframework.cli.process.CliCommandExecution;
 import il.co.topq.integframework.cli.process.LinuxCommandLineModule;
 import il.co.topq.integframework.utils.StringUtils;
 
+import java.io.IOException;
 import java.net.URL;
 
 import org.testng.Assert;
@@ -98,7 +99,7 @@ public class WgetModule extends LinuxCommandLineModule {
 			return this;
 		}
 		@Override
-		public void execute() throws Exception {
+		public void execute() throws IOException {
 			alreadyRun = setFlag(alreadyRun, "A client can execute only once!");
 			if (StringUtils.isEmpty(cmd)) {
 				cmd = command.append(' ').append(url).toString();

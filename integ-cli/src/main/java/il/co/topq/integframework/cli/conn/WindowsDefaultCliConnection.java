@@ -6,6 +6,7 @@ package il.co.topq.integframework.cli.conn;
 import il.co.topq.integframework.cli.terminal.Prompt;
 import il.co.topq.integframework.cli.terminal.VT100FilterInputStream;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,12 +34,12 @@ public class WindowsDefaultCliConnection extends CliConnectionImpl {
 	}
 	
 	@Override
-	public void init() throws Exception {
+	public void init() throws IOException {
 		super.init();
 	}
 	
 	@Override
-	public void connect() throws Exception {
+	public void connect() throws IOException {
 		super.connect();
 		terminal.addFilter(new VT100FilterInputStream());
 	}

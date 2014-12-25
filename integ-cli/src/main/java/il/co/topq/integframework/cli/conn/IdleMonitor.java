@@ -68,9 +68,13 @@ public class IdleMonitor extends Thread {
 					if (!isEmpty(position)) {
 						cmd.setPosition(position);
 					}
-					PrintStream stream =  cli.terminal.getPrintStream();
+					PrintStream stream = cli.terminal.getPrintStream();
 					cli.setPrintStream(silentPrintStream);
-					cli.command(cmd);
+					try {
+						cli.command(cmd);
+					} catch (InterruptedException e) {
+						setStop();
+					}
 					cli.setPrintStream(stream);
 					position = cmd.getPosition();
 					if (cmd.isFailed()) {

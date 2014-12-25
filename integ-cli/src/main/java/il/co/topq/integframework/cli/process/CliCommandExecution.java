@@ -59,7 +59,7 @@ public class CliCommandExecution {
 		return this;
 	}
 
-	public void execute(String command) throws Exception {
+	public void execute(String command) throws IOException {
 		this.cmd = command;
 		execute();
 	}
@@ -76,7 +76,7 @@ public class CliCommandExecution {
 	 * 
 	 * @throws Exception
 	 */
-	public void execute() throws Exception {
+	public void execute() throws IOException {
 		if (StringUtils.isEmpty(cmd)) {
 			throw new NullPointerException("command is not set");
 		}
@@ -105,6 +105,9 @@ public class CliCommandExecution {
 				this.cliConnection.handleCliCommand(title, cliCommand);
 			} catch (IOException exception) {
 				throw new IOException("Execution of " + title + " failed on " + cliConnection.toString(), exception);
+			}
+			catch (InterruptedException e) {
+				throw new IOException("Execution of " + title + " failed on " + cliConnection.toString(), e);
 			}
 
 			if (cliConnection instanceof AbstractModule) {

@@ -16,7 +16,6 @@ import il.co.topq.integframework.utils.StringUtils;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 /**
@@ -175,13 +174,13 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 		this.host = host;
 	}
 
-	protected void navigate(CliCommand command, boolean toPosition) throws Exception {
+	protected void navigate(CliCommand command, boolean toPosition) throws IOException, InterruptedException {
 		if (command.getPosition() == null) {
 			return;
 		}
 		Position currentPosition = positions.get(command.getPosition());
 		if (currentPosition == null) {
-			throw new Exception("Fail to find position: " + command.getPosition());
+			throw new IOException("Fail to find position: " + command.getPosition());
 		}
 
 		String[] commands = toPosition ? currentPosition.getEnters() : currentPosition.getExits();
@@ -198,12 +197,12 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 	}
 
 	@Override
-	public void navigateToPosition(CliCommand command) throws Exception {
+	public void navigateToPosition(CliCommand command) throws IOException, InterruptedException {
 		navigate(command, true);
 	}
 
 	@Override
-	public void returnFromPosition(CliCommand command) throws Exception {
+	public void returnFromPosition(CliCommand command) throws IOException, InterruptedException {
 		navigate(command, false);
 	}
 
@@ -211,15 +210,15 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 	private Thread initializer = null;
 
 	@Override
-	public void init() throws Exception {
-		final List<Exception> ex = new ArrayList<>();
+	public void init() throws IOException {
+		final List<IOException> ex = new ArrayList<>();
 		Runnable r = new Runnable() {
 			@Override
 			public void run() {
 				if (isConnectOnInit()) {
 					try {
 						connect();
-					} catch (Exception e) {
+					} catch (IOException e) {
 						ex.add(e);
 					}
 				}
@@ -240,15 +239,19 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 	}
 
 	@Override
-	public void connect() throws Exception {
+	public void connect() throws IOException {
 		connectRetries = connectRetries <= 0 ? 1 : connectRetries;
 		if (!Thread.currentThread().equals(initializer)) {
 			int countdownLatch = 10;
 			synchronized (initializer) {
 				while (initializer.isAlive() && (!isConnected())) {
-					SECONDS.timedJoin(initializer, 5);
-					if (0 < --countdownLatch) {
-						initializer.interrupt();
+					try {
+						SECONDS.timedJoin(initializer, 5);
+						if (0 < --countdownLatch) {
+							initializer.interrupt();
+						}
+					} catch (InterruptedException e) {
+						continue;
 					}
 				}
 			}
@@ -260,7 +263,7 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 						internalConnect();
 						activateIdleMonitor();
 						break;
-					} catch (Exception e) {
+					} catch (IOException e) {
 						Reporter.log("Failed connecting  " + getHost() + ". Attempt " + (retriesCounter + 1) + ".  "
 								+ e.getMessage());
 						try {
@@ -270,6 +273,8 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 						if (retriesCounter == connectRetries - 1) {
 							throw e;
 						}
+					} catch (InterruptedException e) {
+						throw new IOException("connection interrupted", e);
 					} finally {
 						// TODO:
 						// Reporter.getCurrentTestResult().setStatus(ITestResult.FAILURE);
@@ -279,9 +284,9 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 		}
 	}
 
-	private synchronized void internalConnect() throws Exception {
+	private synchronized void internalConnect() throws IOException, InterruptedException {
 		if (host == null) {
-			throw new Exception("Default connection ip/comm is not configured");
+			throw new IllegalArgumentException("Default connection ip/comm is not configured");
 		}
 		Reporter.log("Init cli, host: " + host);
 		if (dummy) {
@@ -297,10 +302,15 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 			isRs232 = true;
 			String[] params = host.split("\\;");
 			if (params.length < 5) {
-				throw new Exception("Unable to extract parameters from host: " + host);
+				throw new IllegalArgumentException("Unable to extract parameters from host: " + host);
 			}
-			terminal = new RS232(params[0], Integer.parseInt(params[1]), Integer.parseInt(params[2]), Integer.parseInt(params[3]),
+			try {
+				terminal = new RS232(params[0], Integer.parseInt(params[1]), Integer.parseInt(params[2]), Integer.parseInt(params[3]),
 					Integer.parseInt(params[4]));
+			}
+			catch (NumberFormatException exception){
+				throw new IllegalArgumentException(exception);
+			}
 		} else if (protocol.toLowerCase().equals(EnumConnectionType.SSH.value())) {
 			terminal = new SSH(host, user, password);
 		} else if (protocol.toLowerCase().equals(EnumConnectionType.SSH_RSA.value())) {
@@ -384,9 +394,14 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 	}
 
 	@Override
-	public void handleCliCommand(String title, CliCommand command) throws Exception {
+	public void handleCliCommand(String title, CliCommand command) throws IOException, InterruptedException {
 		if (command.isClone()) {
-			CliConnectionImpl cloned = (CliConnectionImpl) this.clone();
+			CliConnectionImpl cloned;
+			try {
+				cloned = (CliConnectionImpl) this.clone();
+			} catch (CloneNotSupportedException e) {
+				throw new IllegalStateException(e);
+			}
 			try {
 				handleCliCommand(cloned, title, command);
 				setActual(cloned.getActual());
@@ -410,7 +425,7 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 	 * 4. Performs Analysis if one or more analyzers are defined <br>
 	 * (and ignore error flags were not raised)
 	 */
-	public static void handleCliCommand(CliConnectionImpl cli, String title, CliCommand command) throws Exception {
+	public static void handleCliCommand(CliConnectionImpl cli, String title, CliCommand command) throws InterruptedException, IOException {
 		synchronized (cli) {
 			if (!cli.isConnectOnInit() || cli.useThreads) {
 				if (!cli.isConnected()) {
@@ -426,11 +441,11 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 				cli.setActual(command.getResult());
 				if (command.isFailed() && (!command.isIgnoreErrors()) && (!cli.isForceIgnoreAnyErrors())) {
 					Reporter.log(command.getFailCause(), command.getResult(), Color.RED);
-					Exception e = command.getThrown();
+					IOException e = command.getThrown();
 					if (e != null) {
 						throw e;
 					}
-					throw new Exception("Cli command failed");
+					throw new IOException("Cli command failed");
 				}
 
 				if (!command.isSilent()) {
@@ -464,15 +479,15 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 	}
 
 	@Override
-	public synchronized void command(CliCommand command) {
+	public synchronized void command(CliCommand command) throws InterruptedException {
 
 		lastCommandTime = System.currentTimeMillis();
 		cli.setDontWaitForPrompts(command.isDontWaitForPrompts());
 		try {
 			navigateToPosition(command);
-		} catch (Exception e1) {
+		} catch (IOException e1) {
 			command.setFailCause("Navigate to position failed");
-			command.setThrown(e1);
+			command.setThrown(new IOException("Navigate to position failed",e1));
 			command.setFailed(true);
 			return;
 		}
@@ -496,7 +511,7 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 								command.getPromptString());
 					}
 
-				} catch (Exception e) {
+				} catch (IOException e) {
 					command.addResult(cli.getResult());
 					command.setFailCause("cli command failed: " + cmd);
 					command.setThrown(e);
@@ -538,20 +553,13 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 					}
 
 				}
-				try {
-					Thread.sleep(command.getDelayInRetries());
-				} catch (InterruptedException e2) {
-					command.setFailCause("Sleep interrupted");
-					command.setThrown(e2);
-					command.setFailed(true);
-					return;
-				}
+				Thread.sleep(command.getDelayInRetries());
 				retries++;
 			}
 		}
 		try {
 			returnFromPosition(command);
-		} catch (Exception e) {
+		} catch (IOException e) {
 			command.setFailCause("Navigate from position failed");
 			command.setThrown(e);
 			command.setFailed(true);

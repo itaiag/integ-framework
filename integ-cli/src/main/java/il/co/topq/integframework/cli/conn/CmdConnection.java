@@ -7,6 +7,7 @@ import il.co.topq.integframework.cli.terminal.Cli;
 import il.co.topq.integframework.cli.terminal.Cmd;
 import il.co.topq.integframework.cli.terminal.Prompt;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -36,12 +37,12 @@ public class CmdConnection extends CliConnectionImpl {
 	}
 	
 	@Override
-	public void init() throws Exception {
+	public void init() throws IOException {
 		super.init();
 	}
 	
 	@Override
-	public void connect() throws Exception {
+	public void connect() throws IOException {
 		terminal = new Cmd(dir);
 		terminal.setPrompts(internalGetPrompts());
 		cli = new Cli(terminal);
@@ -50,7 +51,7 @@ public class CmdConnection extends CliConnectionImpl {
 		
 	}
 	@Override
-	public void handleCliCommand(String title,CliCommand command) throws Exception{
+	public void handleCliCommand(String title,CliCommand command) throws IOException, InterruptedException{
 		boolean commandClone = command.isClone();
 		boolean isCloneOneveryOp = 	isCloneOnEveryOperation();
 

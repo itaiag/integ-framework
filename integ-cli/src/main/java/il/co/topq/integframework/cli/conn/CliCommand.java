@@ -10,6 +10,7 @@ import il.co.topq.integframework.assertion.IAssertionLogic;
 import il.co.topq.integframework.assertion.TextNotFoundAssertion;
 import il.co.topq.integframework.cli.terminal.Prompt;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -144,7 +145,7 @@ public class CliCommand {
 	
 	Prompt resultPrompt;
 
-	Exception thrown;
+	IOException thrown;
 	
 	boolean failed = false;
 	
@@ -449,7 +450,7 @@ public class CliCommand {
 	 * 
 	 * @return thrown 
 	 */
-	public Exception getThrown() {
+	public IOException getThrown() {
 		return thrown;
 	}
 	
@@ -458,7 +459,7 @@ public class CliCommand {
 	 * 			if it was thrown.
 	 * @param thrown 
 	 */
-	public void setThrown(Exception thrown) {
+	public void setThrown(IOException thrown) {
 		this.thrown = thrown;
 	}
 	

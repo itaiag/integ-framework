@@ -90,7 +90,7 @@ public abstract class Terminal {
 	 * @return a String of all data in the input buffer
 	 * @throws Exception
 	 */
-	public String readInputBuffer() throws Exception {
+	public String readInputBuffer() throws IOException {
 		int avail = in.available();
 		if (avail <= 0) {
 			return "";
@@ -114,9 +114,10 @@ public abstract class Terminal {
 	 * checks if there is more input in the buffer
 	 * 
 	 * @return True if there isn't any new input after ${scrollEndTimeout} ms
+	 * @throws InterruptedException 
 	 * @throws Exception
 	 */
-	public synchronized boolean isScrallEnd() throws Exception {
+	public synchronized boolean isScrallEnd() throws IOException, InterruptedException {
 		if (scrollEndTimeout == 0) { // if set to 0 always return true.
 			return true;
 		}

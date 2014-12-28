@@ -2,6 +2,7 @@ package il.co.topq.integframework.cli.process;
 
 import static org.apache.commons.io.output.NullOutputStream.NULL_OUTPUT_STREAM;
 import il.co.topq.integframework.AbstractModule;
+import il.co.topq.integframework.Named;
 import il.co.topq.integframework.assertion.*;
 import il.co.topq.integframework.cli.conn.CliCommand;
 import il.co.topq.integframework.cli.conn.CliConnection;
@@ -103,11 +104,12 @@ public class CliCommandExecution {
 			}
 			try {
 				this.cliConnection.handleCliCommand(title, cliCommand);
-			} catch (IOException exception) {
-				throw new IOException("Execution of " + title + " failed on " + cliConnection.toString(), exception);
-			}
-			catch (InterruptedException e) {
-				throw new IOException("Execution of " + title + " failed on " + cliConnection.toString(), e);
+			} catch (IOException | InterruptedException e) {
+				String on = cliConnection.toString();
+				if (cliConnection instanceof Named){
+					on = ((Named) cliConnection).getName();
+				}
+				throw new IOException("Execution of " + title + " failed on " + on, e);
 			}
 
 			if (cliConnection instanceof AbstractModule) {

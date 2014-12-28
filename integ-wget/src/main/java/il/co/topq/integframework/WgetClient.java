@@ -16,8 +16,6 @@ import java.util.concurrent.*;
 
 import org.apache.commons.io.IOUtils;
 
-
-
 //import com.google.common.base.Stopwatch;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -62,11 +60,10 @@ public class WgetClient {
 	public void setDataGenerator(PostDataGenerator postDataGenerator) {
 		if (null == this.dataGenerator) {
 			this.dataGenerator = postDataGenerator;
-		}
-		else {
+		} else {
 			synchronized (this) {
-				
-				this.dataGenerator = postDataGenerator;				
+
+				this.dataGenerator = postDataGenerator;
 			}
 		}
 	}
@@ -253,26 +250,27 @@ public class WgetClient {
 
 	public synchronized void resetDispatcher() throws InterruptedException {
 		if (dispatcher != null) {
-			dispatcher.shutdownNow();
-			dispatcher.awaitTermination(1, TimeUnit.MINUTES);
+			dispatcher.shutdown();
+			if (!dispatcher.awaitTermination(5, TimeUnit.MINUTES)) {
+				throw new IllegalStateException("Dispatcher failed to stop within 5 minutes");
+			}
 		}
 		dispatcher = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("Wget dispatcher @" + StringUtils.either(ip).or(this.module.getCliConnectionImpl().getName())).build());
 	}
 
 	public synchronized Future<List<Future<String>>> start() {
 		final WgetClient client = this;
-		if (sender != null){
-			if (sender.isShutdown()){
-				if (sender.isTerminated()){
+		if (sender != null) {
+			if (sender.isShutdown()) {
+				if (sender.isTerminated()) {
 					sender = null;
-				}
-				else {
+				} else {
 					try {
-						if (!sender.awaitTermination(1, TimeUnit.MINUTES)){
+						if (!sender.awaitTermination(5, TimeUnit.MINUTES)) {
 							throw new IllegalStateException("Wget client sender did not finish yet!");
 						}
 					} catch (InterruptedException e) {
-						throw new IllegalStateException("Wget client sender did not finish yet!",e);
+						throw new IllegalStateException("Wget client sender did not finish yet!", e);
 					}
 					sender = null;
 				}

@@ -234,7 +234,7 @@ public abstract class Terminal {
 				if (timeout > 0) {
 					if (System.currentTimeMillis() - startTime > timeout) {
 						result.append(sb);
-						throw new IOException("Timeout waiting for prompt");
+						throw new IOException("Timeout (" + timeout+ "ms) waiting for prompt");
 					}
 				}
 				int avail = in.available();

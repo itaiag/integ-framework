@@ -264,17 +264,18 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 						activateIdleMonitor();
 						break;
 					} catch (IOException e) {
-						Reporter.log("Failed connecting  " + getHost() + ". Attempt " + (retriesCounter + 1) + ".  "
+						Reporter.log("Connecting to " + getHost() + " Failed. (Attempt #" + (retriesCounter + 1) + ")"
 								+ e.getMessage());
 						try {
 							disconnect();
 						} catch (Throwable t) {
+							Reporter.log("Disconnecting to " + getHost() + " Failed.");
 						}
 						if (retriesCounter == connectRetries - 1) {
-							throw e;
+							throw new IOException("Connecting to " + getHost() + " Failed." ,e);
 						}
 					} catch (InterruptedException e) {
-						throw new IOException("connection interrupted", e);
+						throw new IOException("Connection to " + getHost() + " interrupted", e);
 					} finally {
 						// TODO:
 						// Reporter.getCurrentTestResult().setStatus(ITestResult.FAILURE);

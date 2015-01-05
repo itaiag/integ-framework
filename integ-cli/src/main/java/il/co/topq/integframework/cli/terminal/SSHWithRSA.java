@@ -27,18 +27,24 @@ public class SSHWithRSA extends SSH {
 	public void connect() throws IOException {
 		boolean isAuthenticated = false;
 		/* Create a connection instance */
-		System.out.println("Connet to " + hostname + " with SSH and RSA private key");
+		System.out.println("Connecting to " + hostname + " with SSH and RSA private key");
 		conn = new Connection(hostname, getPort());
 
 		/* Now connect */
-
+		try {
 		conn.connect();
+		} catch (IOException e) {
+			System.err.println("Connection to " + hostname + " failed" + e.getMessage() );
+			throw e;
+		}
 
-		// Check what connection options are available to us
 		String[] authMethods = conn.getRemainingAuthMethods(username);
-		System.out.println("The supported auth Methods are:");
-		for (String method : authMethods) {
-			System.out.println(method);
+		// Check what connection options are available to us
+		synchronized (System.out){
+			System.out.println("The supported auth Methods are:");
+			for (String method : authMethods) {
+				System.out.println(method);
+			}
 		}
 		boolean privateKeyAuthentication = false;
 		boolean passAuthentication = false;

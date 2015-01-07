@@ -18,6 +18,8 @@ import java.io.*;
 import java.util.*;
 import java.util.regex.Pattern;
 
+import org.testng.ITestResult;
+
 /**
  * This is a default implementation for CliConnection your implementation should
  * extend this one.
@@ -277,8 +279,7 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 					} catch (InterruptedException e) {
 						throw new IOException("Connection to " + getHost() + " interrupted", e);
 					} finally {
-						// TODO:
-						// Reporter.getCurrentTestResult().setStatus(ITestResult.FAILURE);
+						 Reporter.getCurrentTestResult().setStatus(isConnected()?ITestResult.SUCCESS:ITestResult.FAILURE);
 					}
 				}
 			}

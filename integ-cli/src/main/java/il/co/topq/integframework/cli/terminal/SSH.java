@@ -3,10 +3,14 @@
  */
 package il.co.topq.integframework.cli.terminal;
 
+import il.co.topq.integframework.reporting.Reporter;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
+
+import org.testng.ITestResult;
 
 import ch.ethz.ssh2.*;
 import ch.ethz.ssh2.channel.Channel;
@@ -59,18 +63,24 @@ public class SSH extends Terminal {
 	public void connect() throws IOException {
 		boolean isAuthenticated = false;
 		/* Create a connection instance */
-
+		Reporter.log("Connecting to " + hostname + " via " + getConnectionName());
 		conn = new Connection(hostname, getPort());
 
 		/* Now connect */
+		try {
+			conn.connect();
+		} catch (IOException e) {
+			Reporter.log("Connection to "+ hostname + " Failed", e, ITestResult.SUCCESS_PERCENTAGE_FAILURE);
+			throw e;
+		}
 
-		conn.connect();
-
-		// Check what connection options are available to us
 		String[] authMethods = conn.getRemainingAuthMethods(username);
-		System.out.println("The supported auth Methods are:");
-		for(String method: authMethods) {
-			System.out.println(method);
+		// Check what connection options are available to us
+		synchronized (System.out){
+			System.out.println("The supported auth Methods are:");
+			for(String method: authMethods) {
+				System.out.println(method);
+			}
 		}
 //		boolean privateKeyAuthentication = false;
 		boolean passAuthentication = false;

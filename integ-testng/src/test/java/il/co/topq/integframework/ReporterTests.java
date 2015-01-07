@@ -158,7 +158,11 @@ public class ReporterTests {
 		log(e, Sets.newHashSet("sun.reflect", "java.lang.reflect", "org.testng", "org.apache.maven.surefire"));
 		e = new RuntimeException("Exception with large stackTrace");
 		log(e);
-
+		
+		e = new RuntimeException("Exception with small stackTrace and cause", new NullPointerException());
+		log(e, Sets.newHashSet("sun.reflect", "java.lang.reflect", "org.testng", "org.apache.maven.surefire"));
+		e = new RuntimeException("Exception with large stackTrace and cause");
+		log(e);
 	}
 
 }

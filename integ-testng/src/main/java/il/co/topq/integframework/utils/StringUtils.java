@@ -1,19 +1,21 @@
 package il.co.topq.integframework.utils;
 
+import static com.google.common.base.Predicates.compose;
+import static com.google.common.base.Predicates.not;
+import static com.google.common.collect.Iterables.filter;
 import il.co.topq.integframework.assertion.CompareMethod;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.testng.collections.Lists;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.collect.Iterables;
 
 public abstract class StringUtils {
 	@SuppressWarnings("unused")
@@ -78,24 +80,23 @@ public abstract class StringUtils {
 		return "";
 	}
 
+	private static final Function<StackTraceElement	, String> getClassNameFunction = new Function<StackTraceElement, String>() {
+		@Override
+		public String apply(StackTraceElement input) {
+			return input.getClassName();
+		}
+	};
+	
 	public static String getStackTrace(Throwable t, Set<String> packagesToFilter) {
 		if (t != null) {
 			StackTraceElement[] stackTrace = t.getStackTrace();
+			List<StackTraceElement> originalStackTrace = Lists.newArrayList(stackTrace);
 			List<StackTraceElement> filteredStackTrace = Lists.newArrayList();
-			for (StackTraceElement stackTraceElement : stackTrace) {
-				String className = stackTraceElement.getClassName();
-				boolean toAdd = true;
-				for (String packageToFilter : packagesToFilter) {
-					if (className.startsWith(packageToFilter)) {
-						toAdd = false;
-						break;
-					}
-				}
-				if (toAdd) {
-					filteredStackTrace.add(stackTraceElement);
-				}
-
+			
+			for (StackTraceElement stackTraceElement : filter(originalStackTrace, not(compose(startsWith(packagesToFilter), getClassNameFunction)))) {
+				filteredStackTrace.add(stackTraceElement);
 			}
+			
 			StackTraceElement[] elements = new StackTraceElement[] {};
 			t.setStackTrace(Lists.newArrayList(filteredStackTrace).toArray(elements));
 

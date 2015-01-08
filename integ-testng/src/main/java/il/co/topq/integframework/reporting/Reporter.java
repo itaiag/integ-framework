@@ -86,11 +86,11 @@ public class Reporter extends org.testng.Reporter {
 
 	}
 
-	private static Set<String> packagesToFilter = Sets.newHashSet();
+	static Set<String> packagesToFilter = Sets.newHashSet();
 
 	public static void filterPackagesOnThrowables(String packageName) {
 		if (StringUtils.isEmpty(packageName)) {
-			packagesToFilter = Sets.newHashSet();
+			packagesToFilter.clear();;
 		} else {
 			packagesToFilter.add(packageName);
 		}

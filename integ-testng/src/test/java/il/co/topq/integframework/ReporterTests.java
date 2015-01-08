@@ -11,16 +11,18 @@ import static il.co.topq.integframework.reporting.Reporter.Style.REGULAR;
 import il.co.topq.integframework.reporting.Reporter;
 import il.co.topq.integframework.reporting.Reporter.Color;
 import il.co.topq.integframework.reporting.Reporter.Style;
+import il.co.topq.integframework.reporting.StackTraceCleanupListener;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
 import org.testng.ITestResult;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Sets;
-
+@Listeners(StackTraceCleanupListener.class)
 public class ReporterTests {
 
 	@Test
@@ -158,11 +160,20 @@ public class ReporterTests {
 		log(e, Sets.newHashSet("sun.reflect", "java.lang.reflect", "org.testng", "org.apache.maven.surefire"));
 		e = new RuntimeException("Exception with large stackTrace");
 		log(e);
-		
+
 		e = new RuntimeException("Exception with small stackTrace and cause", new NullPointerException());
 		log(e, Sets.newHashSet("sun.reflect", "java.lang.reflect", "org.testng", "org.apache.maven.surefire"));
+
+		e = new RuntimeException("Exception with small stackTrace and cause", new RuntimeException("cause", new NullPointerException("root cause")));
+		log(e, Sets.newHashSet("sun.reflect", "java.lang.reflect", "org.testng", "org.apache.maven.surefire"));
+
 		e = new RuntimeException("Exception with large stackTrace and cause");
 		log(e);
 	}
 
+	@Test(enabled=false)
+	public void testExceptionStacktrace() throws Exception {
+		Reporter.filterPackagesOnThrowables(Sets.newHashSet("sun.reflect", "java.lang.reflect", "org.testng", "org.apache.maven.surefire"));
+		throw new RuntimeException("Exception with small stackTrace and cause", new RuntimeException("cause", new NullPointerException("root cause")));
+	}
 }

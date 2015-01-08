@@ -290,7 +290,7 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 		if (host == null) {
 			throw new IllegalArgumentException("Default connection ip/comm is not configured");
 		}
-		Reporter.log("Init cli, host: " + host);
+		Reporter.log("Connecting to [" + host + "] ...",true);
 		if (dummy) {
 			return;
 		}

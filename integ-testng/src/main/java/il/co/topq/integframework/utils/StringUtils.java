@@ -89,6 +89,9 @@ public abstract class StringUtils {
 	
 	public static String getStackTrace(Throwable t, Set<String> packagesToFilter) {
 		if (t != null) {
+			if (t.getCause() != null && t.getCause()!=t){
+				getStackTrace(t.getCause(), packagesToFilter);
+			}
 			StackTraceElement[] stackTrace = t.getStackTrace();
 			List<StackTraceElement> originalStackTrace = Lists.newArrayList(stackTrace);
 			List<StackTraceElement> filteredStackTrace = Lists.newArrayList();

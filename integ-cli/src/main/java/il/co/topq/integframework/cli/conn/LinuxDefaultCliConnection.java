@@ -149,7 +149,7 @@ public class LinuxDefaultCliConnection extends CliConnectionImpl {
 
 	public boolean isProccessNotRunning(String name) throws Exception {
 		CliCommandExecution execution = new CliCommandExecution(this, processInstancesCounterCommand(name));
-		execution.withTitle("check if process " + name + " is running").execute();
+		execution.withTitle("check if process " + name + " is not running").execute();
 		return "0".equals(execution.getResult());
 	}
 
@@ -157,7 +157,7 @@ public class LinuxDefaultCliConnection extends CliConnectionImpl {
 		return "ps -C '" + cmd + "' -o pid= |wc -l";
 	}
 
-	public Date getRemoteMachineDate() throws Exception {
+	public Date getRemoteMachineDate() throws IOException {
 		CliCommandExecution execution = new CliCommandExecution(this, "date +%s");
 		// seconds since epoch
 		execution.execute();

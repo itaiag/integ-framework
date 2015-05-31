@@ -1,5 +1,6 @@
 package il.co.topq.integframework.webdriver;
 
+import il.co.topq.integframework.AbstractModuleImpl;
 import il.co.topq.integframework.webdriver.CurrentPageKeeper.AbstractPageObjectResolver;
 import il.co.topq.integframework.webdriver.eventlistener.WebDriverReportEventHandler;
 import il.co.topq.integframework.webdriver.eventlistener.WebDriverScreenshotEventHandler;
@@ -41,7 +42,7 @@ import org.testng.Reporter;
  * 
  * @author Liel Ran ,Create Date - 22.12.11
  */
-public class WebDriverSystemModule implements HasWebDriver {
+public class WebDriverSystemModule extends AbstractModuleImpl implements HasWebDriver {
 
 	// can be init from the SUT file.
 	// the path should be full path with "chromedriver.exe" at the end of the
@@ -103,11 +104,7 @@ public class WebDriverSystemModule implements HasWebDriver {
 	 * <li>Maximizes the browser window</li>
 	 * <li>If the changeMousePosition set to true - moves the mouse to the
 	 * bottom left position</li>
-	 * 
-	 * <ol>
-	 * 
-	 * @throws Exception
-	 *             when the SUT doesn't configures the driver type
+	 * </ol>
 	 */
 	public void openBrowser() {
 
@@ -140,7 +137,7 @@ public class WebDriverSystemModule implements HasWebDriver {
 	 * <li>
 	 * Closes the browser window, but not removing the profile.</li>
 	 * <li>Open the browser again</li>
-	 * 
+	 * </ol>
 	 * @see #openBrowser
 	 */
 	public void restartBrowser() {
@@ -188,7 +185,7 @@ public class WebDriverSystemModule implements HasWebDriver {
 	 * Creates Selenium client using SUT parameters
 	 * 
 	 * @return SeleniumClient
-	 * @throws Exception
+//	 * @throws Exception
 	 */
 	protected WebDriverWrapper getBrowserInstance() {
 		WebDriverWrapper webDriverInstance = null;
@@ -453,10 +450,13 @@ public class WebDriverSystemModule implements HasWebDriver {
 	 * Build the Default path of Chrome driver in runtime Note: the
 	 * 'chromedriver.exe' must be under lib folder on the local project(the
 	 * tests/src project).
+	 * @return 
+	 * the exe path of chrome
 	 * 
 	 * @throws URISyntaxException
+	 * when the URI of chromeDriverPath is invalid
 	 */
-	private String getChromeDriverExePath() throws IOException, URISyntaxException {
+	private String getChromeDriverExePath() throws URISyntaxException {
 		String path = "";
 
 		try {
@@ -570,11 +570,11 @@ public class WebDriverSystemModule implements HasWebDriver {
 	}
 
 	/**
-	 * Closes WebDriver Selenium client driver instance<br/>
+	 * Closes WebDriver Selenium client driver instance<br >
 	 * This function will also delete the temp profile.
 	 * 
-	 * @throws Exception
-	 *             when {@code WebDriver.quit()} throws an exception
+//	 * @throws Exception
+//	 *             when {@code WebDriver.quit()} throws an exception
 	 * @see org.openqa.selenium.WebDriver#quit()
 	 */
 	public void closeBrowserInstance() {
@@ -635,7 +635,7 @@ public class WebDriverSystemModule implements HasWebDriver {
 	}
 
 	/**
-	 * Setters/Getters
+	 * @return the domain
 	 */
 	public String getDomain() {
 		return domain;
@@ -780,7 +780,7 @@ public class WebDriverSystemModule implements HasWebDriver {
 
 	/**
 	 * @return True if and only if the driver set to clear cookies inside
-	 *         {@link #openBrowser()} method
+	 *         {@link WebDriverSystemModule#openBrowser()} method
 	 */
 	public boolean isClearCookiesBeforeOpen() {
 		return clearCookiesBeforeOpen;
@@ -788,7 +788,7 @@ public class WebDriverSystemModule implements HasWebDriver {
 
 	/**
 	 * The WebDriverSystemObject can delete all cookies before navigating to the
-	 * domain (in {@link #openBrowser()} and {@link #init()} methods)
+	 * domain (in {@link WebDriverSystemModule#openBrowser()} and {@link #init()} methods)
 	 * 
 	 * @param clearCookiesBeforeOpen
 	 * 

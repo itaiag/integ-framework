@@ -58,7 +58,7 @@ public abstract class AbstractPageObject implements HasWebDriver {
 	}
 
 	/**
-	 * change all {@link WebElement} and {@link List}<{@link WebElement}> fields
+	 * change all {@link WebElement} and {@link List}&lt;{@link WebElement}&gt; fields
 	 * of this object to be proxys to the HTML elements in the page
 	 */
 	void initElements() {

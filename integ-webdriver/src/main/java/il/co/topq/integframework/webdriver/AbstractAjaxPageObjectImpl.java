@@ -186,7 +186,7 @@ public abstract class AbstractAjaxPageObjectImpl extends AbstractAjaxPageObject 
 	 * <p>
 	 * In reality, the interval may be greater as the cost of actually
 	 * evaluating a condition function is not factored in. The default polling
-	 * interval is {@link #FIVE_HUNDRED_MILLIS}.
+	 * interval is 500 milliseconds.
 	 * 
 	 * @param pollingMillis
 	 *            The timeout duration in milliseconds.

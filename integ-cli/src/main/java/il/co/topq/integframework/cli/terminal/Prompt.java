@@ -185,6 +185,10 @@ public class Prompt {
 		return (o instanceof Prompt && ((Prompt) o).getPrompt().equals(getPrompt()));
 	}
 
+	@Override
+	public int hashCode() {
+		return getPrompt().hashCode();
+	}
 	/**
 	 * should prompt appear after all input was read?
 	 * 

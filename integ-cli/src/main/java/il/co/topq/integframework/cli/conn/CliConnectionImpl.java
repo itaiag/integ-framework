@@ -290,10 +290,15 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 		if (host == null) {
 			throw new IllegalArgumentException("Default connection ip/comm is not configured");
 		}
-		Reporter.log("Connecting to [" + host + "] ...",true);
 		if (dummy) {
+			Reporter.log("Connecting to a dummy CLI ...",true);
+			this.cli = new Cli(new DummyTerminal());
+			this.cli.setDontWaitForPrompts(true);
+			this.cli.connect();
+			this.connected = cli.isConnected();
 			return;
 		}
+		Reporter.log("Connecting to [" + host + "] ...",true);
 		// Terminal t;
 		boolean isRs232 = false;
 
@@ -575,6 +580,9 @@ public abstract class CliConnectionImpl extends AbstractModuleImpl implements Cl
 
 	public void setDummy(boolean dummy) {
 		this.dummy = dummy;
+		if (dummy){
+			setScrollEndTimeout(0);			
+		}
 	}
 
 	public boolean isUseTelnetInputStream() {

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.base.Function;
 import com.google.common.base.Supplier;
 
 /**
@@ -65,6 +66,26 @@ public class IndexedList<INDEX, ELEMENTS extends IndexedBy<INDEX>> extends Chang
 		return getItem(index);
 	}
 
+	/**
+	 * Returns the item to which the specified index key is set<br>
+	 * If there is no mapping for the index, invoking {@link Function#apply(Object)} on the given index, in order to
+	 * get one.
+	 * 
+	 * @param index
+	 *            the index to search for
+	 * @param supplier
+	 *            a function to create an item if needed.
+	 * @return the item with the given index, or null if there is no mapping for
+	 *         the index, <b>and the supplier didn't provide an item that is
+	 *         indexed by</b>
+	 */
+	public ELEMENTS getItem(INDEX index, Function<INDEX,? extends ELEMENTS> supplier) {
+		if (!_internalMap().containsKey(index)) {
+			this.add(supplier.apply(index));
+		}
+		return getItem(index);
+	}
+	
 	@Override
 	public void onAddAll(Collection<? extends ELEMENTS> collection) {
 		for (ELEMENTS e : collection) {

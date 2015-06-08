@@ -1,17 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <artifactId>integ-bdd</artifactId>
   <parent>
   	<groupId>il.co.topq.integframework</groupId>
   	<artifactId>integ-parent</artifactId>
-  	<version>1.0.4-SNAPSHOT</version>
+  	<version>1.0.5-SNAPSHOT</version>
   	<relativePath>../integ-parent</relativePath>
   </parent>
   <dependencies>
   	<dependency>
   		<groupId>il.co.topq.integframework</groupId>
   		<artifactId>integ-testng</artifactId>
-  		<version>${project.version}</version>
+  		<version>1.0.5-SNAPSHOT</version>
   	</dependency>
   </dependencies>
 </project>

@@ -29,30 +29,37 @@ public class WebDriverReportEventHandler implements WebDriverEventListener {
 		Reporter.log("Init the WebDriverReportEventHandler");
 	}
 
+	@Override
 	public void afterChangeValueOf(WebElement arg0, WebDriver arg1) {
 		Reporter.log("After Change Value");
 	}
 
+	@Override
 	public void afterClickOn(WebElement arg0, WebDriver arg1) {
 		Reporter.log("After Click");
 	}
 
+	@Override
 	public void afterFindBy(By arg0, WebElement arg1, WebDriver arg2) {
 		report("After FindBy", "FindBy= " + arg0);
 	}
 
+	@Override
 	public void afterNavigateBack(WebDriver arg0) {
 		report("After Navigate", "Navigate back to= " + arg0.getCurrentUrl());
 	}
 
+	@Override
 	public void afterNavigateForward(WebDriver arg0) {
 		report("After Navigate", "Navigate forward to= " + arg0.getCurrentUrl());
 	}
 
+	@Override
 	public void afterNavigateTo(String arg0, WebDriver arg1) {
 		report("After Navigation", "Page loaded= " + arg0);
 	}
 
+	@Override
 	public void afterScript(String arg0, WebDriver arg1) {
 		Reporter.log("after Script");
 	}
@@ -61,34 +68,42 @@ public class WebDriverReportEventHandler implements WebDriverEventListener {
 	 * Called before {@link WebElement#clear WebElement.clear()} and
 	 * {@link WebElement#sendKeys(CharSequence...)}
 	 */
+	@Override
 	public void beforeChangeValueOf(WebElement arg0, WebDriver arg1) {
 		report("Before Change Value Of");
 	}
 
+	@Override
 	public void beforeClickOn(WebElement arg0, WebDriver arg1) {
 		report("Before Click On");
 	}
 
+	@Override
 	public void beforeFindBy(By arg0, WebElement arg1, WebDriver arg2) {
 		report("Before FindBy", "FindBy= " + arg0);
 	}
 
+	@Override
 	public void beforeNavigateBack(WebDriver arg0) {
 		report("Before Navigate Back", "Navigate back from= " + arg0.getCurrentUrl());
 	}
 
+	@Override
 	public void beforeNavigateForward(WebDriver arg0) {
 		report("Before Navigate Forward", "Navigate forward from= " + arg0.getCurrentUrl());
 	}
 
+	@Override
 	public void beforeNavigateTo(String arg0, WebDriver arg1) {
 		report("Before Navigation", "Navigate from= " + arg1.getCurrentUrl() + ", Navigate to= " + arg0);
 	}
 
+	@Override
 	public void beforeScript(String arg0, WebDriver arg1) {
 		Reporter.log("Before script execution");
 	}
 
+	@Override
 	public void onException(Throwable arg0, WebDriver arg1) {
 		synchronized (arg0) {
 			if (arg0 instanceof NoSuchElementException) {

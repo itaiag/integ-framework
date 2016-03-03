@@ -14,6 +14,7 @@ public class CliConnectionWait extends FluentWait<CliConnection> {
 		super(input);
 		withTimeout(DEFAULT_TIMEOUT_IN_MINUTES, TimeUnit.MINUTES);
 		pollingEvery(DEFAULT_POLLING_INTERVAL_IN_MILLISECONDS, TimeUnit.MILLISECONDS);
+		ignoring(AssertionError.class);
 	}
 
 }

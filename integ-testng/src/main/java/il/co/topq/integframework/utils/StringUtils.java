@@ -1,7 +1,21 @@
 package il.co.topq.integframework.utils;
 
+import static com.google.common.base.Predicates.compose;
+import static com.google.common.base.Predicates.not;
+import static com.google.common.collect.Iterables.filter;
+import il.co.topq.integframework.assertion.CompareMethod;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.*;
+
+import org.testng.collections.Lists;
+
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.collect.Iterables;
 
 public abstract class StringUtils {
 	@SuppressWarnings("unused")
@@ -15,12 +29,81 @@ public abstract class StringUtils {
 		return (str == null) ? true : str.isEmpty();
 	}
 
+	public static Optional<String> either(String s) {
+		return isEmpty(s) ? Optional.<String> absent() : Optional.of(s);
+	}
+
+	public final static Predicate<String> isEmpty = new Predicate<String>() {
+		@Override
+		public boolean apply(String input) {
+			return isEmpty(input);
+		}
+	};
+
+	public final static Predicate<String> length(final CompareMethod method, final int length) {
+		return new Predicate<String>() {
+			@Override
+			public boolean apply(String input) {
+				return method.compare(input.length(), length);
+			}
+		};
+	}
+
+	public final static Predicate<String> is(final CompareMethod compare, final String another) {
+		return compare.to(another);
+	}
+
+	public final static Predicate<String> startsWith(final String another) {
+		return new Predicate<String>() {
+			@Override
+			public boolean apply(String input) {
+				return input.startsWith(another);
+			}
+		};
+	}
+
+	public final static Predicate<String> startsWith(final Collection<String> oneOfTheStrings) {
+		List<Predicate<String>> startWithEitherString = new ArrayList<>();
+		for (String string : oneOfTheStrings) {
+			startWithEitherString.add(startsWith(string));
+		}
+		return Predicates.or(startWithEitherString);
+	}
+
 	public static String getStackTrace(Throwable t) {
 		if (t != null) {
 			StringWriter stringWriter = new StringWriter();
 			PrintWriter printWriter = new PrintWriter(stringWriter);
 			t.printStackTrace(printWriter);
 			return stringWriter.toString();
+		}
+		return "";
+	}
+
+	private static final Function<StackTraceElement	, String> getClassNameFunction = new Function<StackTraceElement, String>() {
+		@Override
+		public String apply(StackTraceElement input) {
+			return input.getClassName();
+		}
+	};
+	
+	public static String getStackTrace(Throwable t, Set<String> packagesToFilter) {
+		if (t != null) {
+			if (t.getCause() != null && t.getCause()!=t){
+				getStackTrace(t.getCause(), packagesToFilter);
+			}
+			StackTraceElement[] stackTrace = t.getStackTrace();
+			List<StackTraceElement> originalStackTrace = Lists.newArrayList(stackTrace);
+			List<StackTraceElement> filteredStackTrace = Lists.newArrayList();
+			
+			for (StackTraceElement stackTraceElement : filter(originalStackTrace, not(compose(startsWith(packagesToFilter), getClassNameFunction)))) {
+				filteredStackTrace.add(stackTraceElement);
+			}
+			
+			StackTraceElement[] elements = new StackTraceElement[] {};
+			t.setStackTrace(Lists.newArrayList(filteredStackTrace).toArray(elements));
+
+			return getStackTrace(t);
 		}
 		return "";
 	}

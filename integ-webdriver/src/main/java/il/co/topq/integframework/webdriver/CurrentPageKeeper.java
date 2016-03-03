@@ -30,10 +30,12 @@ public class CurrentPageKeeper implements WebDriverContainer {
 
 	WebDriver driver;
 
+	@Override
 	public WebDriver getDriver() {
 		return driver;
 	}
 
+	@Override
 	public void setDriver(WebDriver driver) {
 		this.driver = driver;
 	}
@@ -44,7 +46,7 @@ public class CurrentPageKeeper implements WebDriverContainer {
 	 * <code>PageObjectResolver</code> uses dynamic type cast and dynamic class
 	 * reference conversion<br>
 	 * e.g. <code><br>
-	 * 	public <T extends AbstractPageObject> T resolvePage(Class<T> pageType){<br>
+	 * 	public &lt;T extends AbstractPageObject&gt; T resolvePage(Class&lt;T&gt; pageType){<br>
 	 * 		AbstractSOPage abstractSOPage = new AbstractSOPage(driver) ;<br>
 	 * <br>
 	 * 		if (pageType.isAssignableFrom(SpecificPage.class)) {<br>
@@ -73,8 +75,10 @@ public class CurrentPageKeeper implements WebDriverContainer {
 	 * @param pageType
 	 *            the type of the required page, such as
 	 *            {@code WelcomePage.class}
+	 * @param <T>
+	 * 	      the generic type of the page type
 	 * @return the last page, or trying to create a new one by invoking
-	 *         <code>PageObjectResolver.resolvePage(Class<T> pageType)</code>
+	 *         <code>PageObjectResolver.resolvePage(Class&lt;T&gt; pageType)</code>
 	 * 
 	 * @throws NullPointerException
 	 *             when both last page and PageObjectResolver are null

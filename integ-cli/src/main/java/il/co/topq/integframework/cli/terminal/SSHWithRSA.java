@@ -3,9 +3,13 @@
  */
 package il.co.topq.integframework.cli.terminal;
 
+import il.co.topq.integframework.reporting.Reporter;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+
+import org.testng.ITestResult;
 
 import ch.ethz.ssh2.Connection;
 
@@ -27,18 +31,24 @@ public class SSHWithRSA extends SSH {
 	public void connect() throws IOException {
 		boolean isAuthenticated = false;
 		/* Create a connection instance */
-		System.out.println("Connet to Host with SSH and RSA private key");
-		conn = new Connection(hostname);
+		Reporter.log("Connecting to " + hostname + " via " + getConnectionName());
+		conn = new Connection(hostname, getPort());
 
 		/* Now connect */
+		try {
+			conn.connect();
+		} catch (IOException e) {
+			Reporter.log("Connection to "+ hostname + " Failed", e, ITestResult.SUCCESS_PERCENTAGE_FAILURE);
+			throw e;
+		}
 
-		conn.connect();
-
-		// Check what connection options are available to us
 		String[] authMethods = conn.getRemainingAuthMethods(username);
-		System.out.println("The supported auth Methods are:");
-		for (String method : authMethods) {
-			System.out.println(method);
+		// Check what connection options are available to us
+		synchronized (System.out){
+			System.out.println("The supported auth Methods are:");
+			for (String method : authMethods) {
+				System.out.println(method);
+			}
 		}
 		boolean privateKeyAuthentication = false;
 		boolean passAuthentication = false;
@@ -54,20 +64,19 @@ public class SSHWithRSA extends SSH {
 		}
 
 		/* Authenticate */
-		if (passAuthentication) {
+		if (passAuthentication && password != null) {
 			super.connect();
 		} else if (privateKeyAuthentication) {
 			try {
 				if (privateKeyFile != null && privateKeyFile.isFile()) {
-					System.out.println();
 					isAuthenticated = conn.authenticateWithPublicKey(username,
 							privateKeyFile, "");
 				} else {
-					System.out
-							.println("Auth Error - The privateKeyFile should be init from the SUT with a valid path to ppk/pem RSA private key");
+					Reporter.log("Connection to "+hostname+" Failed","Auth Error - The privateKeyFile should be init from the SUT with a valid path to ppk/pem RSA private key",false);
+					System.out.println(privateKeyFile);
 				}
 			} catch (Exception e) {
-				System.out.println(e.getMessage());
+				Reporter.log("Connection to "+ hostname+" Failed",e);
 				isAuthenticated = false;
 			}
 		}

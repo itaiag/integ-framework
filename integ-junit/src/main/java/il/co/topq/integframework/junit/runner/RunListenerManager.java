@@ -25,7 +25,7 @@ public class RunListenerManager {
 
 	public void addRunListener(RunListener listener) {
 		if (null == listeners) {
-			listeners = new ArrayList<RunListener>();
+			listeners = new ArrayList<>();
 		}
 		listeners.add(listener);
 	}

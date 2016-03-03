@@ -12,33 +12,40 @@ public abstract class AbstractModule implements Module {
 	 * @see il.co.topq.integframework.Module#getActual()
 	 */
 	@Override
-	public Object getActual() {
+	public final Object getActual() {
 		return actual;
 	}
 
-	@SuppressWarnings("unchecked")
-	public <T> T getActual(Class<T> clazz) {
-		if (clazz.isInstance(actual)) {
-			return (T) getActual();
-		}
-		throw new ClassCastException(actual.toString() + " is not castable to "	+ clazz.getName());
+	/**
+	 * Casts the actual object to the class or interface represented by the
+	 * given {@code Class} object.
+	 * 
+	 * @return the object after casting, or null if obj is null
+	 * 
+	 * @throws ClassCastException
+	 *             if the object is not null and is not assignable to the type
+	 *             T.
+	 */
+	public final <T> T getActual(Class<T> clazz) {
+		return clazz.cast(getActual());
+
 	}
 
 	/* (non-Javadoc)
 	 * @see il.co.topq.integframework.Module#setActual(java.lang.Object)
 	 */
 	@Override
-	public void setActual(Object actual) {
+	public final void setActual(Object actual) {
 		this.actual = actual;
 	}
 
 	@PostConstruct
-	public void initializeObject() throws Exception{
+	public final void initializeObject() throws Exception {
 		init();
 	}
 	
 	@PreDestroy
-	public void closeObject() throws Exception{
+	public final void closeObject() throws Exception {
 		close();
 	}
 	

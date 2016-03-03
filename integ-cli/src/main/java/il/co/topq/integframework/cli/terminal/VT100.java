@@ -148,6 +148,7 @@ class ScreenReader extends Thread {
 
 	char[][] screen;
 
+	@Override
 	public void run() {
 		int c;
 		try {

@@ -12,7 +12,7 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 
 /**
- * Used on {@link WebElement}s which must exist when the page is loaded<br/>
+ * Used on {@link WebElement}s which must exist when the page is loaded<br >
  * After constructing a new page object from a subclass of
  * {@link AbstractAjaxPageObjectImpl} an annotated element will be in the page.<br>
  * The {@link AbstractPageObject#assertInModule()} will try to find it (inside

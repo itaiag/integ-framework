@@ -5,33 +5,20 @@
  */
 package il.co.topq.integframework.cli.conn;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
 import il.co.topq.integframework.AbstractModuleImpl;
 import il.co.topq.integframework.assertion.AbstractAssertionLogic;
 import il.co.topq.integframework.assertion.IAssertionLogic;
-import il.co.topq.integframework.cli.terminal.BufferInputStream;
-import il.co.topq.integframework.cli.terminal.Cli;
-import il.co.topq.integframework.cli.terminal.InOutInputStream;
-import il.co.topq.integframework.cli.terminal.Prompt;
-import il.co.topq.integframework.cli.terminal.RS232;
-import il.co.topq.integframework.cli.terminal.SSH;
-import il.co.topq.integframework.cli.terminal.SSHWithRSA;
-import il.co.topq.integframework.cli.terminal.Telnet;
-import il.co.topq.integframework.cli.terminal.Terminal;
-import il.co.topq.integframework.cli.terminal.VT100FilterInputStream;
+import il.co.topq.integframework.cli.terminal.*;
 import il.co.topq.integframework.reporting.Reporter;
 import il.co.topq.integframework.reporting.Reporter.Color;
+import il.co.topq.integframework.utils.StringUtils;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Properties;
+import java.io.*;
+import java.util.*;
 import java.util.regex.Pattern;
+
+import org.testng.ITestResult;
 
 /**
  * This is a default implementation for CliConnection your implementation should
@@ -40,30 +27,26 @@ import java.util.regex.Pattern;
  * @author guy.arieli
  * 
  */
-public abstract class CliConnectionImpl 
-extends AbstractModuleImpl 
-implements CliConnection {
-	
-	public static enum EnumConnectionType {    
-		COM("com"),
-		RS232("rs232"),
-		TELNET("telnet"),
-		SSH("ssh"),
-		SSH_RSA("ssh-rsa");
+public abstract class CliConnectionImpl extends AbstractModuleImpl implements CliConnection {
+
+	public static enum EnumConnectionType {
+		COM("com"), RS232("rs232"), TELNET("telnet"), SSH("ssh"), SSH_RSA("ssh-rsa");
 		EnumConnectionType(String value) {
 			this.value = value;
 		}
+
 		private String value;
+
 		public String value() {
 			return value;
 		}
 	}
 
-	protected Cli cli;
+	protected volatile Cli cli;
 
 	protected Terminal terminal;
 
-	protected HashMap<String, Position> positions = new HashMap<String, Position>();
+	protected HashMap<String, Position> positions = new HashMap<>();
 
 	protected int port = 23;
 
@@ -83,7 +66,7 @@ implements CliConnection {
 
 	protected String protocol = EnumConnectionType.TELNET.value();
 
-	protected long lastCommandTime = 0;
+	protected volatile long lastCommandTime = 0;
 
 	// set to true in windows XP telnet server
 	protected boolean dump = false;
@@ -99,14 +82,14 @@ implements CliConnection {
 	protected boolean dummy = false;
 
 	protected boolean forceIgnoreAnyErrors = false;
-	
+
 	// used for win2K server
 	protected boolean vt100Filter = false;
-	
+
 	// will generate enter upon login (like in rs232)
 	protected boolean leadingEnter = false;
 
-	private ArrayList<Prompt> prompts = new ArrayList<Prompt>();
+	private List<Prompt> prompts = new ArrayList<>();
 
 	// number of times the client will try to connect to the remote cli
 	// agent.
@@ -126,7 +109,7 @@ implements CliConnection {
 	 * this is the command enter string, can be set from the sut
 	 */
 	protected String enterStr = null;
-	
+
 	/**
 	 * The key delay when sending keys to the terminal. Only relevant when
 	 * delayTyping is set to true
@@ -136,15 +119,16 @@ implements CliConnection {
 	/**
 	 * Whether to ignore backspace characters or not
 	 */
-    private boolean ignoreBackSpace = false;
-    
-    private String charSet = "ASCII";
+	private boolean ignoreBackSpace = false;
+
+	private String charSet = "ASCII";
 
 	/**
 	 * SSH2 private key -RSA (ppk or pem file)
 	 */
 	private File privateKey;
 
+	@Override
 	public boolean isConnectOnInit() {
 		return connectOnInit;
 	}
@@ -153,18 +137,22 @@ implements CliConnection {
 		this.connectOnInit = connectOnInit;
 	}
 
+	@Override
 	public String getPassword() {
 		return password;
 	}
 
+	@Override
 	public void setPassword(String password) {
 		this.password = password;
 	}
 
+	@Override
 	public String getUser() {
 		return user;
 	}
 
+	@Override
 	public void setUser(String user) {
 		this.user = user;
 	}
@@ -178,25 +166,27 @@ implements CliConnection {
 		}
 	}
 
+	@Override
 	public String getHost() {
 		return host;
 	}
 
+	@Override
 	public void setHost(String host) {
 		this.host = host;
 	}
 
-	protected void navigate(CliCommand command, boolean toPosition) throws Exception {
+	protected void navigate(CliCommand command, boolean toPosition) throws IOException, InterruptedException {
 		if (command.getPosition() == null) {
 			return;
 		}
 		Position currentPosition = positions.get(command.getPosition());
 		if (currentPosition == null) {
-			throw new Exception("Fail to find position: " + command.getPosition());
+			throw new IOException("Fail to find position: " + command.getPosition());
 		}
-		
+
 		String[] commands = toPosition ? currentPosition.getEnters() : currentPosition.getExits();
-		
+
 		if (commands != null) {
 			for (int ccommandIndex = 0; ccommandIndex < commands.length; ccommandIndex++) {
 				String cmd = changeCommand(commands[ccommandIndex], command.getProperties());
@@ -208,76 +198,133 @@ implements CliConnection {
 		}
 	}
 
-	public void navigateToPosition(CliCommand command) throws Exception {
+	@Override
+	public void navigateToPosition(CliCommand command) throws IOException, InterruptedException {
 		navigate(command, true);
 	}
 
-	public void returnFromPosition(CliCommand command) throws Exception {
+	@Override
+	public void returnFromPosition(CliCommand command) throws IOException, InterruptedException {
 		navigate(command, false);
 	}
 
-	
-	public void init() throws Exception {
-		
-		if (isConnectOnInit()) {
-			connect();
+	private boolean useThreads = false;
+	private Thread initializer = null;
+
+	@Override
+	public void init() throws IOException {
+		final List<IOException> ex = new ArrayList<>();
+		Runnable r = new Runnable() {
+			@Override
+			public void run() {
+				if (isConnectOnInit()) {
+					try {
+						connect();
+					} catch (IOException e) {
+						ex.add(e);
+					}
+				}
+			}
+		};
+		if (useThreads) {
+			initializer = new Thread(null, r, "Connector for " + getName());
+			initializer.setDaemon(true);
+			initializer.start();
+		} else {
+			initializer = Thread.currentThread();
+			r.run();
+			if (ex.size() == 1) {
+				throw ex.get(0);
+			}
 		}
+
 	}
 
-	public void connect() throws Exception {
-		activateIdleMonitor();
+	@Override
+	public void connect() throws IOException {
 		connectRetries = connectRetries <= 0 ? 1 : connectRetries;
-
-		for (int retriesCounter = 0; retriesCounter < connectRetries; retriesCounter++) {
-			try {
-				//TODO: Reporter.getCurrentTestResult().setStatus(ITestResult.SUCCESS);
-				internalConnect();
-				break;
-			} catch (Exception e) {
-				Reporter.log("Failed connecting  " + getHost() + ". Attempt " + (retriesCounter + 1) + ".  " + e.getMessage());
-				try {
-					disconnect();
-				} catch (Throwable t) {
+		if (!Thread.currentThread().equals(initializer)) {
+			int countdownLatch = 10;
+			synchronized (initializer) {
+				while (initializer.isAlive() && (!isConnected())) {
+					try {
+						SECONDS.timedJoin(initializer, 5);
+						if (0 < --countdownLatch) {
+							initializer.interrupt();
+						}
+					} catch (InterruptedException e) {
+						continue;
+					}
 				}
-				if (retriesCounter == connectRetries - 1) {
-					throw e;
+			}
+		}
+		synchronized (this) {
+			if (!isConnected()) {
+				for (int retriesCounter = 0; retriesCounter < connectRetries; retriesCounter++) {
+					try {
+						internalConnect();
+						activateIdleMonitor();
+						break;
+					} catch (IOException e) {
+						Reporter.log("Connecting to " + getHost() + " Failed. (Attempt #" + (retriesCounter + 1) + ")"
+								+ e.getMessage());
+						try {
+							disconnect();
+						} catch (Throwable t) {
+							Reporter.log("Disconnecting to " + getHost() + " Failed.");
+						}
+						if (retriesCounter == connectRetries - 1) {
+							throw new IOException("Connecting to " + getHost() + " Failed." ,e);
+						}
+					} catch (InterruptedException e) {
+						throw new IOException("Connection to " + getHost() + " interrupted", e);
+					} finally {
+						 Reporter.getCurrentTestResult().setStatus(isConnected()?ITestResult.SUCCESS:ITestResult.FAILURE);
+					}
 				}
-			} finally {
-				//TODO: Reporter.getCurrentTestResult().setStatus(ITestResult.FAILURE);
 			}
 		}
 	}
 
-	private void internalConnect() throws Exception {
+	private synchronized void internalConnect() throws IOException, InterruptedException {
 		if (host == null) {
-			throw new Exception("Default connection ip/comm is not configured");
+			throw new IllegalArgumentException("Default connection ip/comm is not configured");
 		}
-		Reporter.log("Init cli, host: " + host);
 		if (dummy) {
+			Reporter.log("Connecting to a dummy CLI ...",true);
+			this.cli = new Cli(new DummyTerminal());
+			this.cli.setDontWaitForPrompts(true);
+			this.cli.connect();
+			this.connected = cli.isConnected();
 			return;
 		}
+		Reporter.log("Connecting to [" + host + "] ...",true);
 		// Terminal t;
 		boolean isRs232 = false;
 
-
-    	boolean isRsa = false;
-		if (host.toLowerCase().startsWith(EnumConnectionType.COM.value()) || protocol.toLowerCase().equals(EnumConnectionType.RS232.value())) { 
+		boolean isRsa = false;
+		if (host.toLowerCase().startsWith(EnumConnectionType.COM.value())
+				|| protocol.toLowerCase().equals(EnumConnectionType.RS232.value())) {
 			// syntax for serial connection found
 			isRs232 = true;
 			String[] params = host.split("\\;");
 			if (params.length < 5) {
-				throw new Exception("Unable to extract parameters from host: " + host);
+				throw new IllegalArgumentException("Unable to extract parameters from host: " + host);
 			}
-			terminal = new RS232(params[0], Integer.parseInt(params[1]), Integer.parseInt(params[2]), Integer.parseInt(params[3]), Integer
-					.parseInt(params[4]));
+			try {
+				terminal = new RS232(params[0], Integer.parseInt(params[1]), Integer.parseInt(params[2]), Integer.parseInt(params[3]),
+					Integer.parseInt(params[4]));
+			}
+			catch (NumberFormatException exception){
+				throw new IllegalArgumentException(exception);
+			}
 		} else if (protocol.toLowerCase().equals(EnumConnectionType.SSH.value())) {
 			terminal = new SSH(host, user, password);
-		} else if (protocol.toLowerCase().equals(
-				EnumConnectionType.SSH_RSA.value())) {
+		} else if (protocol.toLowerCase().equals(EnumConnectionType.SSH_RSA.value())) {
 			terminal = new SSHWithRSA(host, user, password, privateKey);
 			prompts.add(new Prompt("$", false, true));
 			prompts.add(new Prompt("]$", false, true));
-			
+
 			isRsa = true;
 		} else {
 			terminal = new Telnet(host, port, useTelnetInputStream);
@@ -285,13 +332,16 @@ implements CliConnection {
 				((Telnet) terminal).setVtType(null);
 			}
 		}
-		
+
 		terminal.setCharSet(getCharSet());
-		
+
 		terminal.setIgnoreBackSpace(isIgnoreBackSpace());
-		
+
 		if (delayedTyping) {
 			terminal.setKeyTypingDelay(keyTypingDelay);
+		}
+		if (terminal instanceof SSH && getPort() != 23) {
+			((SSH) terminal).setPort(getPort());
 		}
 		cli = new Cli(terminal);
 		if (enterStr != null) {
@@ -303,7 +353,7 @@ implements CliConnection {
 			terminal.addFilter(buffer);
 			buffer.startThread();
 		}
-		
+
 		if (vt100Filter) {
 			terminal.addFilter(new VT100FilterInputStream());
 		}
@@ -313,9 +363,9 @@ implements CliConnection {
 		}
 		if (isRs232 || leadingEnter) {
 			cli.command("");
-		}else if (isRsa){
+		} else if (isRsa) {
 			cli.login();
-		}else {
+		} else {
 			cli.login(60000, delayedTyping);
 		}
 		connected = true;
@@ -325,12 +375,17 @@ implements CliConnection {
 	public void close() {
 		if (idleMonitor != null) {
 			idleMonitor.setStop();
-			idleMonitor.interrupt();
+			try {
+				idleMonitor.join();
+			} catch (InterruptedException e) {
+				Reporter.log("Waiting for idle monitor failed", e);
+			}
 		}
 		disconnect();
 		isClosed = true;
 	}
 
+	@Override
 	public void disconnect() {
 		connected = false;
 		if (cli != null) {
@@ -345,13 +400,18 @@ implements CliConnection {
 		positions.put(position.getName(), position);
 	}
 
-	public void handleCliCommand(String title, CliCommand command) throws Exception {
+	@Override
+	public void handleCliCommand(String title, CliCommand command) throws IOException, InterruptedException {
 		if (command.isClone()) {
-			CliConnectionImpl cloned = (CliConnectionImpl) this.clone();
+			CliConnectionImpl cloned;
+			try {
+				cloned = (CliConnectionImpl) this.clone();
+			} catch (CloneNotSupportedException e) {
+				throw new IllegalStateException(e);
+			}
 			try {
 				handleCliCommand(cloned, title, command);
 				setActual(cloned.getActual());
-				//setTestAgainstObject(cloned.getTestAgainstObject());
 			} finally {
 				cloned.close();
 			}
@@ -372,54 +432,69 @@ implements CliConnection {
 	 * 4. Performs Analysis if one or more analyzers are defined <br>
 	 * (and ignore error flags were not raised)
 	 */
-	public static void handleCliCommand(CliConnectionImpl cli, String title, CliCommand command) throws Exception {
-		if (!cli.isConnectOnInit() && !cli.isConnected()) {
-			cli.connect();
-		}
-		cli.command(command);
-
-		cli.setActual(command.getResult());
-		if (command.isFailed() && (!command.isIgnoreErrors()) && (!cli.isForceIgnoreAnyErrors())) {
-			Reporter.log(title + ", " + command.getFailCause(), command.getResult(),Color.RED);
-			Exception e = command.getThrown();
-			if (e != null) {
-				throw e;
+	public static void handleCliCommand(CliConnectionImpl cli, String title, CliCommand command) throws InterruptedException, IOException {
+		synchronized (cli) {
+			if (!cli.isConnectOnInit() || cli.useThreads) {
+				if (!cli.isConnected()) {
+					cli.connect();
+				}
 			}
-			throw new Exception("Cli command failed");
-		}
+			try {
+				if (!command.isSilent()) {
+					Reporter.startLogToggle(title);
+				}
+				cli.command(command);
 
-		if (!command.isSilent()) {
-			Reporter.log(title, command.getResult());
-		}
-		if (command.isIgnoreErrors() || (cli.isForceIgnoreAnyErrors())) {
-			;
-		} else {
-			List<IAssertionLogic<String>> analyzers = command.getAnalyzers();
-			if (analyzers != null) {
-				for (IAssertionLogic<String> analyzer : analyzers) {
-					analyzer.setActual(cli.getActual(String.class));
-					analyzer.doAssertion();
-					if (analyzer instanceof AbstractAssertionLogic<?> ){
-						AbstractAssertionLogic<String> stringAssertionLogic = (AbstractAssertionLogic<String>) analyzer;
-						if (!(command.isSilent() && stringAssertionLogic.isStatus())){
-							Reporter.log(stringAssertionLogic.getTitle(), stringAssertionLogic.getMessage(), stringAssertionLogic.isStatus());
+				cli.setActual(command.getResult());
+				if (command.isFailed() && (!command.isIgnoreErrors()) && (!cli.isForceIgnoreAnyErrors())) {
+					Reporter.log(command.getFailCause(), command.getResult(), Color.RED);
+					IOException e = command.getThrown();
+					if (e != null) {
+						throw e;
+					}
+					throw new IOException("Cli command failed");
+				}
+
+				if (!command.isSilent()) {
+					Reporter.log(command.getResult());
+				}
+				if (command.isIgnoreErrors() || (cli.isForceIgnoreAnyErrors())) {
+					;
+				} else {
+					List<IAssertionLogic<String>> analyzers = command.getAnalyzers();
+					if (analyzers != null) {
+						for (IAssertionLogic<String> analyzer : analyzers) {
+							analyzer.setActual(cli.getActual(String.class));
+							analyzer.doAssertion();
+							if (analyzer instanceof AbstractAssertionLogic<?>) {
+								AbstractAssertionLogic<String> stringAssertionLogic = (AbstractAssertionLogic<String>) analyzer;
+								if (!(command.isSilent() && stringAssertionLogic.isStatus())) {
+									Reporter.log(stringAssertionLogic.getTitle(), stringAssertionLogic.getMessage(),
+											stringAssertionLogic.isStatus());
+								}
+							}
 						}
 					}
 				}
+				cli.setForceIgnoreAnyErrors(false);
+			} finally {
+				if (!command.isSilent()) {
+					Reporter.stopLogToggle();
+				}
 			}
 		}
-		cli.setForceIgnoreAnyErrors(false);
 	}
 
-	public synchronized void command(CliCommand command) {
-		
+	@Override
+	public synchronized void command(CliCommand command) throws InterruptedException {
+
 		lastCommandTime = System.currentTimeMillis();
 		cli.setDontWaitForPrompts(command.isDontWaitForPrompts());
 		try {
 			navigateToPosition(command);
-		} catch (Exception e1) {
+		} catch (IOException e1) {
 			command.setFailCause("Navigate to position failed");
-			command.setThrown(e1);
+			command.setThrown(new IOException("Navigate to position failed",e1));
 			command.setFailed(true);
 			return;
 		}
@@ -436,12 +511,14 @@ implements CliConnection {
 
 				try {
 					if (command.getPrompts() != null) {
-						cli.command(cmd, command.getTimeout(), command.isAddEnter(), command.isDelayTyping(), null, command.getPrompts());
+						cli.command(cmd, command.getTimeout(), command.isAddEnter(), command.isDelayTyping(), null,
+								command.getPrompts());
 					} else {
-						cli.command(cmd, command.getTimeout(), command.isAddEnter(), command.isDelayTyping(), command.getPromptString());
+						cli.command(cmd, command.getTimeout(), command.isAddEnter(), command.isDelayTyping(),
+								command.getPromptString());
 					}
 
-				} catch (Exception e) {
+				} catch (IOException e) {
 					command.addResult(cli.getResult());
 					command.setFailCause("cli command failed: " + cmd);
 					command.setThrown(e);
@@ -459,16 +536,14 @@ implements CliConnection {
 
 				command.addResult(lastResult);
 				command.setResultPrompt(cli.getResultPrompt());
-				setActual(command.getResult());				
+				setActual(command.getResult());
 
 				// If log file name (+path) defined at the sut, CLI results will
 				// be save also to this file
 				// Add to the sut file under <conn><cli> the tag <cliLogFile>
 				if (cliLogFile != null) {
-					try {
-						BufferedWriter out = new BufferedWriter(new FileWriter(cliLogFile, true));
+					try (BufferedWriter out = new BufferedWriter(new FileWriter(cliLogFile, true))) {
 						out.write(lastResult);
-						out.close();
 					} catch (IOException e) {
 						command.setFailCause("Writing CLI buffer to file " + cliLogFile + " failed");
 						command.setThrown(e);
@@ -485,20 +560,13 @@ implements CliConnection {
 					}
 
 				}
-				try {
-					Thread.sleep(command.getDelayInRetries());
-				} catch (InterruptedException e2) {
-					command.setFailCause("Sleep failed");
-					command.setThrown(e2);
-					command.setFailed(true);
-					return;
-				}
+				Thread.sleep(command.getDelayInRetries());
 				retries++;
 			}
 		}
 		try {
 			returnFromPosition(command);
-		} catch (Exception e) {
+		} catch (IOException e) {
 			command.setFailCause("Navigate from position failed");
 			command.setThrown(e);
 			command.setFailed(true);
@@ -512,6 +580,9 @@ implements CliConnection {
 
 	public void setDummy(boolean dummy) {
 		this.dummy = dummy;
+		if (dummy){
+			setScrollEndTimeout(0);			
+		}
 	}
 
 	public boolean isUseTelnetInputStream() {
@@ -542,11 +613,13 @@ implements CliConnection {
 		return command;
 	}
 
+	@Override
 	public void waitForNotifications(String[] notifications, long timeout) throws Exception {
 		cli.command("", timeout, false, false, notifications);
 		cli.command("", timeout, false, false, (String) null);
 	}
 
+	@Override
 	public String getCliBuffer() {
 		if (useBuffer) {
 			return buffer.getBuffer();
@@ -554,6 +627,7 @@ implements CliConnection {
 		return null;
 	}
 
+	@Override
 	public void cleanCliBuffer() {
 		if (useBuffer) {
 			buffer.clean();
@@ -568,6 +642,7 @@ implements CliConnection {
 		this.useBuffer = useBuffer;
 	}
 
+	@Override
 	public boolean isConnected() {
 		if (cli == null) {
 			return false;
@@ -579,38 +654,74 @@ implements CliConnection {
 		this.connected = connected;
 	}
 
+	@Override
 	public String getProtocol() {
 		return protocol;
 	}
 
+	@Override
 	public void setProtocol(String protocol) {
 		this.protocol = protocol;
 	}
 
+	@Override
 	public long getLastCommandTime() {
 		return lastCommandTime;
 	}
 
+	@Override
 	public long getMaxIdleTime() {
 		return maxIdleTime;
 	}
 
+	@Override
 	public void setMaxIdleTime(long maxIdleTime) {
 		this.maxIdleTime = maxIdleTime;
 	}
-	
-    /**
-     * activates the IdleMonitor (if it wasn't activated allready)
-     * don't use if idleMonitor was allready active
-     */
-    public void activateIdleMonitor() {
-		if (maxIdleTime > 0 ) {
-			lastCommandTime = System.currentTimeMillis();
-			idleMonitor = new IdleMonitor(this,maxIdleTime);
+
+	/**
+	 * activates the IdleMonitor (if it wasn't activated already) don't use if
+	 * idleMonitor was already active
+	 */
+	public synchronized void activateIdleMonitor() {
+		if (maxIdleTime > 0 && (idleMonitor == null || !idleMonitor.isAlive())) {
+			idleMonitor = new IdleMonitor(this, maxIdleTime);
 			idleMonitor.start();
+			initializer = idleMonitor;
 		}
-    }
-	
+	}
+
+	/**
+	 * deactivates the IdleMonitor
+	 */
+	public synchronized void deactivateIdleMonitor() {
+
+		if (idleMonitor != null) {
+			synchronized (idleMonitor) {
+				try {
+					System.out.println("stopping " + idleMonitor.getName());
+					idleMonitor.setStop();
+					idleMonitor.join();
+				} catch (InterruptedException e) {
+					Reporter.log("Deactivating idle monitor failed", e);
+				} finally {
+					idleMonitor = null;
+				}
+			}
+		}
+	}
+
+	public synchronized boolean idleMonitorIsActive() {
+		if (idleMonitor == null) {
+			return false;
+		}
+		if (!idleMonitor.isAlive()) {
+			deactivateIdleMonitor();
+			return false;
+		}
+		return true;
+	}
+
 	public String getCliLogFile() {
 		return cliLogFile;
 	}
@@ -627,6 +738,7 @@ implements CliConnection {
 		this.dump = dump;
 	}
 
+	@Override
 	public void setGraceful(boolean graceful) {
 		this.graceful = graceful;
 		if (cli != null) {
@@ -634,14 +746,17 @@ implements CliConnection {
 		}
 	}
 
+	@Override
 	public boolean isGraceful() {
 		return graceful;
 	}
 
+	@Override
 	public void setPrintStream(PrintStream printStream) {
 		cli.setPrintStream(printStream);
 	}
 
+	@Override
 	public Prompt getResultPrompt() {
 		if (cli == null) {
 			return null;
@@ -649,21 +764,25 @@ implements CliConnection {
 		return cli.getResultPrompt();
 	}
 
+	@Override
 	public String read() throws Exception {
 		return cli.read();
 	}
 
+	@Override
 	public void reconnect() {
-		
+
 		try {
 			cli.reconnect();
 		} catch (Exception e) {
 		}
 	}
 
+	@Override
 	public Object clone() throws CloneNotSupportedException {
 		try {
-			CliConnectionImpl newImpl = (CliConnectionImpl) getClass().getClassLoader().loadClass(getClass().getName()).newInstance();
+			CliConnectionImpl newImpl = (CliConnectionImpl) getClass().getClassLoader().loadClass(getClass().getName())
+					.newInstance();
 			newImpl.port = port;
 			newImpl.user = user;
 			newImpl.password = password;
@@ -698,7 +817,7 @@ implements CliConnection {
 	}
 
 	private Prompt[] getAllPrompts() {
-		ArrayList<Prompt> allPrompts = new ArrayList<Prompt>();
+		ArrayList<Prompt> allPrompts = new ArrayList<>();
 		allPrompts.addAll(prompts);
 		Prompt[] pr = getPrompts();
 		for (Prompt p : pr) {
@@ -707,6 +826,7 @@ implements CliConnection {
 		return allPrompts.toArray(new Prompt[0]);
 	}
 
+	@Override
 	public void addPrompts(Prompt[] promptsToAdd) {
 		if (promptsToAdd == null) {
 			return;
@@ -719,8 +839,9 @@ implements CliConnection {
 		}
 	}
 
+	@Override
 	public void setPrompts(Prompt[] promptsToAdd) {
-		prompts = new ArrayList<Prompt>();
+		prompts = new ArrayList<>();
 		if (terminal != null) {
 			terminal.removePrompts();
 		}
@@ -735,6 +856,7 @@ implements CliConnection {
 		}
 	}
 
+	@Override
 	public void setEnterStr(String enterStr) {
 		// replace \r string with the '\r' char (the same for \n)
 		enterStr = enterStr.replaceAll(Pattern.quote("\\r"), "\r");
@@ -746,18 +868,22 @@ implements CliConnection {
 		}
 	}
 
+	@Override
 	public void setScrollEndTimeout(long timeout) {
 		terminal.setScrollEndTimeout(timeout);
 	}
 
+	@Override
 	public void addFilter(InOutInputStream stream) {
 		terminal.addFilter(stream);
 	}
 
+	@Override
 	public void sendString(String toSend, boolean delayedTyping) throws Exception {
 		terminal.sendString(toSend, delayedTyping);
 	}
 
+	@Override
 	public String getEnterStr() {
 		if (cli == null) {
 			return enterStr;
@@ -765,10 +891,12 @@ implements CliConnection {
 		return cli.getEnterStr();
 	}
 
+	@Override
 	public int getConnectRetries() {
 		return connectRetries;
 	}
 
+	@Override
 	public void setConnectRetries(int connectRetries) {
 		this.connectRetries = connectRetries;
 	}
@@ -781,14 +909,17 @@ implements CliConnection {
 		this.vt100Filter = vt100Filter;
 	}
 
+	@Override
 	public boolean isLeadingEnter() {
 		return leadingEnter;
 	}
 
+	@Override
 	public void setLeadingEnter(boolean leadingEnter) {
 		this.leadingEnter = leadingEnter;
 	}
-	
+
+	@Override
 	public long getKeyTypingDelay() {
 		if (terminal != null) {
 			return terminal.getKeyTypingDelay();
@@ -796,9 +927,10 @@ implements CliConnection {
 		return keyTypingDelay;
 	}
 
+	@Override
 	public void setKeyTypingDelay(long keyTypingDelay) {
 		this.keyTypingDelay = keyTypingDelay;
-		if (terminal !=null) {
+		if (terminal != null) {
 			terminal.setKeyTypingDelay(keyTypingDelay);
 		}
 	}
@@ -811,7 +943,7 @@ implements CliConnection {
 	public boolean isIgnoreBackSpace() {
 		return ignoreBackSpace;
 	}
-	
+
 	/**
 	 * Whether to ignore backspace characters or not
 	 * 
@@ -819,7 +951,7 @@ implements CliConnection {
 	 */
 	public void setIgnoreBackSpace(boolean ignoreBackSpace) {
 		this.ignoreBackSpace = ignoreBackSpace;
-		
+
 		if (terminal != null) {
 			terminal.setIgnoreBackSpace(ignoreBackSpace);
 		}
@@ -839,6 +971,20 @@ implements CliConnection {
 
 	public void setPrivateKey(File privateKey) {
 		this.privateKey = privateKey;
+	}
+
+	public void setUseThreads(boolean useThreads) {
+		this.useThreads = useThreads;
+	}
+
+	@Override
+	public String getName() {
+		return StringUtils.either(super.getName()).or(getHost());
+	}
+
+	@Override
+	public String toString() {
+		return getName();
 	}
 
 }

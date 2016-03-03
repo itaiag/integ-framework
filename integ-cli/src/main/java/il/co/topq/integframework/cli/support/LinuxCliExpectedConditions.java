@@ -1,7 +1,12 @@
 package il.co.topq.integframework.cli.support;
 
+import static il.co.topq.integframework.cli.support.CliExecutionExpectedConditions.executionLogicHappens;
+import static il.co.topq.integframework.utils.Parsers.intParser;
+import il.co.topq.integframework.assertion.ComparableAssertion;
+import il.co.topq.integframework.assertion.CompareMethod;
 import il.co.topq.integframework.cli.conn.CliConnection;
 import il.co.topq.integframework.cli.conn.LinuxDefaultCliConnection;
+import il.co.topq.integframework.cli.process.CliCommandExecution;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -18,6 +23,13 @@ public abstract class LinuxCliExpectedConditions {
 		_ = 1;
 	}
 
+	/**
+	 * an expectation of existence of a file.
+	 * 
+	 * @param path
+	 *            the file path to find
+	 * @return true if the file exists
+	 */
 	public static Predicate<LinuxDefaultCliConnection> fileExists(final String path) {
 		return new Predicate<LinuxDefaultCliConnection>() {
 
@@ -42,12 +54,19 @@ public abstract class LinuxCliExpectedConditions {
 		};
 	}
 
+	/**
+	 * expectation for a file to be readable.
+	 * 
+	 * @param path
+	 *            the file path to find
+	 * @return an input stream to the file
+	 */
 	public static CliExpectedCondition<InputStream> fileIsReadable(final String path) {
 		return new CliExpectedCondition<InputStream>() {
 
 			@Override
 			public String toString() {
-				return "the file in " + path.toString() + " to be openable";
+				return "the file in " + path.toString() + " to be readable";
 			};
 
 			public InputStream apply(LinuxDefaultCliConnection cliConnection) {
@@ -73,6 +92,15 @@ public abstract class LinuxCliExpectedConditions {
 		};
 	}
 
+	/**
+	 * an expectation for a directory to contain a file
+	 * 
+	 * @param directory
+	 *            the path of the directory to find the file in
+	 * @param file
+	 *            the exact name of the file to find in the folder
+	 * @return the filename
+	 */
 	public static CliExpectedCondition<String> directoryConatins(final String directory, final String file) {
 		return new CliExpectedCondition<String>() {
 			@Override
@@ -166,6 +194,14 @@ public abstract class LinuxCliExpectedConditions {
 		};
 	}
 
+	/**
+	 * an expectation for a process to be running
+	 * 
+	 * @param processName
+	 *            the name of the process (the name of the binary executable)
+	 * @return true if the process is running
+	 * @see man ps
+	 */
 	public static CliExpectedCondition<Boolean> processIsRunning(final String processName) {
 		return new CliExpectedCondition<Boolean>() {
 
@@ -193,6 +229,16 @@ public abstract class LinuxCliExpectedConditions {
 		};
 	}
 
+	/**
+	 * an expectation for a process not to be running, i.e that the machine does
+	 * not run a process with this name
+	 * 
+	 * @param processName
+	 *            the name of the process (the name of the binary executable)
+	 * @return true if there is no process running with the given name
+	 * @see man ps
+	 */
+
 	public static CliExpectedCondition<Boolean> processIsNotRunning(final String processName) {
 		return new CliExpectedCondition<Boolean>() {
 
@@ -215,9 +261,47 @@ public abstract class LinuxCliExpectedConditions {
 			}
 
 			public Boolean apply(LinuxDefaultCliConnection linux) throws Exception {
-				return !linux.isProccessRunning(processName);
+				return linux.isProccessNotRunning(processName);
 			}
 		};
 	}
 
+	public enum DirectoryItemType {
+		File("f"), Directory("d"), SymbolicLink("l");
+		final String typeCmd;
+
+		private DirectoryItemType(String typeCmd) {
+			this.typeCmd = typeCmd;
+		}
+	}
+
+	public static CliExpectedCondition<Integer> directoryHas(final String directory, final String filenamePattern,
+			final CompareMethod compareMethod,
+			final int expectedAmount, final DirectoryItemType itemType) {
+
+		StringBuilder commandBuilder = new StringBuilder().append("find ").append(directory).append(" -maxdepth 1 -type ")
+				.append(itemType.typeCmd).append(" -name ").append(filenamePattern).append(" | wc -l");
+		final String findCommand = commandBuilder.toString();
+		final ComparableAssertion<Integer> amountOfItemsAssertion = new ComparableAssertion<>(compareMethod, expectedAmount);
+		return new CliExpectedCondition<Integer>() {
+
+			@Override
+			public Integer apply(CliConnection cliConnection) {
+				return executionLogicHappens(amountOfItemsAssertion, intParser).apply(
+						new CliCommandExecution(cliConnection, findCommand).silently());
+			}
+
+			@Override
+			public String toString() {
+				return "the directory's " + directory + " amount of " + itemType.name() + "(s) to be " + compareMethod.toString()
+						+ " " + expectedAmount;
+			}
+		};
+	}
+
+	public static CliExpectedCondition<Integer> directoryHas(final String directory, final CompareMethod compareMethod,
+			final int expectedAmount, final DirectoryItemType itemType) {
+
+		return directoryHas(directory, "'*'", compareMethod, expectedAmount, itemType);
+	}
 }

@@ -6,7 +6,9 @@ package il.co.topq.integframework.cli.conn;
 import il.co.topq.integframework.cli.terminal.Prompt;
 import il.co.topq.integframework.cli.terminal.VT100FilterInputStream;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Default CliConnection for a Cli connection to a windows xm/vista machine.
@@ -31,22 +33,26 @@ public class WindowsDefaultCliConnection extends CliConnectionImpl {
 		setHost(host);
 	}
 	
-	public void init() throws Exception {
+	@Override
+	public void init() throws IOException {
 		super.init();
 	}
 	
-	public void connect() throws Exception {
+	@Override
+	public void connect() throws IOException {
 		super.connect();
 		terminal.addFilter(new VT100FilterInputStream());
 	}
 	
+	@Override
 	public Position[] getPositions() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	@Override
 	public Prompt[] getPrompts() {
-		ArrayList<Prompt> prompts = new ArrayList<Prompt>();
+		List<Prompt> prompts = new ArrayList<>();
 		Prompt p = new Prompt();
 		p.setPrompt("login:");
 		p.setStringToSend(getUser());

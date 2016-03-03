@@ -180,10 +180,15 @@ public class Prompt {
 		this.regularExpression = regularExpression;
 	}
 
+	@Override
 	public boolean equals(Object o) {
 		return (o instanceof Prompt && ((Prompt) o).getPrompt().equals(getPrompt()));
 	}
 
+	@Override
+	public int hashCode() {
+		return getPrompt().hashCode();
+	}
 	/**
 	 * should prompt appear after all input was read?
 	 * 

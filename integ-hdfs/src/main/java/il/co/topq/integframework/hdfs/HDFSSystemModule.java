@@ -1,48 +1,77 @@
 package il.co.topq.integframework.hdfs;
 
 import static org.apache.hadoop.io.IOUtils.copyBytes;
+import il.co.topq.integframework.AbstractModuleImpl;
+import il.co.topq.integframework.cli.conn.LinuxDefaultCliConnection;
 import il.co.topq.integframework.hdfs.support.HdfsExpectedCondition;
+import il.co.topq.integframework.hdfs.support.HdfsExpectedConditions;
 import il.co.topq.integframework.hdfs.support.HdfsWait;
 import il.co.topq.integframework.reporting.Reporter;
 import il.co.topq.integframework.support.TimeoutException;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.DirectoryNotEmptyException;
+import java.security.PrivilegedExceptionAction;
 import java.util.EnumSet;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.CreateFlag;
-import org.apache.hadoop.fs.FileAlreadyExistsException;
-import org.apache.hadoop.fs.Hdfs;
+import org.apache.hadoop.fs.*;
 import org.apache.hadoop.fs.Options.CreateOpts;
-import org.apache.hadoop.fs.ParentNotDirectoryException;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.UnresolvedLinkException;
-import org.apache.hadoop.fs.UnsupportedFileSystemException;
+import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.hdfs.protocol.HdfsConstants;
 import org.apache.hadoop.security.AccessControlException;
+import org.apache.hadoop.security.UserGroupInformation;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 
-public class HDFSSystemModule {
+public class HDFSSystemModule extends AbstractModuleImpl {
 
-	protected final Hdfs hdfs;
+	protected Hdfs hdfs;
 	private HdfsWait wait;
+	protected UserGroupInformation ugi;
+	protected LinuxDefaultCliConnection gateway = null;
+	protected String[] resourcesPaths = null;
+	protected final int port;
+	protected final String host;
+	protected final String userinfo;
 
-	public HDFSSystemModule(String host, int port, String userinfo)
-			throws URISyntaxException, UnsupportedFileSystemException {
-		Configuration conf = new Configuration();
+	public HDFSSystemModule(final String host, final int port, final String userinfo) throws URISyntaxException, IOException,
+			InterruptedException {
+		this.host = host;
+		this.port = port;
+		this.userinfo = userinfo;
+		ugi = UserGroupInformation.getCurrentUser();
+		if (userinfo != null) {
+			String username;
+			if (userinfo.contains(":")) {
+				username = userinfo.split(":")[0];
+			} else {
+				username = userinfo;
+			}
+			ugi = UserGroupInformation.createRemoteUser(username);
+		}
+	}
 
-		hdfs = (Hdfs) Hdfs.get(new URI(HdfsConstants.HDFS_URI_SCHEME, userinfo,
-				host, port, "", "", ""), conf);
+	@Override
+	public void init() throws Exception {
+		super.init();
+		hdfs = ugi.doAs(new PrivilegedExceptionAction<Hdfs>() {
+			@Override
+			public Hdfs run() throws Exception {
+				Configuration conf = new Configuration();
+				if (gateway != null) {
+					for (String resourcePath : resourcesPaths) {
+						conf.addResource(new BufferedInputStream(gateway.get(resourcePath)));
+					}
+				}
+				UserGroupInformation.setConfiguration(conf);
+				return (Hdfs) Hdfs.get(new URI(HdfsConstants.HDFS_URI_SCHEME, userinfo, host, port, "", "", ""), conf);
+			}
+		});
 	}
 
 	public Hdfs getHdfs() {
@@ -56,48 +85,82 @@ public class HDFSSystemModule {
 		return wait;
 	}
 
-	public void copyFromLocal(File src, Path dst,
-			EnumSet<CreateFlag> createFlag, CreateOpts... opts)
-			throws AccessControlException, FileAlreadyExistsException,
-			FileNotFoundException, ParentNotDirectoryException,
-			UnsupportedFileSystemException, UnresolvedLinkException,
-			IOException {
+	public void copyFromLocal(File src, Path dst, EnumSet<CreateFlag> createFlag, CreateOpts... opts)
+			throws AccessControlException, FileAlreadyExistsException, FileNotFoundException, ParentNotDirectoryException,
+			UnsupportedFileSystemException, UnresolvedLinkException, IOException {
 
-		copyBytes(new BufferedInputStream(new FileInputStream(src)),
-				new BufferedOutputStream(hdfs.create(dst, createFlag, opts)),
+		copyBytes(new BufferedInputStream(new FileInputStream(src)), new BufferedOutputStream(hdfs.create(dst, createFlag, opts)),
 				10240, true);
 	}
 
-	public void copyFromRemote(Path src, File dst)
-			throws AccessControlException,
-			FileNotFoundException,
-			UnresolvedLinkException,
+	public void copyFromRemote(Path src, File dst) throws AccessControlException, FileNotFoundException, UnresolvedLinkException,
 			IOException {
 
-		copyBytes(new BufferedInputStream(hdfs.open(src)),
-				new BufferedOutputStream(new FileOutputStream(dst)), 10240,
-				true);
+		copyBytes(new BufferedInputStream(hdfs.open(src)), new BufferedOutputStream(new FileOutputStream(dst)), 10240, true);
 	}
 
-	public <T> T validateThat(HdfsExpectedCondition<T> expectedCondition) throws Exception{
+	public OutputStream create(Path f, EnumSet<CreateFlag> createFlag, CreateOpts... opts) throws AccessControlException,
+			FileAlreadyExistsException, FileNotFoundException, ParentNotDirectoryException, UnsupportedFileSystemException,
+			UnresolvedLinkException, IOException {
+		return hdfs.create(f, createFlag, opts);
+	}
+
+	public InputStream open(Path f) throws AccessControlException, FileNotFoundException, UnresolvedLinkException, IOException {
+		return hdfs.open(f);
+	}
+
+	public void mkdir(Path dir, FsPermission permission, boolean createParent) throws UnresolvedLinkException, IOException {
+		hdfs.mkdir(dir, permission, createParent);
+	}
+
+	public void rmdir(Path dir) throws UnresolvedLinkException, IOException {
+		rmdir(dir, false);
+	}
+
+	public void rmdir(Path dir, boolean throwFileNotFoundException) throws UnresolvedLinkException, IOException {
+		if (validateThat(HdfsExpectedConditions.isDirectory(dir))) {
+			if (!hdfs.delete(dir, true)) {
+				throw new DirectoryNotEmptyException("delete of " + dir.toString() + " failed");
+			}
+		} else if (throwFileNotFoundException) {
+			throw new FileNotFoundException(dir.toString());
+		}
+	}
+
+	public <T> T validateThat(HdfsExpectedCondition<T> expectedCondition) throws Throwable {
 		Reporter.log("Validating: " + expectedCondition.toString());
 		HdfsWait oldWait = this.wait;
 		this.wait = new HdfsWait(hdfs);
-		wait.withTimeout(0, TimeUnit.MILLISECONDS);
 		try {
-			return wait.until(expectedCondition);
-		}
-		catch (TimeoutException exception){
-			throw new Exception(exception.getCause()); 
+			return wait.withTimeout(0, TimeUnit.MILLISECONDS).until(expectedCondition);
+		} catch (TimeoutException exception) {
+			throw Optional.fromNullable(exception.getCause()).or(exception);
 		} finally {
-			this.wait=oldWait;
+			this.wait = oldWait;
 		}
-		
+
 	}
-	
-	public boolean validateThat(Predicate<Hdfs> predicate){
+
+	public boolean validateThat(Predicate<Hdfs> predicate) {
 		// TODO AssertTrue
 		Reporter.log("Validating " + predicate.toString());
 		return predicate.apply(hdfs);
 	}
+
+	public LinuxDefaultCliConnection getGateway() {
+		return gateway;
+	}
+
+	public void setGateway(LinuxDefaultCliConnection gateway) {
+		this.gateway = gateway;
+	}
+
+	public String[] getResourcesPaths() {
+		return resourcesPaths;
+	}
+
+	public void setResourcesPaths(String[] resourcesPaths) {
+		this.resourcesPaths = resourcesPaths;
+	}
+
 }

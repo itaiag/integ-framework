@@ -43,10 +43,10 @@
 	<parent>
 		<groupId>il.co.topq.integframework</groupId>
 		<artifactId>integ-parent</artifactId>
-		<version>1.0.0</version>
+		<version>1.0.4-SNAPSHOT</version>
 		<relativePath>../integ-parent</relativePath>
 	</parent>
 	<properties>
-		<integ.dependency.version>1.0.00-SNAPSHOT</integ.dependency.version>
+		<integ.dependency.version>1.0.4-SNAPSHOT</integ.dependency.version>
 	</properties>
 </project>

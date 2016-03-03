@@ -3,65 +3,100 @@
  */
 package il.co.topq.integframework.cli.conn;
 
-import il.co.topq.integframework.reporting.Reporter;
+import static il.co.topq.integframework.reporting.Reporter.log;
+import static il.co.topq.integframework.utils.StringUtils.isEmpty;
+import static java.lang.System.currentTimeMillis;
+import static java.lang.System.out;
+import static org.apache.commons.io.output.NullOutputStream.NULL_OUTPUT_STREAM;
+import il.co.topq.integframework.cli.process.CliCommandExecution;
+
+import java.io.PrintStream;
 
 /**
- * Monitors the allowed idle time of a machine.
- * (Many devices forces log out in case of the maximum idle time has passed)
- * In order to activate this monitor the maxIdleTime tag(in miliSeconds) should be added to the SUT file.
- * under conn / cli 
+ * Monitors the allowed idle time of a machine. (Many devices forces log out in
+ * case of the maximum idle time has passed) In order to activate this monitor
+ * the maxIdleTime tag(in miliSeconds) should be added to the SUT file. under
+ * conn / cli
  * 
  * Note that the actual keep alive 'Enter' will be done at idleTime * 0.9
- *
+ * 
  */
 public class IdleMonitor extends Thread {
 	CliConnectionImpl cli;
+	final PrintStream silentPrintStream = new PrintStream(NULL_OUTPUT_STREAM);
 	long timeout;
-	boolean stop = false;
-	
-	/**	 
-	 * @param cli CliConnection 
-	 * @param timeout (miliSeconds) the maximum idleTime
+
+	/**
+	 * @param cli
+	 *            CliConnection
+	 * @param timeout
+	 *            (miliSeconds) the maximum idleTime
 	 */
-	public IdleMonitor(CliConnectionImpl cli, long timeout){
+	public IdleMonitor(CliConnectionImpl cli, long timeout) {
+		super("Idle monitor for " + cli.getName());
+		setDaemon(true);
 		this.cli = cli;
 		this.timeout = timeout;
 	}
-	
-	public void run(){
-		System.out.println("Idle monitor was started");
-		while(!stop){
+
+	@Override
+	public void run() {
+		out.println(this.getName() + " started");
+		String position = null;
+		while (!isInterrupted()) {
+			try {
+				synchronized (cli) {
+					if (!cli.terminal.isConnected()) {
+						cli.connect();
+					}
+				}
+			} catch (Exception e) {
+				continue;
+			}
 			long lastCommandTime = cli.getLastCommandTime();
-			if(lastCommandTime == 0){
+			if (lastCommandTime == 0) {
 				try {
-					Thread.sleep(timeout/2);
+					sleep(timeout / 2);
 				} catch (InterruptedException e) {
-					return;
+					setStop();
 				}
 				continue;
 			}
-			if(System.currentTimeMillis() - lastCommandTime > (timeout * 0.9)){
-				CliCommand cmd = new CliCommand();
-				cmd.setCommands(new String[]{""});
-				cli.command(cmd);
-				if(cmd.isFailed()){
-					Reporter.log(" idle monitor failed" , null ,false);
-				} else {
-					Reporter.log(" idle monitor keepalive success");
+			if (currentTimeMillis() - lastCommandTime > (timeout * 0.9)) {
+				synchronized (cli) {
+					CliCommand cmd = new CliCommand("");
+					if (!isEmpty(position)) {
+						cmd.setPosition(position);
+					}
+					PrintStream stream = cli.terminal.getPrintStream();
+					cli.setPrintStream(silentPrintStream);
+					try {
+						cli.command(cmd);
+					} catch (InterruptedException e) {
+						setStop();
+					}
+					cli.setPrintStream(stream);
+					position = cmd.getPosition();
+					if (cmd.isFailed()) {
+						log(getName() + " keepalive failed", null, false);
+					} else {
+						// System.out.println(getName() + " keepalive success");
+					}
 				}
 			} else {
 				try {
-					long toSleep = (long)(timeout * 0.9) - (System.currentTimeMillis() - lastCommandTime);
-					if(toSleep > 0){
-						Thread.sleep(toSleep);
+					long toSleep = (long) (timeout * 0.9) - (currentTimeMillis() - lastCommandTime);
+					if (toSleep > 0) {
+						sleep(toSleep);
 					}
 				} catch (InterruptedException e) {
-					return;
+					setStop();
 				}
 			}
 		}
 	}
-	public void setStop(){
-		stop = true;
+
+	public void setStop() {
+		this.interrupt();
 	}
 }

@@ -4,6 +4,7 @@ import static com.sun.jersey.api.client.Client.create;
 import static il.co.topq.integframework.utils.StringUtils.isEmpty;
 import il.co.topq.integframework.reporting.Reporter;
 import il.co.topq.integframework.reporting.Reporter.Color;
+import il.co.topq.integframework.reporting.Reporter.Style;
 import il.co.topq.integframework.utils.StringUtils;
 
 import java.net.URI;
@@ -70,7 +71,7 @@ public class TomcatRESTApplicationContainer extends RESTClientModule implements 
 
 		setActual(clientResponse.getEntity(String.class));
 		Reporter.log("Response", Color.BLUE);
-		Reporter.log("<pre>\n" + getActual(String.class) + "</pre>\n");
+		Reporter.log(getActual(String.class), Style.PLAINTEXT);
 		return clientResponse;
 	}
 

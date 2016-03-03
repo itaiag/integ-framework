@@ -3,16 +3,17 @@
  */
 package il.co.topq.integframework.cli.terminal;
 
+import il.co.topq.integframework.reporting.Reporter;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 
-import ch.ethz.ssh2.Connection;
-import ch.ethz.ssh2.InteractiveCallback;
-import ch.ethz.ssh2.LocalPortForwarder;
-import ch.ethz.ssh2.SCPClient;
-import ch.ethz.ssh2.Session;
+import org.testng.ITestResult;
+
+import ch.ethz.ssh2.*;
+import ch.ethz.ssh2.channel.Channel;
 
 /**
  * A terminal used for SSH Connection
@@ -36,6 +37,8 @@ public class SSH extends Terminal {
 
 	protected int destinationPort = -1;
 	
+	protected int port = 22;
+
 	protected boolean xtermTerminal = true;
 	
 	public SSH(String hostnameP, String usernameP, String passwordP) {
@@ -60,18 +63,24 @@ public class SSH extends Terminal {
 	public void connect() throws IOException {
 		boolean isAuthenticated = false;
 		/* Create a connection instance */
-
-		conn = new Connection(hostname);
+		Reporter.log("Connecting to " + hostname + " via " + getConnectionName());
+		conn = new Connection(hostname, getPort());
 
 		/* Now connect */
+		try {
+			conn.connect();
+		} catch (IOException e) {
+			Reporter.log("Connection to "+ hostname + " Failed", e, ITestResult.SUCCESS_PERCENTAGE_FAILURE);
+			throw e;
+		}
 
-		conn.connect();
-
-		// Check what connection options are available to us
 		String[] authMethods = conn.getRemainingAuthMethods(username);
-		System.out.println("The supported auth Methods are:");
-		for(String method: authMethods) {
-			System.out.println(method);
+		// Check what connection options are available to us
+		synchronized (System.out){
+			System.out.println("The supported auth Methods are:");
+			for(String method: authMethods) {
+				System.out.println(method);
+			}
 		}
 //		boolean privateKeyAuthentication = false;
 		boolean passAuthentication = false;
@@ -119,6 +128,14 @@ public class SSH extends Terminal {
 		out = sess.getStdin();
 	}
 
+	protected int getPort() {
+		return port;
+	}
+
+	public void setPort(int port) {
+		this.port = port;
+	}
+
 	@Override
 	public void disconnect() {
 		if (lpf != null) {
@@ -137,7 +154,7 @@ public class SSH extends Terminal {
 
 	@Override
 	public boolean isConnected() {
-		return true;
+		return sess.getState() == Channel.STATE_OPEN;
 	}
 
 	@Override
@@ -178,6 +195,7 @@ public class SSH extends Terminal {
 	 */
 	class InteractiveLogic implements InteractiveCallback {
 		/* the callback may be invoked several times, depending on how many questions-sets the server sends */
+		@Override
 		public String[] replyToChallenge(String name, String instruction, int numPrompts, String[] prompt, boolean[] echo) throws IOException {
 			/* Often, servers just send empty strings for "name" and "instruction" */
 
@@ -245,8 +263,4 @@ public class SSH extends Terminal {
 	protected void setDestinationPort(int destinationPort) {
 		this.destinationPort = destinationPort;
 	}
-
-
-
-	
 }

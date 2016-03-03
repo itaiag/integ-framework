@@ -6,6 +6,7 @@ package il.co.topq.integframework.cli.conn;
 import il.co.topq.integframework.cli.terminal.Prompt;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This CLI connection enable you to describe the basic cli connection
@@ -24,12 +25,14 @@ public class BasicCliConnection extends CliConnectionImpl {
 	protected String commandEndPrompts;
 	protected String loginPrompt;
 	protected String passwordPrompt;
+	@Override
 	public Position[] getPositions() {
 		return null;
 	}
 
+	@Override
 	public Prompt[] getPrompts() {
-		ArrayList<Prompt> prompts = new ArrayList<Prompt>();
+		List<Prompt> prompts = new ArrayList<>();
 		if(getCommandEndPrompts() != null){
 			String[] pString = getCommandEndPrompts().split(",");
 			for(String ps: pString){

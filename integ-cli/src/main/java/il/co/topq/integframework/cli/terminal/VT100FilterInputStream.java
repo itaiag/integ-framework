@@ -14,6 +14,7 @@ public class VT100FilterInputStream extends InOutInputStream {
 	public VT100FilterInputStream() {
 	}
 
+	@Override
 	public int read() throws IOException {
 		int c = in.read();
 		while (true) {
@@ -424,6 +425,7 @@ public class VT100FilterInputStream extends InOutInputStream {
 
 	}
 
+	@Override
 	public int available() throws IOException {
 
 		return in.available();

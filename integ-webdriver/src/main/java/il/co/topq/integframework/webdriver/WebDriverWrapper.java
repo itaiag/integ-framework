@@ -40,7 +40,7 @@ public class WebDriverWrapper extends EventFiringWebDriver implements HasWebDriv
 	public WebDriverWrapper(WebDriver driver) {
 		super(driver);
 		webDriver = driver;
-		webDriverEventListeners = new ArrayList<WebDriverEventListener>();
+		webDriverEventListeners = new ArrayList<>();
 	}
 
 	/**
@@ -84,6 +84,7 @@ public class WebDriverWrapper extends EventFiringWebDriver implements HasWebDriv
 		return getDriver();
 	}
 
+	@Override
 	public WebDriver getDriver() {
 		return this;
 	}

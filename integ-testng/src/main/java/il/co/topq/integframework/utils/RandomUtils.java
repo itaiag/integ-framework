@@ -1,6 +1,8 @@
 package il.co.topq.integframework.utils;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -13,10 +15,10 @@ import java.util.Random;
  * 
  */
 public class RandomUtils {
-	static final ArrayList<Character> ALPHABET_LETTERS_ALL;
+	static final List<Character> ALPHABET_LETTERS_ALL;
 
 	static {
-		ArrayList<Character> letters = new ArrayList<Character>();
+		List<Character> letters = new ArrayList<>();
 		for (int i = (int) 'A'; i <= (int) 'Z'; i++) {
 			letters.add((char) i);
 		}
@@ -40,9 +42,8 @@ public class RandomUtils {
 	 *            the Random object to randomize with
 	 * @return a random English alphabetical char
 	 */
-	@SuppressWarnings("unchecked")
 	public static char getRandomAlphabet(char differentThen, boolean caseSensitive, Random random) {
-		ArrayList<Character> temp = (ArrayList<Character>) ALPHABET_LETTERS_ALL.clone();
+		List<Character> temp = new ArrayList<>(ALPHABET_LETTERS_ALL);
 		if (differentThen != ' ') {
 			if (caseSensitive) {
 				temp.remove(new Character(differentThen));
@@ -66,8 +67,8 @@ public class RandomUtils {
 	 *            {{67,95},{97,115}}
 	 * @return an ArrayList of all chars in ranges
 	 */
-	public static ArrayList<Character> getAllCharsInRange(int[][] ranges) {
-		ArrayList<Character> chars = new ArrayList<Character>();
+	public static List<Character> getAllCharsInRange(int[][] ranges) {
+		List<Character> chars = new ArrayList<>();
 		for (int[] range : ranges) {
 			for (int i = range[0]; i <= range[1]; i++) {
 				chars.add((char) i);
@@ -93,7 +94,7 @@ public class RandomUtils {
 	 * @return a random chars in given conditions
 	 */
 	public static char getRandomChar(int[][] ranges, char differentThen, boolean caseSensitive, Random random) {
-		ArrayList<Character> chars = getAllCharsInRange(ranges);
+		List<Character> chars = getAllCharsInRange(ranges);
 		if (differentThen != ' ') {
 			if (caseSensitive) {
 				chars.remove(new Character(differentThen));
@@ -133,9 +134,59 @@ public class RandomUtils {
 	 * @return an int value in the given range
 	 */
 	public static int getRandomInt(int min, int max, Random random) {
-		int diff = max - min + 1;
+		if (max <= min)
+			throw new IllegalArgumentException(max + " is smaller then " + min);
+		int diff = max - min;
+
+		if (diff < 0) {
+			int a = getRandomInt(0, (max == 0) ? 1 : max, random);
+			if (max == 0 && a == 0)
+				a--;
+			int b;
+			if (min == Integer.MIN_VALUE) {
+				b = -getRandomInt(0, Integer.MAX_VALUE - 2, random);
+			} else {
+				b = getRandomInt(min, 0, random);
+			}
+			return random.nextBoolean() ? a : b;
+		}
 		int randomInt = random.nextInt(diff);
 		return randomInt + min;
+	}
+
+	/**
+	 * Get a random long value in given range
+	 * 
+	 * @param min
+	 *            range start (inclusive)
+	 * @param max
+	 *            range end (exclusive)
+	 * @param random
+	 *            the Random object to random with
+	 * @return an int value in the given range
+	 */
+	public static long getRandomLong(long min, long max, Random random) {
+		if (max <= min)
+			throw new IllegalArgumentException(max + " is smaller then " + min);
+		long val, bits, diff = max - min;
+		if (diff < 0) {
+			long a = getRandomLong(0, (max == 0) ? 1 : max, random);
+			if (max == 0 && a == 0)
+				a--;
+			long b;
+			if (min == Long.MIN_VALUE) {
+				b = -getRandomLong(0, Long.MAX_VALUE - 2, random);
+			} else {
+				b = getRandomLong(min, 0, random);
+			}
+			return random.nextBoolean() ? a : b;
+		}
+		do {
+			bits = (random.nextLong() << 1) >>> 1;
+			val = bits % diff + min;
+		} while (val < min || max <= val);
+		return val;
+
 	}
 
 	public static float getRandomFloat(float min, float max, Random random) {
@@ -159,7 +210,7 @@ public class RandomUtils {
 	 *         <b>NOTE: NO REPEATED VALUES</b>
 	 */
 	public static int[] getSeveralRandomInts(int[][] ranges, int amount, Random random) {
-		ArrayList<Integer> group = new ArrayList<Integer>();
+		List<Integer> group = new ArrayList<>();
 
 		for (int[] ints : ranges) {
 			for (int i = ints[0]; i <= ints[1]; i++) {
@@ -233,6 +284,14 @@ public class RandomUtils {
 		}
 
 		return toReturn;
+	}
+
+	public static <E> E getRandomItemFrom(Collection<E> collection) {
+		return getRandomItemFrom(collection, collection.size());
+	}
+
+	public static <E> E getRandomItemFrom(Collection<E> collection, int limit) {
+		return new ArrayList<>(collection).get(getRandomInt(0, limit, new Random()));
 	}
 
 }

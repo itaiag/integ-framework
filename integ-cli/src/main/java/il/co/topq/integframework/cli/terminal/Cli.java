@@ -83,8 +83,9 @@ public class Cli {
 	 * send an enter string and wait for a matching Prompt in 60 seconds
 	 * 
 	 * @exception IOException
+	 * @throws InterruptedException 
 	 */
-	public void login() throws Exception {
+	public void login() throws IOException, InterruptedException {
 		login(60000);
 	}
 
@@ -92,9 +93,10 @@ public class Cli {
 	 * send an enter string and wait for a matching Prompt in given time
 	 * 
 	 * @param timeout	the time after which a timeout exception will be thrown
+	 * @throws InterruptedException 
 	 * @throws Exception
 	 */
-	public void login(long timeout) throws Exception {
+	public void login(long timeout) throws IOException, InterruptedException {
 		login(timeout, false);
 	}
 
@@ -103,9 +105,10 @@ public class Cli {
 	 * 
 	 * @param timeout	the time after which a timeout exception will be thrown
 	 * @param delayedTyping	if True then terminal buffer reading will be delayed (20 ms sleep between each byte)
+	 * @throws InterruptedException 
 	 * @throws Exception
 	 */
-	public void login(long timeout, boolean delayedTyping) throws Exception {
+	public void login(long timeout, boolean delayedTyping) throws IOException, InterruptedException {
 		Thread.sleep(1000);
 		command(null, timeout, true, delayedTyping);
 	}
@@ -113,8 +116,9 @@ public class Cli {
 	/**
 	 * Sends the command without waiting to any prompt.
 	 * If delayedTyping is true, sends each byte desperately + small wait after each byte.
+	 * @throws InterruptedException 
 	 */
-	public void sendString(String command, boolean delayedTyping) throws Exception {
+	public void sendString(String command, boolean delayedTyping) throws IOException, InterruptedException {
 		terminal.sendString(command, delayedTyping);
 	}
 
@@ -124,8 +128,9 @@ public class Cli {
 	 * @param command Command text.
 	 * 
 	 * @exception IOException
+	 * @throws InterruptedException 
 	 */
-	public void command(String command) throws Exception {
+	public void command(String command) throws IOException, InterruptedException {
 		command(command, 20000, true, false);
 	}
 
@@ -156,8 +161,9 @@ public class Cli {
 	 * @param addEnter If true enterString will be add to the command.
 	 * 
 	 * @exception IOException
+	 * @throws InterruptedException 
 	 */
-	public void command(String command, long timeout, boolean addEnter) throws Exception {
+	public void command(String command, long timeout, boolean addEnter) throws IOException, InterruptedException {
 		command(command, timeout, addEnter, false);
 	}
 
@@ -169,8 +175,9 @@ public class Cli {
 	 * @param addEnter If True, defined enter string will be added to the command.
 	 * 
 	 * @exception IOException
+	 * @throws InterruptedException 
 	 */
-	public void command(String command, long timeout, boolean addEnter, boolean delayedTyping) throws Exception {
+	public void command(String command, long timeout, boolean addEnter, boolean delayedTyping) throws IOException, InterruptedException {
 		command(command, timeout, addEnter, delayedTyping, (String) null);
 	}
 
@@ -182,9 +189,10 @@ public class Cli {
 	 * @param addEnter	If True, defined enter string will be added to the command.
 	 * @param delayedTyping	if True then terminal buffer reading will be delayed (20 ms sleep between each byte)
 	 * @param promptString	a Prompt String to wait for (if null then default terminal prompts will be used)
+	 * @throws InterruptedException 
 	 * @throws Exception
 	 */
-	public void command(String command, long timeout, boolean addEnter, boolean delayedTyping, String promptString) throws Exception {
+	public void command(String command, long timeout, boolean addEnter, boolean delayedTyping, String promptString) throws IOException, InterruptedException {
 		if (promptString != null) {
 			command(command, timeout, addEnter, delayedTyping, new String[] { promptString });
 		} else {
@@ -201,9 +209,10 @@ public class Cli {
 	 * @param addEnter	If True, defined enter string will be added to the command.
 	 * @param delayTyping	if True then terminal buffer writing will be delayed (20 ms sleep between each byte)
 	 * @param promptStrings	an array of all Prompt Strings that should be found (if null then default terminal prompts will be used)
+	 * @throws InterruptedException 
 	 * @throws Exception
 	 */
-	public void command(String command, long timeout, boolean addEnter, boolean delayTyping, String[] promptStrings) throws Exception {
+	public void command(String command, long timeout, boolean addEnter, boolean delayTyping, String[] promptStrings) throws IOException, InterruptedException {
 		command(command, timeout, addEnter, delayTyping, promptStrings, null);
 	}
 
@@ -216,10 +225,11 @@ public class Cli {
 	 * @param delayedTyping	if True will sleep 20 ms between each typed byte sent to the terminal
 	 * @param promptStrings	if not null then wait for <b>ALL</b> Strings in the given Array to be found in the terminal
 	 * @param prompts	if promptStrings is null, wait for ONE of the  prompts, if any exists
+	 * @throws InterruptedException 
 	 * @throws Exception
 	 */
 	public void command(String command, long timeout, boolean addEnter, boolean delayedTyping, String[] promptStrings, Prompt[] prompts)
-			throws Exception {
+			throws IOException, InterruptedException {
 		
 		resultPrompt = null;
 		ArrayList<Prompt> defaultPromts = null;
@@ -258,7 +268,7 @@ public class Cli {
 				}
 				if (timeout > 0) {
 					if (System.currentTimeMillis() - startTime > (timeout)) {
-						throw new IOException("timeout: " + timeout);
+						throw new IOException("Timeout waiting for scroll");
 					}
 				}
 				/*
@@ -368,15 +378,16 @@ public class Cli {
 	 * If true will send ENTER if prompt wait fail
 	 * @param timeout the timeout to wait
 	 * @return the prompt
+	 * @throws InterruptedException 
 	 * @throws Exception
 	 */
-	private Prompt waitWithGrace(long timeout) throws Exception {
+	private Prompt waitWithGrace(long timeout) throws IOException, InterruptedException {
 		
 		try {
 			Prompt p = terminal.waitForPrompt(timeout);
 			result.append(terminal.getResult());
 			return p;
-		} catch (Exception e) {
+		} catch (IOException e) {
 			if ((!graceful) || (waitWithGraceCounter > 2)) {
 				throw e;
 			}
@@ -392,9 +403,10 @@ public class Cli {
 	 * @param timeout
 	 * 				the prompt timeout
 	 * @return	the prompt found
+	 * @throws InterruptedException 
 	 * @throws Exception
 	 */
-	private Prompt sendEnter(long timeout) throws Exception {
+	private Prompt sendEnter(long timeout) throws IOException, InterruptedException {
 		startTime = System.currentTimeMillis();
 		terminal.sendString(getEnterStr(), false);
 		result.append(terminal.getResult());

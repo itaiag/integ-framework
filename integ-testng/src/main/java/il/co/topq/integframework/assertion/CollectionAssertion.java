@@ -1,21 +1,26 @@
 package il.co.topq.integframework.assertion;
 
+import static il.co.topq.integframework.utils.StringUtils.either;
+import static il.co.topq.integframework.utils.StringUtils.isEmpty;
+import il.co.topq.integframework.Named;
 import il.co.topq.integframework.reporting.Reporter;
-import il.co.topq.integframework.utils.StringUtils;
+import il.co.topq.integframework.reporting.Reporter.Color;
+import il.co.topq.integframework.utils.Formatter;
+import il.co.topq.integframework.utils.FormattingComparator;
+import il.co.topq.integframework.utils.FormattingComparatorDecorator;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 import org.testng.xml.XmlSuite;
+
+import com.google.common.base.Optional;
 
 public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 
 	private String expectedTitle = "", actualTitle = "";
 	final protected List<E> expected;
 	private List<E> singlesInActual, singlesInExpected;
+	private long maxMismatchesToReport = -1, maxNotFoundToReport = -1, maxUnexpectedToReport = -1;
 
 	private static final class PairOfMatches<E> {
 		final E actual, expected;
@@ -26,24 +31,25 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 		}
 	}
 
-	protected boolean keepMatches = true;
+	protected boolean keepMatches = false;
 	private List<PairOfMatches<E>> matches;
 
 	protected void addMatch(E actual, E expected) {
 		if (keepMatches) {
 			if (matches == null) {
-				matches = new ArrayList<CollectionAssertion.PairOfMatches<E>>();
+				matches = new ArrayList<>();
 			}
-			matches.add(new PairOfMatches<E>(actual, expected));
+			matches.add(new PairOfMatches<>(actual, expected));
 		}
 	}
 
 	protected boolean allItems = false, exitIfSizeDoesNotMatch = true;
 
-	private List<Comparator<E>> comparators;
+	private List<FormattingComparator<E>> comparators;
+	private Formatter<E> formatter;
 
-	public CollectionAssertion(List<E> expected) {
-		this.expected = new ArrayList<E>(expected);
+	public CollectionAssertion(Collection<E> expected) {
+		this.expected = new ArrayList<>(expected);
 	}
 
 	public CollectionAssertion<E> containsAllItems() {
@@ -53,6 +59,21 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 
 	public CollectionAssertion<E> dontExitIfSizeDoesNotMatch() {
 		this.exitIfSizeDoesNotMatch = false;
+		return this;
+	}
+
+	public CollectionAssertion<E> maxMismatchesToReport(long max) {
+		this.maxMismatchesToReport = max;
+		return this;
+	}
+
+	public CollectionAssertion<E> maxNotFoundToReport(long max) {
+		this.maxNotFoundToReport = max;
+		return this;
+	}
+
+	public CollectionAssertion<E> maxUnexpectedToReport(long max) {
+		this.maxUnexpectedToReport = max;
 		return this;
 	}
 
@@ -74,11 +95,11 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 	@Override
 	public String getTitle() {
 		StringBuilder titleBuilder = new StringBuilder("all items");
-		if (!StringUtils.isEmpty(expectedTitle)) {
+		if (!isEmpty(expectedTitle)) {
 			titleBuilder.append(" from ").append(expectedTitle);
 		}
 		titleBuilder.append(" should exists");
-		if (!StringUtils.isEmpty(actualTitle)) {
+		if (!isEmpty(actualTitle)) {
 			titleBuilder.append(" in ").append(actualTitle);
 		}
 		if (allItems) {
@@ -87,31 +108,36 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 		return titleBuilder.toString();
 	}
 
+	@Override
 	public String getMessage() {
 		return status ? "passed" : "failed";
 	}
 
 	@Override
 	public void doAssertion() {
-		Comparator<E> comparator;
+		FormattingComparator<E> comparator;
 		if (this.comparators == null) {
 			comparator = simpleComparator;
 		} else {
 			if (comparators.size() == 1) {
 				comparator = comparators.get(0);
 			} else {
-				comparator = new CombinedComparator<E>(comparators);
+				comparator = new FormattingComparatorDecorator<>(new CombinedComparator<>(comparators));
 			}
 		}
+		Formatter<E> formatter = Optional.fromNullable(this.formatter).or(comparator);
+
 		if (keepMatches && matches == null || !keepMatches) {
 			message = "";
-			singlesInExpected = new ArrayList<E>(expected.size());
-			singlesInActual = new ArrayList<E>(actual.size());
+			singlesInExpected = new ArrayList<>(expected.size());
+			singlesInActual = new ArrayList<>(actual.size());
 
 			if (!allItems) {
 				if (expected.size() > actual.size()) {
 					status = false;
-					Reporter.log(new AssertionError(new StringBuilder("Size of actual items is ").append(actual.size())
+
+					Reporter.logToFile(new AssertionError(new StringBuilder("size of ")
+							.append(either(actualTitle).or("actual items")).append(" ").append(actual.size())
 							.append(", should be at least ").append(expected.size()).append("\n")));
 					if (exitIfSizeDoesNotMatch) {
 						return;
@@ -120,8 +146,9 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 				singlesInActual.addAll(actual);
 			} else {
 				if (expected.size() != actual.size()) {
-					Reporter.log(new AssertionError(new StringBuilder("Size of actual items is ").append(actual.size())
-							.append("instead of ").append(expected.size()).append("\n")));
+					Reporter.logToFile(new AssertionError(new StringBuilder("size of ")
+							.append(either(actualTitle).or("actual items")).append(" ").append(actual.size())
+							.append(" instead of ").append(expected.size()).append("\n")));
 					status = false;
 					if (exitIfSizeDoesNotMatch) {
 						return;
@@ -132,8 +159,8 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 
 			List<E> sortedActual = actual.subList(0, actual.size());
 			List<E> sortedExpected = expected.subList(0, expected.size());
-			Collections.sort(sortedActual, comparator);
-			Collections.sort(sortedExpected, comparator);
+			Collections.sort(sortedActual, sortingComparator(comparator, either(actualTitle).or("actual")));
+			Collections.sort(sortedExpected, sortingComparator(comparator, either(actualTitle).or("expected")));
 			for (int iactual = 0, iexpected = 0; (iactual < sortedActual.size() || !allItems)
 					&& (iexpected < sortedExpected.size());) {
 				if (iactual >= sortedActual.size()) {
@@ -161,18 +188,24 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 					iactual++;
 				}
 			}
-
+			long singlesCounter = 0;
 			for (E e : singlesInExpected) {
-				Reporter.log(new AssertionError(new StringBuilder(e.toString()).append(" was expected but not found")));
-
+				Reporter.logToFile("Item not found",
+						new AssertionError(new StringBuilder(formatter.toString(e)).append(" was expected but not found")));
+				if (++singlesCounter > maxNotFoundToReport) {
+					break;
+				}
 			}
 
+			singlesCounter = 0;
 			for (E e : singlesInActual) {
-				StringBuilder itemFound = new StringBuilder(e.toString()).append(" was found");
-
+				StringBuilder itemFound = new StringBuilder(formatter.toString(e)).append(" was found");
 				if (!allItems) {
+					if (++singlesCounter > maxUnexpectedToReport) {
+						break;
+					}
 					itemFound.append(" unexpectedly");
-					Reporter.log(new AssertionError(itemFound));
+					Reporter.logToFile("Unexpected item found", new AssertionError(itemFound));
 				} else {
 					Reporter.log(itemFound.toString(), XmlSuite.DEFAULT_VERBOSE + 1);
 				}
@@ -181,29 +214,45 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 
 			status = singlesInExpected.isEmpty() && (singlesInActual.isEmpty() || !allItems);
 			if (!status) {
-				message = "Total items not found: " + singlesInExpected.size() + "\n";
+				message = "Total items not found: " + singlesInExpected.size();
 				if (allItems) {
-					message = message + "Total unexpected items found: " + singlesInActual.size() + "\n";
+					message = message + "\nTotal unexpected items found: " + singlesInActual.size() + "\n";
 				}
 			}
 		} else if (matches != null) {
 			status = true;
-			Reporter.step("Validating matches data:\n");
+			Named matchName;
+			if (formatter instanceof Named){
+				matchName = (Named) formatter;
+			} else if (comparator instanceof Named) {
+				matchName  = (Named) comparator;
+			} else {
+				matchName = new Named() {
+					@Override
+					public String getName() {
+						return "";
+					}
+				};
+			}
+			
+			Reporter.log("Validating matches data using " + matchName.getName(), XmlSuite.DEFAULT_VERBOSE + 1);
 			long mismatchCounter = 0;
+			String itemMismatchTitle = "Item mismatch when comparing " + matchName.getName();
 			for (PairOfMatches<E> match : matches) {
 				if (comparator.compare(match.actual, match.expected) != 0) {
 					status = false;
-					StringBuilder itemMismatch = new StringBuilder("The item [").append(match.actual)
-							.append("]\n, which was acually found, did not match the expected item \n[")
-							.append(match.expected.toString()).append("]\n when comparing ").append(comparator.toString())
-							.append("\n");
-					Reporter.log(new AssertionError(itemMismatch));
-					mismatchCounter++;
+					StringBuilder itemMismatch = new StringBuilder("The item:\n[").append(formatter.toString(match.actual))
+							.append("]\nwhich was acually found, did not match the expected item\n[")
+							.append(formatter.toString(match.expected)).append("]");
+					if (++mismatchCounter <= maxMismatchesToReport) {
+						Reporter.logToFile(itemMismatchTitle, itemMismatch.toString(), Color.RED);
+					}
 				}
 			}
-			message = message + "Total reproccessed items:" + matches.size() + "\n";
+			message = "Total reproccessed items:" + matches.size() + "\n";
 			if (mismatchCounter > 0) {
-				message = message + "Total mismatch data items found:" + mismatchCounter + "\n";
+				message = message + "Total mismatch data items found:" + mismatchCounter + "\n when comparing "
+						+ matchName.getName();
 			}
 
 		}
@@ -211,14 +260,25 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 
 	public CollectionAssertion<E> withComparator(Comparator<E> comparator) {
 		if (this.comparators == null) {
-			comparators = new ArrayList<Comparator<E>>();
+			comparators = new ArrayList<>();
 		}
-		comparators.add(comparator);
+		FormattingComparator<E> formattingComparator;
+		if (comparator instanceof FormattingComparator<?>) {
+			formattingComparator = (FormattingComparator<E>) comparator;
+		} else {
+			formattingComparator = new FormattingComparatorDecorator<>(comparator);
+		}
+		comparators.add(formattingComparator);
+		return this;
+	}
+
+	public CollectionAssertion<E> withFormatter(Formatter<E> formatter) {
+		this.formatter = formatter;
 		return this;
 	}
 
 	@SafeVarargs
-	public CollectionAssertion<E> compareWith(Comparator<E>... comparators) {
+	public final CollectionAssertion<E> compareWith(Comparator<E>... comparators) {
 		return compareWith(Arrays.asList(comparators));
 	}
 
@@ -235,7 +295,8 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 	 * @param comparators
 	 * @return
 	 */
-	public CollectionAssertion<E> andNowCompareWith(Comparator<E>... comparators) {
+	@SafeVarargs
+	public final CollectionAssertion<E> andNowCompareWith(Comparator<E>... comparators) {
 		this.comparators = null;
 		return andNowCompareWith(Arrays.asList(comparators));
 	}
@@ -254,8 +315,7 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 		return this;
 	}
 
-	protected final Comparator<E> simpleComparator = new Comparator<E>() {
-
+	protected final FormattingComparator<E> simpleComparator = new FormattingComparatorDecorator<E>(new Comparator<E>() {
 		@Override
 		public int compare(E o1, E o2) {
 			if (o1 instanceof Comparable<?>) {
@@ -272,6 +332,24 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 				return Integer.compare(o1.hashCode(), o2.hashCode());
 			}
 		}
+
+	}) {
+		@Override
+		public String toString() {
+			return "Simple comparator";
+		};
 	};
 
+	protected final Comparator<E> sortingComparator(final Comparator<E> delegate, final String title) {
+		return new Comparator<E>() {
+			@Override
+			public int compare(E o1, E o2) {
+				int res = delegate.compare(o1, o2);
+				if (res == 0) {
+					Assert.fail("Duplicates found in " + title);
+				}
+				return res;
+			}
+		};
+	}
 }

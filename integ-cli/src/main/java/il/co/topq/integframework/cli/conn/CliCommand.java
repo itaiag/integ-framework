@@ -10,6 +10,7 @@ import il.co.topq.integframework.assertion.IAssertionLogic;
 import il.co.topq.integframework.assertion.TextNotFoundAssertion;
 import il.co.topq.integframework.cli.terminal.Prompt;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -144,7 +145,7 @@ public class CliCommand {
 	
 	Prompt resultPrompt;
 
-	Exception thrown;
+	IOException thrown;
 	
 	boolean failed = false;
 	
@@ -168,7 +169,7 @@ public class CliCommand {
 	
 	boolean suppressEcho = false;
 
-	List<IAssertionLogic<String>> analyzers = new ArrayList<IAssertionLogic<String>> ();
+	List<IAssertionLogic<String>> analyzers = new ArrayList<> ();
 	
 	Prompt[] prompts = null;
 	
@@ -396,6 +397,9 @@ public class CliCommand {
 	 * @param musts
 	 */
 	public void addMusts(List<String> musts) {
+		if (this.musts == null) {
+			this.musts = new ArrayList<>();
+		}
 		this.musts.addAll(musts);
 		for (String must: musts){
 			addAnalyzers(new FindTextAssertion(must));
@@ -446,7 +450,7 @@ public class CliCommand {
 	 * 
 	 * @return thrown 
 	 */
-	public Exception getThrown() {
+	public IOException getThrown() {
 		return thrown;
 	}
 	
@@ -455,7 +459,7 @@ public class CliCommand {
 	 * 			if it was thrown.
 	 * @param thrown 
 	 */
-	public void setThrown(Exception thrown) {
+	public void setThrown(IOException thrown) {
 		this.thrown = thrown;
 	}
 	

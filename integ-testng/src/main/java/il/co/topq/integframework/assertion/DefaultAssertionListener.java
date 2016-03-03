@@ -1,5 +1,7 @@
 package il.co.topq.integframework.assertion;
 
+import il.co.topq.integframework.reporting.Reporter;
+
 public class DefaultAssertionListener<T> implements AssertionListener<T>{
 
 	@Override
@@ -9,12 +11,14 @@ public class DefaultAssertionListener<T> implements AssertionListener<T>{
 
 	@Override
 	public void assertionFailed(T actual, AbstractAssertionLogic<T> logic) {
-		org.testng.Assert.fail(logic.message);
+		Reporter.log("Assertion failed: " + logic.getTitle(), logic.getMessage(), false);
+		org.testng.Assert.fail(logic.getTitle());
 		
 	}
 
 	@Override
 	public void assertionFailed(T actual, AbstractAssertionLogic<T> logic, Throwable t) {
-		org.testng.Assert.fail(logic.message, t);
+		Reporter.log("Assertion process failed: ", t);
+		org.testng.Assert.fail(logic.getTitle(), t);
 	}
 };

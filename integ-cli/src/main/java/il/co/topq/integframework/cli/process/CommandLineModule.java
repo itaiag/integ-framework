@@ -7,7 +7,7 @@ public class CommandLineModule extends AbstractModuleImpl {
 
 	protected CliConnectionImpl cliConnectionImpl;
 
-	public CliCommandExecution execute() {
+	public CliCommandExecution executer() {
 		return new CliCommandExecution(cliConnectionImpl);
 	}
 

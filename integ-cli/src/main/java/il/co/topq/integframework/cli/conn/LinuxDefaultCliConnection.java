@@ -13,9 +13,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
+import java.util.*;
 
 /**
  * Default CliConnection for a Cli connection to a linux machine. Protocol is
@@ -40,22 +38,24 @@ public class LinuxDefaultCliConnection extends CliConnectionImpl {
 	}
 
 	@Override
-	public void init() throws Exception {
+	public void init() throws IOException {
 		super.init();
 	}
 
 	@Override
-	public void connect() throws Exception {
+	public void connect() throws IOException {
 		super.connect();
 		terminal.addFilter(new VT100FilterInputStream());
 	}
 
+	@Override
 	public Position[] getPositions() {
 		return null;
 	}
 
+	@Override
 	public Prompt[] getPrompts() {
-		ArrayList<Prompt> prompts = new ArrayList<Prompt>();
+		List<Prompt> prompts = new ArrayList<>();
 		Prompt p = new Prompt();
 		p.setCommandEnd(true);
 		p.setPrompt("$ ");
@@ -87,15 +87,16 @@ public class LinuxDefaultCliConnection extends CliConnectionImpl {
 	 * @return
 	 * @throws IOException
 	 */
-	public InputStream get(String remoteFile) throws IOException {
-		if (terminal instanceof SSH) {
-			SSH ssh = (SSH) terminal;
-			return ssh.get(remoteFile);
-		}
+	public synchronized InputStream get(String remoteFile) throws IOException {
+
+			if (terminal instanceof SSH) {
+				SSH ssh = (SSH) terminal;
+				return ssh.get(remoteFile);
+			}
 		return null;
 	}
 
-	public void get(String remoteFile, File dst) throws IOException {
+	public synchronized void get(String remoteFile, File dst) throws IOException {
 		byte buf[] = new byte[10240];
 		InputStream in = get(remoteFile);
 		OutputStream out = new FileOutputStream(dst);
@@ -125,7 +126,7 @@ public class LinuxDefaultCliConnection extends CliConnectionImpl {
 	 * @throws IOException
 	 *             when
 	 */
-	public OutputStream put(String remoteDir, String remoteFile, String mode, long length) throws IOException {
+	public synchronized OutputStream put(String remoteDir, String remoteFile, String mode, long length) throws IOException {
 		if (terminal instanceof SSH) {
 			SSH ssh = (SSH) terminal;
 			return ssh.put(remoteFile, length, remoteDir, mode);
@@ -141,9 +142,37 @@ public class LinuxDefaultCliConnection extends CliConnectionImpl {
 	}
 
 	public boolean isProccessRunning(String name) throws Exception {
-		CliCommandExecution execution = new CliCommandExecution(this, "ps -C '" + name + "' -o pid= |wc -l");
+		CliCommandExecution execution = new CliCommandExecution(this, processInstancesCounterCommand(name));
 		execution.withTitle("check if process " + name + " is running").execute();
-		return "1".equals(execution.getResult());
+		return !"0".equals(execution.getResult());
 	}
 
+	public boolean isProccessNotRunning(String name) throws Exception {
+		CliCommandExecution execution = new CliCommandExecution(this, processInstancesCounterCommand(name));
+		execution.withTitle("check if process " + name + " is not running").execute();
+		return "0".equals(execution.getResult());
+	}
+
+	public static String processInstancesCounterCommand(String cmd) {
+		return "ps -C '" + cmd + "' -o pid= |wc -l";
+	}
+
+	public Date getRemoteMachineDate() throws IOException {
+		CliCommandExecution execution = new CliCommandExecution(this, "date +%s");
+		// seconds since epoch
+		execution.execute();
+		return new Date(Long.parseLong(execution.getResult() + "000"));
+	}
+
+	public Calendar getRemoteMachineCalendar() throws Exception {
+		Calendar calendar = new GregorianCalendar(getRemoteMachineTimeZone());
+		calendar.setTimeInMillis(getRemoteMachineDate().getTime());
+		return calendar;
+	}
+
+	public TimeZone getRemoteMachineTimeZone() throws Exception {
+		CliCommandExecution execution = new CliCommandExecution(this, "date +%Z");
+		execution.execute();
+		return TimeZone.getTimeZone(execution.getResult());
+	}
 }

@@ -25,7 +25,7 @@ public class ReportersManager {
 
 	public void addReporter(ReporterI reporter) {
 		if (null == reporters) {
-			reporters = new ArrayList<ReporterI>();
+			reporters = new ArrayList<>();
 		}
 		reporters.add(reporter);
 		if (reporter instanceof RunListener) {

@@ -9,6 +9,10 @@
 .project
 .classpath
 
+# Intellij
+*.iml
+.idea
+
 #Binaries
 target
 

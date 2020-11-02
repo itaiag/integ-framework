@@ -217,7 +217,6 @@ public class CollectionAssertion<E> extends AbstractAssertionLogic<List<E>> {
 		return this;
 	}
 
-	@SafeVarargs
 	public CollectionAssertion<E> compareWith(Comparator<E>... comparators) {
 		return compareWith(Arrays.asList(comparators));
 	}

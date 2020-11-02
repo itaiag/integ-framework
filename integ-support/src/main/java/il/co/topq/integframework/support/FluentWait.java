@@ -13,11 +13,11 @@ public class FluentWait<T> extends org.openqa.selenium.support.ui.FluentWait<T> 
 	public FluentWait(T input, Clock clock, Sleeper sleeper) {
 		super(input, clock, sleeper);
 	}
-	
+
 	public FluentWait(T input) {
 		super(input);
 	}
-	
+
 	@Override
 	public <V> V until(Function<? super T, V> isTrue) {
 		lastFunctionTitle = isTrue.toString();
@@ -30,7 +30,7 @@ public class FluentWait<T> extends org.openqa.selenium.support.ui.FluentWait<T> 
 	public String toString() {
 		return lastFunctionTitle;
 	}
-	
+
 	  /**
 	   * Throws a timeout exception. This method may be overridden to throw an exception that is
 	   * idiomatic for a particular test infrastructure, such as an AssertionError in JUnit4.
